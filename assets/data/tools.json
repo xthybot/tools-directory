@@ -1,0 +1,16 @@
+[
+  {
+    "title": "Example External Tool",
+    "icon": "assets/icons/example-external.svg",
+    "description": "一個示範用的外部工具連結。",
+    "tags": ["AI", "效率", "外部連結"],
+    "link": "https://example.com"
+  },
+  {
+    "title": "Example Local Tool",
+    "icon": "assets/icons/example-local.svg",
+    "description": "一個示範用的站內工具頁。",
+    "tags": ["站內工具", "Demo"],
+    "link": "/tools/example-tool/index.html"
+  }
+]

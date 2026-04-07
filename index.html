@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tools Directory</title>
+    <meta
+      name="description"
+      content="A clean directory page for useful tools and resources."
+    />
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero__badge">Tools Directory</div>
+        <h1 class="hero__title">收集好工具，快速找到對的工具。</h1>
+        <p class="hero__text">
+          用搜尋和標籤快速篩出想找的工具，也支援外部連結與站內工具頁。
+        </p>
+      </header>
+
+      <main class="directory-layout">
+        <section class="controls-panel">
+          <div class="search-box">
+            <label class="search-box__label" for="searchInput">搜尋工具</label>
+            <input
+              id="searchInput"
+              class="search-box__input"
+              type="search"
+              placeholder="輸入工具名稱、介紹或標籤..."
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="tags-panel">
+            <div class="section-head">
+              <h2>標籤篩選</h2>
+              <button id="clearFiltersBtn" class="ghost-button" type="button">清除篩選</button>
+            </div>
+            <div id="tagList" class="tag-list" aria-label="Tool tag filters"></div>
+          </div>
+        </section>
+
+        <section class="results-panel">
+          <div class="section-head section-head--results">
+            <h2>工具列表</h2>
+            <p id="resultsCount" class="results-count">載入中...</p>
+          </div>
+
+          <div id="toolsGrid" class="tools-grid"></div>
+          <div id="emptyState" class="empty-state" hidden>
+            <h3>找不到符合條件的工具</h3>
+            <p>可以試試別的關鍵字，或清除目前的標籤篩選。</p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="assets/js/app.js"></script>
+  </body>
+</html>
