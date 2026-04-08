@@ -21,9 +21,31 @@ async function loadTools() {
     state.tools = Array.isArray(data) ? data : [];
     renderAll();
   } catch (error) {
+    console.warn('Failed to fetch tools.json, falling back to embedded data:', error);
+
+    const fallbackData = readEmbeddedTools();
+    if (fallbackData.length) {
+      state.tools = fallbackData;
+      renderAll();
+      return;
+    }
+
     console.error('Failed to load tools:', error);
     elements.resultsCount.textContent = '資料載入失敗';
     elements.toolsGrid.innerHTML = '<div class="tool-card"><p>無法載入工具資料。</p></div>';
+  }
+}
+
+function readEmbeddedTools() {
+  const script = document.querySelector('#toolsData');
+  if (!script) return [];
+
+  try {
+    const data = JSON.parse(script.textContent || '[]');
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error('Failed to parse embedded tools data:', error);
+    return [];
   }
 }
 
