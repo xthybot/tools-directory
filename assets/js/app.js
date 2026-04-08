@@ -21,31 +21,9 @@ async function loadTools() {
     state.tools = Array.isArray(data) ? data : [];
     renderAll();
   } catch (error) {
-    console.warn('Failed to fetch tools.json, falling back to embedded data:', error);
-
-    const fallbackData = readEmbeddedTools();
-    if (fallbackData.length) {
-      state.tools = fallbackData;
-      renderAll();
-      return;
-    }
-
     console.error('Failed to load tools:', error);
     elements.resultsCount.textContent = '資料載入失敗';
     elements.toolsGrid.innerHTML = '<div class="tool-card"><p>無法載入工具資料。</p></div>';
-  }
-}
-
-function readEmbeddedTools() {
-  const script = document.querySelector('#toolsData');
-  if (!script) return [];
-
-  try {
-    const data = JSON.parse(script.textContent || '[]');
-    return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.error('Failed to parse embedded tools data:', error);
-    return [];
   }
 }
 
@@ -117,8 +95,6 @@ function renderTools() {
       const tagsHtml = (tool.tags || [])
         .map((tag) => `<span class="tool-tag">${escapeHtml(tag)}</span>`)
         .join('');
-      const linkMeta = getLinkMeta(tool.link);
-
       return `
         <article class="tool-card">
           <a
@@ -134,7 +110,6 @@ function renderTools() {
               <div class="tool-card__title-wrap">
                 <div class="tool-card__heading-row">
                   <h3 class="tool-card__title">${escapeHtml(tool.title)}</h3>
-                  <span class="tool-card__type">${escapeHtml(linkMeta.label)}</span>
                 </div>
                 <p class="tool-card__desc">${escapeHtml(tool.description)}</p>
               </div>
@@ -153,14 +128,6 @@ function renderTools() {
 function renderAll() {
   renderTags();
   renderTools();
-}
-
-function getLinkMeta(link = '') {
-  const isExternal = /^https?:\/\//i.test(link);
-  return {
-    isExternal,
-    label: isExternal ? '外部連結' : '站內工具',
-  };
 }
 
 function escapeHtml(value = '') {

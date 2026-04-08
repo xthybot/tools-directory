@@ -234,27 +234,15 @@ input {
 .tool-card__heading-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
   margin-bottom: 8px;
 }
 
 .tool-card__title {
   margin: 0;
-  font-size: 20px;
-}
-
-.tool-card__type {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(88, 197, 254, 0.12);
-  border: 1px solid rgba(88, 197, 254, 0.16);
-  color: var(--primary);
-  font-size: 12px;
-  white-space: nowrap;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.35;
 }
 
 .tool-card__desc {
