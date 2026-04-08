@@ -12,5 +12,12 @@
     "description": "圖片去浮水印工具，提供遮罩與處理流程，方便快速清理畫面。",
     "tags": ["AI圖片", "浮水印", "修圖"],
     "link": "tools/NanoBanana_remove_watermark/index.html"
+  },
+  {
+    "title": "Mermaid Preview",
+    "icon": "assets/icons/example-local.svg",
+    "description": "即時預覽 Mermaid 圖表，支援主題調整與 SVG、PNG 匯出。",
+    "tags": ["圖表", "流程圖", "開發"],
+    "link": "tools/mermaid-preview/index.html"
   }
 ]
