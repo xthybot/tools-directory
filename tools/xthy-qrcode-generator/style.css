@@ -169,9 +169,11 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   padding: 0;
 }
 .qrcode-preview canvas, .qrcode-preview svg {
+  width: 100% !important;
+  height: 100% !important;
   max-width: 100%;
   max-height: 100%;
-  height: auto !important;
+  object-fit: contain;
 }
 .export-controls { margin-top: 18px; flex: 0 0 auto; }
 .copy-status {

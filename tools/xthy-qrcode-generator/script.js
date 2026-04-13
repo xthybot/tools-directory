@@ -465,7 +465,7 @@ function refreshQr() {
     ? buildTextLogoAsset()
     : (hasImageLogo ? buildImageLogoAsset() : null);
   const image = logoAsset?.dataUrl;
-  const imageSize = logoAsset ? Math.min(1, logoAsset.outerSize / state.qr.size) : 0.34;
+  const imageSize = hasTextLogo ? 1 : (logoAsset ? Math.min(1, logoAsset.outerSize / state.qr.size) : 0.34);
   const imageMargin = 0;
 
   qrCode.update({
@@ -518,29 +518,29 @@ function buildTextLogoAsset() {
   const qrInnerSize = Math.max(1, state.qr.size - state.qr.borderSize * 2);
   const canvasSize = qrInnerSize;
   const textWidth = Math.max(24, Math.round(text.length * size * 0.62));
-  const textHeight = Math.max(size + 6, Math.round(size * 1.15));
+  const textHeight = Math.max(size, Math.round(size * 1.08));
   const centerX = canvasSize / 2;
   const centerY = canvasSize / 2;
   let bg = '';
   let textStroke = '';
 
   if (state.logo.textStyle === 'box') {
-    const boxWidth = Math.max(textWidth + padding * 2, textWidth);
-    const boxHeight = Math.max(textHeight + padding * 2, textHeight);
+    const boxWidth = textWidth + padding * 2;
+    const boxHeight = textHeight + padding * 2;
     const boxX = (canvasSize - boxWidth) / 2;
     const boxY = (canvasSize - boxHeight) / 2;
     if (padding > 0) {
       bg = `<rect x="${boxX}" y="${boxY}" width="${boxWidth}" height="${boxHeight}" rx="${Math.min(16, padding)}" fill="${state.logo.textBgColor}" />`;
     }
   } else if (state.logo.textStyle === 'bar') {
-    const barHeight = Math.max(textHeight + padding * 2, textHeight);
+    const barHeight = textHeight + padding * 2;
     const barY = (canvasSize - barHeight) / 2;
-    bg = `<rect x="0" y="${barY}" width="${canvasSize}" height="${barHeight}" rx="${Math.min(14, Math.round(barHeight / 3))}" fill="${state.logo.textBgColor}" />`;
+    bg = `<rect x="0" y="${barY}" width="${canvasSize}" height="${barHeight}" fill="${state.logo.textBgColor}" />`;
   } else if (state.logo.textStyle === 'outline' && padding > 0) {
     textStroke = `stroke="${state.logo.textBgColor}" stroke-width="${padding}" paint-order="stroke" stroke-linejoin="round"`;
   }
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${canvasSize}" height="${canvasSize}" viewBox="0 0 ${canvasSize} ${canvasSize}">${bg}<text x="${centerX}" y="${centerY}" dominant-baseline="middle" text-anchor="middle" font-family="${font}" font-size="${size}" font-weight="700" fill="${state.logo.textColor}" ${textStroke}>${text}</text></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${canvasSize}" height="${canvasSize}" viewBox="0 0 ${canvasSize} ${canvasSize}"><rect x="0" y="0" width="${canvasSize}" height="${canvasSize}" fill="transparent"/>${bg}<text x="${centerX}" y="${centerY}" dominant-baseline="central" text-anchor="middle" font-family="${font}" font-size="${size}px" font-weight="700" fill="${state.logo.textColor}" ${textStroke}>${text}</text></svg>`;
   return { dataUrl: svgToDataUrl(svg), outerSize: canvasSize };
 }
 
