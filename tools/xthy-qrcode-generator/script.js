@@ -465,8 +465,8 @@ function refreshQr() {
     ? buildTextLogoAsset()
     : (hasImageLogo ? buildImageLogoAsset() : null);
   const image = logoAsset?.dataUrl;
-  const imageSize = logoAsset ? Math.min(0.6, Math.max(0.08, logoAsset.outerSize / state.qr.size)) : 0.34;
-  const imageMargin = logoAsset ? 0 : 6;
+  const imageSize = logoAsset ? Math.min(1, logoAsset.outerSize / state.qr.size) : 0.34;
+  const imageMargin = 0;
 
   qrCode.update({
     width: state.qr.size,
@@ -502,10 +502,10 @@ function refreshQr() {
     }
   });
 
-  const summary = errors.length ? `資料有 ${errors.length} 個待修正項目` : (payload.trim() ? '資料完整，可下載 / 掃描' : '尚未輸入資料');
+  const summary = errors.length ? `資料有 ${errors.length} 個待修正項目` : (payload.trim() ? '可儲存' : '尚未輸入資料');
   elements.validationSummary.textContent = summary;
   elements.riskBox.innerHTML = [
-    errors.length ? `<span class="notice-bad">需要修正：</span>\n- ${errors.join('\n- ')}` : '<span class="notice-ok">欄位檢查通過</span>',
+    errors.length ? `<span class="notice-bad">需要修正：</span>\n- ${errors.join('\n- ')}` : '<span class="notice-ok">可儲存</span>',
     riskMessages.length ? `\n\n<span class="notice-warn">風險提示：</span>\n- ${riskMessages.join('\n- ')}` : ''
   ].join('');
 }
@@ -513,25 +513,35 @@ function refreshQr() {
 function buildTextLogoAsset() {
   const text = escapeHtml(state.logo.text || '');
   const size = Number(state.logo.textSize) || 32;
-  const padding = Number(state.logo.textPadding) || 0;
+  const padding = Math.max(0, Number(state.logo.textPadding) || 0);
   const font = state.logo.fontFamily;
   const textWidth = Math.max(24, Math.round(text.length * size * 0.62));
-  const textHeight = Math.max(size + 8, Math.round(size * 1.25));
-  const outerWidth = Math.max(60, textWidth + padding * 2);
-  const outerHeight = Math.max(44, textHeight + padding * 2);
+  const textHeight = Math.max(size + 6, Math.round(size * 1.15));
+  let contentWidth = textWidth;
+  let contentHeight = textHeight;
   let bg = '';
   let textStroke = '';
 
-  if (state.logo.textStyle === 'box' && padding > 0) {
-    bg = `<rect x="0" y="0" width="${outerWidth}" height="${outerHeight}" rx="${Math.min(16, Math.max(0, padding))}" fill="${state.logo.textBgColor}" />`;
-  } else if (state.logo.textStyle === 'bar' && padding >= 0) {
-    bg = `<rect x="0" y="${Math.round((outerHeight - textHeight) / 2)}" width="${outerWidth}" height="${textHeight}" rx="${Math.min(14, Math.round(textHeight / 3))}" fill="${state.logo.textBgColor}" />`;
+  if (state.logo.textStyle === 'box') {
+    contentWidth = textWidth + padding * 2;
+    contentHeight = textHeight + padding * 2;
+    if (padding > 0) {
+      bg = `<rect x="0" y="0" width="${contentWidth}" height="${contentHeight}" rx="${Math.min(16, padding)}" fill="${state.logo.textBgColor}" />`;
+    }
+  } else if (state.logo.textStyle === 'bar') {
+    contentWidth = Math.max(1, state.qr.size - state.qr.borderSize * 2);
+    contentHeight = textHeight + padding * 2;
+    bg = `<rect x="0" y="0" width="${contentWidth}" height="${contentHeight}" rx="${Math.min(14, Math.round(contentHeight / 3))}" fill="${state.logo.textBgColor}" />`;
   } else if (state.logo.textStyle === 'outline' && padding > 0) {
     textStroke = `stroke="${state.logo.textBgColor}" stroke-width="${padding}" paint-order="stroke" stroke-linejoin="round"`;
   }
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${outerWidth}" height="${outerHeight}" viewBox="0 0 ${outerWidth} ${outerHeight}">${bg}<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="${font}" font-size="${size}" font-weight="700" fill="${state.logo.textColor}" ${textStroke}>${text}</text></svg>`;
-  return { dataUrl: svgToDataUrl(svg), outerSize: Math.max(outerWidth, outerHeight) };
+  const viewWidth = Math.max(1, contentWidth);
+  const viewHeight = Math.max(1, contentHeight);
+  const textX = viewWidth / 2;
+  const textY = viewHeight / 2;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${viewWidth}" height="${viewHeight}" viewBox="0 0 ${viewWidth} ${viewHeight}">${bg}<text x="${textX}" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${font}" font-size="${size}" font-weight="700" fill="${state.logo.textColor}" ${textStroke}>${text}</text></svg>`;
+  return { dataUrl: svgToDataUrl(svg), outerSize: Math.max(viewWidth, viewHeight) };
 }
 
 function buildImageLogoAsset() {

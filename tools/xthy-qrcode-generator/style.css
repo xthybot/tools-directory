@@ -166,7 +166,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   height: 100%;
   display: grid;
   place-items: center;
-  padding: 16px;
+  padding: 0;
 }
 .qrcode-preview canvas, .qrcode-preview svg {
   max-width: 100%;
