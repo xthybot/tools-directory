@@ -131,6 +131,7 @@ const elements = {
   logoImageSizeValue: document.querySelector('#logoImageSizeValue'),
   logoImageBorderValue: document.querySelector('#logoImageBorderValue'),
   copyStatus: document.querySelector('#copyStatus'),
+  logoPreviewOverlay: document.querySelector('#logoPreviewOverlay'),
 };
 
 const PREVIEW_RENDER_SIZE = 1200;
@@ -240,7 +241,7 @@ function bindStaticControls() {
 
   bindValue('#qrSize', 'qr.size', (v) => {
     elements.qrSizeValue.textContent = `${v}px`;
-  });
+  }, { refresh: false });
   bindValue('#backgroundAlpha', 'qr.backgroundAlpha', (v) => {
     elements.backgroundAlphaValue.textContent = `${v}%`;
   });
@@ -292,13 +293,13 @@ function bindStaticControls() {
   });
 }
 
-function bindValue(selector, path, callback) {
+function bindValue(selector, path, callback, options = {}) {
   const el = document.querySelector(selector);
   const [group, key] = path.split('.');
   const update = (value) => {
     state[group][key] = typeof state[group][key] === 'number' ? Number(value) : value;
     callback?.(state[group][key]);
-    refreshQr();
+    if (options.refresh !== false) refreshQr();
   };
   callback?.(el.value);
   el.addEventListener('input', (e) => update(e.target.value));
@@ -466,8 +467,10 @@ function refreshQr() {
   const logoAsset = hasTextLogo
     ? buildTextLogoAsset()
     : (hasImageLogo ? buildImageLogoAsset() : null);
-  const image = logoAsset?.dataUrl;
-  const imageSize = hasTextLogo ? 1 : (logoAsset ? Math.min(1, logoAsset.outerSize / state.qr.size) : 0.34);
+  renderLogoPreviewOverlay();
+
+  const image = undefined;
+  const imageSize = 0.34;
   const imageMargin = 0;
 
   qrCode.update({
@@ -510,6 +513,35 @@ function refreshQr() {
     errors.length ? `<span class="notice-bad">需要修正：</span>\n- ${errors.join('\n- ')}` : '<span class="notice-ok">可儲存</span>',
     riskMessages.length ? `\n\n<span class="notice-warn">風險提示：</span>\n- ${riskMessages.join('\n- ')}` : ''
   ].join('');
+}
+
+function renderLogoPreviewOverlay() {
+  if (!elements.logoPreviewOverlay) return;
+  if (state.logo.mode === 'text' && (state.logo.text || '').trim()) {
+    const size = Number(state.logo.textSize) || 32;
+    const padding = Math.max(0, Number(state.logo.textPadding) || 0);
+    const text = escapeHtml(state.logo.text || '');
+    const font = state.logo.fontFamily;
+    const textWidth = Math.max(24, Math.round(text.length * size * 0.62));
+    const textHeight = Math.max(size, Math.round(size * 1.08));
+    let boxStyle = '';
+    if (state.logo.textStyle === 'box') {
+      boxStyle = `background:${state.logo.textBgColor};padding:${padding}px;border-radius:${Math.min(16, padding)}px;`;
+    } else if (state.logo.textStyle === 'bar') {
+      boxStyle = `background:${state.logo.textBgColor};width:100%;padding:${padding}px 0;display:flex;justify-content:center;`;
+    }
+    const outlineStyle = state.logo.textStyle === 'outline' && padding > 0
+      ? `-webkit-text-stroke:${padding}px ${state.logo.textBgColor};paint-order:stroke fill;`
+      : '';
+    elements.logoPreviewOverlay.innerHTML = `<div class="logo-preview-text" style="${boxStyle}color:${state.logo.textColor};font-family:${font};font-size:${size}px;font-weight:700;line-height:${textHeight}px;text-align:center;${outlineStyle}">${text}</div>`;
+    return;
+  }
+  if (state.logo.mode === 'image' && state.logo.imageDataUrl) {
+    const full = 'width:100%;height:100%;object-fit:contain;display:block;';
+    elements.logoPreviewOverlay.innerHTML = `<img src="${state.logo.imageDataUrl}" alt="logo preview" style="${full}" />`;
+    return;
+  }
+  elements.logoPreviewOverlay.innerHTML = '';
 }
 
 function buildTextLogoAsset() {

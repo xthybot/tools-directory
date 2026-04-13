@@ -140,6 +140,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 }
 .hint { margin: 6px 0 0; color: var(--soft); font-size: 13px; line-height: 1.6; }
 .preview-card {
+  position: relative;
   display: grid;
   place-items: center;
   flex: 1 1 auto;
@@ -174,6 +175,19 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+}
+.logo-preview-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+}
+.logo-preview-overlay img,
+.logo-preview-overlay svg,
+.logo-preview-overlay .logo-preview-text {
+  max-width: 100%;
+  max-height: 100%;
 }
 .export-controls { margin-top: 18px; flex: 0 0 auto; }
 .copy-status {
