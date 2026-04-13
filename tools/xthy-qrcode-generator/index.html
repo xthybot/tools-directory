@@ -12,16 +12,15 @@
   </head>
   <body>
     <div class="app-shell">
-      <header class="app-header">
-        <div>
-          <p class="eyebrow">Xthy Work Tools</p>
-          <h1>Xthy QRCode 產生器</h1>
-          <p class="subtitle">可建立、掃描、驗證並匯出多種 QRCode，支援手機操作。</p>
-        </div>
-      </header>
-
       <main class="workspace-grid">
-        <section class="panel form-panel">
+        <section class="left-column-stack">
+          <section class="panel intro-panel">
+            <p class="eyebrow">Xthy Work Tools</p>
+            <h1>Xthy QRCode 產生器</h1>
+            <p class="subtitle">可建立、掃描、驗證並匯出多種 QRCode，支援手機操作。</p>
+          </section>
+
+          <section class="panel form-panel">
           <div class="panel-head">
             <h2>內容設定</h2>
           </div>
@@ -46,6 +45,7 @@
             <div id="cameraReader" class="camera-reader" hidden></div>
             <p id="scanStatus" class="hint">可上傳含 QRCode 的圖片，或使用相機即時掃描。</p>
           </details>
+          </section>
         </section>
 
         <section class="panel options-panel">

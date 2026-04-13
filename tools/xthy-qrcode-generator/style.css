@@ -29,7 +29,6 @@ button { cursor: pointer; }
   margin: 0 auto;
   padding: 24px;
 }
-.app-header { margin-bottom: 20px; }
 .eyebrow { margin: 0 0 8px; color: var(--primary); letter-spacing: .08em; text-transform: uppercase; font-size: 13px; }
 h1 { margin: 0 0 10px; font-size: clamp(32px, 5vw, 56px); }
 .subtitle { margin: 0; color: var(--soft); }
@@ -39,6 +38,17 @@ h1 { margin: 0 0 10px; font-size: clamp(32px, 5vw, 56px); }
   grid-template-columns: repeat(3, minmax(320px, 1fr));
   gap: 18px;
   align-items: start;
+}
+.left-column-stack {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+.intro-panel {
+  padding: 18px 20px;
+}
+.intro-panel h1 {
+  font-size: clamp(28px, 3.2vw, 44px);
 }
 .panel {
   min-width: 0;
@@ -106,7 +116,9 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 
 .preview-panel {
   position: sticky;
-  top: 20px;
+  top: 0;
+  height: 100vh;
+  overflow: auto;
 }
 .qrcode-preview {
   width: 100%;
@@ -158,14 +170,16 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 
 @media (max-width: 1180px) {
   .workspace-grid { grid-template-columns: repeat(2, minmax(280px, 1fr)); }
-  .preview-panel { position: static; }
+  .left-column-stack { grid-column: 1 / -1; }
+  .preview-panel { position: static; height: auto; overflow: visible; }
 }
 
 @media (max-width: 800px) {
   .app-shell { padding: 14px; }
   .workspace-grid { grid-template-columns: 1fr; }
+  .left-column-stack { grid-column: auto; }
   .panel { padding: 16px; border-radius: 18px; }
-  .preview-panel { position: static; }
+  .preview-panel { position: static; height: auto; overflow: visible; }
   .preview-card { min-height: 320px; }
   .two-cols { grid-template-columns: 1fr; }
   .export-buttons, .scan-actions, .actions-row { flex-direction: column; }
