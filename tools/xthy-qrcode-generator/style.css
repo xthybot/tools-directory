@@ -36,7 +36,7 @@ h1 { margin: 0 0 10px; font-size: clamp(32px, 5vw, 56px); }
 
 .workspace-grid {
   display: grid;
-  grid-template-columns: 1.2fr 0.95fr 0.9fr 0.9fr;
+  grid-template-columns: 1.2fr 0.95fr 1.1fr;
   gap: 18px;
   align-items: start;
 }
@@ -52,6 +52,7 @@ h1 { margin: 0 0 10px; font-size: clamp(32px, 5vw, 56px); }
 .panel-head h2 { margin: 0; font-size: 20px; }
 .validation-summary { margin: 0; color: var(--soft); font-size: 14px; }
 .field-group { margin-bottom: 16px; }
+.compact-group { margin-bottom: 12px; }
 .field-grid { display: grid; gap: 14px; }
 .two-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 label { display: block; margin-bottom: 8px; color: var(--soft); font-size: 14px; }
@@ -115,6 +116,15 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .export-controls { margin-top: 18px; }
 .export-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
 .dynamic-fields, .mode-panel { margin-top: 10px; }
+.settings-divider {
+  height: 1px;
+  margin: 22px 0 18px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.24), transparent);
+}
+.panel-head--subsection {
+  margin-top: 0;
+  margin-bottom: 14px;
+}
 .scan-panel summary { cursor: pointer; color: var(--primary); margin-bottom: 12px; }
 .scan-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .camera-reader {
@@ -142,6 +152,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 
 @media (max-width: 1280px) {
   .workspace-grid { grid-template-columns: 1fr 1fr; }
+  .options-panel { grid-column: 1 / -1; }
 }
 @media (max-width: 800px) {
   .app-shell { padding: 14px; }

@@ -84,75 +84,67 @@
             <h2>QRCode 設定</h2>
           </div>
 
-          <div class="field-grid two-cols">
-            <div class="field-group">
-              <label for="qrSize">尺寸 <span id="qrSizeValue">280px</span></label>
-              <input id="qrSize" type="range" min="100" max="600" step="10" value="280" />
-            </div>
-            <div class="field-group">
-              <label for="minVersion">Minimum Version</label>
-              <select id="minVersion"></select>
-            </div>
+          <div class="field-group compact-group">
+            <label for="qrSize">尺寸 <span id="qrSizeValue">280px</span></label>
+            <input id="qrSize" type="range" min="100" max="600" step="10" value="280" />
           </div>
 
-          <div class="field-grid two-cols">
-            <div class="field-group">
-              <label for="errorCorrection">容錯率 (ECL)</label>
-              <select id="errorCorrection">
-                <option value="L">低 (7%)</option>
-                <option value="M" selected>中 (15%)</option>
-                <option value="Q">高 (25%)</option>
-                <option value="H">超高 (30%)</option>
-              </select>
-            </div>
-            <div class="field-group">
-              <label for="dotStyle">點樣式</label>
-              <select id="dotStyle">
-                <option value="square">方形</option>
-                <option value="rounded">圓角</option>
-                <option value="dots">圓形</option>
-              </select>
-            </div>
+          <div class="field-group compact-group">
+            <label for="minVersion">Minimum Version</label>
+            <select id="minVersion"></select>
           </div>
 
-          <div class="field-grid two-cols">
-            <div class="field-group">
-              <label for="qrColor">QRCode 顏色</label>
-              <input id="qrColor" type="color" value="#111827" />
-            </div>
-            <div class="field-group">
-              <label for="backgroundColor">背景顏色</label>
-              <input id="backgroundColor" type="color" value="#ffffff" />
-            </div>
+          <div class="field-group compact-group">
+            <label for="errorCorrection">容錯率 (ECL)</label>
+            <select id="errorCorrection">
+              <option value="L">低 (7%)</option>
+              <option value="M" selected>中 (15%)</option>
+              <option value="Q">高 (25%)</option>
+              <option value="H">超高 (30%)</option>
+            </select>
           </div>
 
-          <div class="field-grid two-cols">
-            <div class="field-group">
-              <label for="backgroundAlpha">背景透明度 <span id="backgroundAlphaValue">100%</span></label>
-              <input id="backgroundAlpha" type="range" min="0" max="100" step="1" value="100" />
-            </div>
-            <div class="field-group">
-              <label for="borderSize">邊框大小 <span id="borderSizeValue">16px</span></label>
-              <input id="borderSize" type="range" min="0" max="80" step="2" value="16" />
-            </div>
+          <div class="field-group compact-group">
+            <label for="dotStyle">點樣式</label>
+            <select id="dotStyle">
+              <option value="square">方形</option>
+              <option value="rounded">圓角</option>
+              <option value="dots">圓形</option>
+            </select>
           </div>
 
-          <div class="field-grid two-cols">
-            <div class="field-group">
-              <label for="borderColor">邊框顏色</label>
-              <input id="borderColor" type="color" value="#ffffff" />
-            </div>
+          <div class="field-group compact-group">
+            <label for="qrColor">QRCode 顏色</label>
+            <input id="qrColor" type="color" value="#111827" />
           </div>
 
-          <div id="riskBox" class="risk-box"></div>
-        </section>
+          <div class="field-group compact-group">
+            <label for="backgroundColor">背景顏色</label>
+            <input id="backgroundColor" type="color" value="#ffffff" />
+          </div>
 
-        <section class="panel logo-panel">
-          <div class="panel-head">
+          <div class="field-group compact-group">
+            <label for="backgroundAlpha">背景透明度 <span id="backgroundAlphaValue">100%</span></label>
+            <input id="backgroundAlpha" type="range" min="0" max="100" step="1" value="100" />
+          </div>
+
+          <div class="field-group compact-group">
+            <label for="borderSize">邊框大小 <span id="borderSizeValue">16px</span></label>
+            <input id="borderSize" type="range" min="0" max="80" step="2" value="16" />
+          </div>
+
+          <div class="field-group compact-group">
+            <label for="borderColor">邊框顏色</label>
+            <input id="borderColor" type="color" value="#ffffff" />
+          </div>
+
+          <div class="settings-divider"></div>
+
+          <div class="panel-head panel-head--subsection">
             <h2>LOGO 設定</h2>
           </div>
 
-          <div class="field-group">
+          <div class="field-group compact-group">
             <label for="logoMode">LOGO 模式</label>
             <select id="logoMode">
               <option value="none">不放</option>
@@ -162,72 +154,66 @@
           </div>
 
           <div id="logoTextFields" class="mode-panel" hidden>
-            <div class="field-group">
+            <div class="field-group compact-group">
               <label for="logoText">文字內容</label>
               <input id="logoText" type="text" maxlength="20" placeholder="例如：Xthy" />
             </div>
-            <div class="field-grid two-cols">
-              <div class="field-group">
-                <label for="logoTextColor">文字顏色</label>
-                <input id="logoTextColor" type="color" value="#111827" />
-              </div>
-              <div class="field-group">
-                <label for="logoTextBgColor">背景顏色</label>
-                <input id="logoTextBgColor" type="color" value="#ffffff" />
-              </div>
+            <div class="field-group compact-group">
+              <label for="logoTextColor">文字顏色</label>
+              <input id="logoTextColor" type="color" value="#111827" />
             </div>
-            <div class="field-grid two-cols">
-              <div class="field-group">
-                <label for="logoTextStyle">背景樣式</label>
-                <select id="logoTextStyle">
-                  <option value="box">方框</option>
-                  <option value="bar">長條</option>
-                  <option value="outline">字描邊</option>
-                  <option value="none">無</option>
-                </select>
-              </div>
-              <div class="field-group">
-                <label for="logoFontFamily">字形</label>
-                <select id="logoFontFamily">
-                  <option value="Inter, Arial, sans-serif">Inter</option>
-                  <option value="'Noto Sans TC', sans-serif">Noto Sans TC</option>
-                  <option value="'Microsoft JhengHei', sans-serif">Microsoft JhengHei</option>
-                  <option value="Georgia, serif">Georgia</option>
-                  <option value="'Courier New', monospace">Courier New</option>
-                </select>
-              </div>
+            <div class="field-group compact-group">
+              <label for="logoTextBgColor">背景顏色</label>
+              <input id="logoTextBgColor" type="color" value="#ffffff" />
             </div>
-            <div class="field-grid two-cols">
-              <div class="field-group">
-                <label for="logoTextSize">文字大小 <span id="logoTextSizeValue">32px</span></label>
-                <input id="logoTextSize" type="range" min="16" max="96" step="1" value="32" />
-              </div>
-              <div class="field-group">
-                <label for="logoTextPadding">背景寬度 / 描邊粗細 <span id="logoTextPaddingValue">12px</span></label>
-                <input id="logoTextPadding" type="range" min="0" max="40" step="1" value="12" />
-              </div>
+            <div class="field-group compact-group">
+              <label for="logoTextStyle">背景樣式</label>
+              <select id="logoTextStyle">
+                <option value="box">方框</option>
+                <option value="bar">長條</option>
+                <option value="outline">字描邊</option>
+                <option value="none">無</option>
+              </select>
+            </div>
+            <div class="field-group compact-group">
+              <label for="logoFontFamily">字形</label>
+              <select id="logoFontFamily">
+                <option value="Inter, Arial, sans-serif">Inter</option>
+                <option value="'Noto Sans TC', sans-serif">Noto Sans TC</option>
+                <option value="'Microsoft JhengHei', sans-serif">Microsoft JhengHei</option>
+                <option value="Georgia, serif">Georgia</option>
+                <option value="'Courier New', monospace">Courier New</option>
+              </select>
+            </div>
+            <div class="field-group compact-group">
+              <label for="logoTextSize">文字大小 <span id="logoTextSizeValue">32px</span></label>
+              <input id="logoTextSize" type="range" min="16" max="96" step="1" value="32" />
+            </div>
+            <div class="field-group compact-group">
+              <label for="logoTextPadding">背景寬度 / 描邊粗細 <span id="logoTextPaddingValue">12px</span></label>
+              <input id="logoTextPadding" type="range" min="0" max="40" step="1" value="12" />
             </div>
           </div>
 
           <div id="logoImageFields" class="mode-panel" hidden>
-            <div class="field-group">
+            <div class="field-group compact-group">
               <label class="upload-button">
                 上傳圖片
                 <input id="logoImageInput" type="file" accept="image/*" hidden />
               </label>
               <p id="logoImageName" class="hint">尚未選擇圖片</p>
             </div>
-            <div class="field-grid two-cols">
-              <div class="field-group">
-                <label for="logoImageSize">圖片大小 <span id="logoImageSizeValue">64px</span></label>
-                <input id="logoImageSize" type="range" min="24" max="180" step="2" value="64" />
-              </div>
-              <div class="field-group">
-                <label for="logoImageBorder">圖片邊框 <span id="logoImageBorderValue">8px</span></label>
-                <input id="logoImageBorder" type="range" min="0" max="30" step="1" value="8" />
-              </div>
+            <div class="field-group compact-group">
+              <label for="logoImageSize">圖片大小 <span id="logoImageSizeValue">64px</span></label>
+              <input id="logoImageSize" type="range" min="24" max="180" step="2" value="64" />
+            </div>
+            <div class="field-group compact-group">
+              <label for="logoImageBorder">圖片邊框 <span id="logoImageBorderValue">8px</span></label>
+              <input id="logoImageBorder" type="range" min="0" max="30" step="1" value="8" />
             </div>
           </div>
+
+          <div id="riskBox" class="risk-box"></div>
         </section>
       </main>
     </div>
