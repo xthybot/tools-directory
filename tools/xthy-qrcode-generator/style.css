@@ -290,16 +290,30 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   overflow: hidden;
   background: #000;
 }
-.risk-box {
+.validation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
   margin: 6px 0 14px;
+}
+.validation-card {
   padding: 12px 14px;
   border-radius: 16px;
   background: rgba(255,255,255,.04);
   border: 1px solid var(--border);
   color: var(--soft);
+}
+.validation-card h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+.validation-card__body {
   line-height: 1.6;
   white-space: pre-line;
+  font-size: 13px;
 }
+.validation-card--fixes h3 { color: var(--danger); }
+.validation-card--risks h3 { color: #ffe39a; }
 .notice-ok { color: var(--ok); }
 .notice-bad { color: var(--danger); }
 .notice-warn { color: #ffe39a; }
@@ -369,7 +383,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   .preview-panel { position: static; height: auto; min-height: 0; max-height: none; overflow: visible; }
   .preview-card { min-height: 320px; }
   .preview-head-controls { width: 100%; justify-content: flex-end; }
-  .risk-box { margin: 0 0 14px; }
+  .validation-grid { grid-template-columns: 1fr; margin: 0 0 14px; }
   .two-cols { grid-template-columns: 1fr; }
   .export-buttons, .scan-actions, .actions-row, .copy-action-group { flex-direction: column; align-items: stretch; }
   button, .upload-button { width: 100%; }

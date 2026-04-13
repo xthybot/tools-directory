@@ -111,6 +111,7 @@ const elements = {
   codeType: document.querySelector('#codeType'),
   dynamicFields: document.querySelector('#dynamicFields'),
   qrcodePreview: document.querySelector('#qrcodePreview'),
+  fixBox: document.querySelector('#fixBox'),
   riskBox: document.querySelector('#riskBox'),
   scanImageInput: document.querySelector('#scanImageInput'),
   scanStatus: document.querySelector('#scanStatus'),
@@ -532,10 +533,12 @@ function refreshQr() {
     }
   });
 
-  elements.riskBox.innerHTML = [
-    errors.length ? `<span class="notice-bad">需要修正：</span>\n- ${errors.join('\n- ')}` : '<span class="notice-ok">可儲存</span>',
-    riskMessages.length ? `\n\n<span class="notice-warn">風險提示：</span>\n- ${riskMessages.join('\n- ')}` : ''
-  ].join('');
+  if (elements.fixBox) {
+    elements.fixBox.innerHTML = errors.length ? `- ${errors.join('\n- ')}` : '無';
+  }
+  if (elements.riskBox) {
+    elements.riskBox.innerHTML = riskMessages.length ? `- ${riskMessages.join('\n- ')}` : '無';
+  }
 }
 
 function renderLogoPreviewOverlay(logoAsset = currentLogoAsset) {

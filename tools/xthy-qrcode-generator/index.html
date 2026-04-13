@@ -216,7 +216,16 @@
                 <option value="svg">SVG</option>
               </select>
             </div>
-            <div id="riskBox" class="risk-box"></div>
+            <div class="validation-grid">
+              <div class="validation-card validation-card--fixes">
+                <h3>需要修正</h3>
+                <div id="fixBox" class="validation-card__body">無</div>
+              </div>
+              <div class="validation-card validation-card--risks">
+                <h3>風險提示</h3>
+                <div id="riskBox" class="validation-card__body">無</div>
+              </div>
+            </div>
             <div class="export-buttons">
               <button id="downloadBtn" type="button">儲存 QRCode</button>
               <div class="copy-action-group">
