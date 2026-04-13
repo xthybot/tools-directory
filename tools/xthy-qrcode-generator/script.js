@@ -133,9 +133,11 @@ const elements = {
   copyStatus: document.querySelector('#copyStatus'),
 };
 
+const PREVIEW_RENDER_SIZE = 1200;
+
 const qrCode = new QRCodeStyling({
-  width: state.qr.size,
-  height: state.qr.size,
+  width: PREVIEW_RENDER_SIZE,
+  height: PREVIEW_RENDER_SIZE,
   type: 'svg',
   data: 'https://xthybot.github.io',
   qrOptions: { typeNumber: 0, mode: 'Byte', errorCorrectionLevel: state.qr.errorCorrection },
@@ -443,7 +445,7 @@ function refreshQr() {
   const backgroundColor = hexToRgba(state.qr.backgroundColor, state.qr.backgroundAlpha / 100);
   const margin = state.qr.borderSize;
 
-  if (state.logo.mode === 'image' && state.logo.imageSize > state.qr.size * 0.32) {
+  if (state.logo.mode === 'image' && state.logo.imageSize > state.qr.size * 0.5) {
     riskMessages.push('LOGO 圖片偏大，可能導致掃描失敗。');
   }
   if (state.logo.mode === 'text' && !(state.logo.text || '').trim()) {
@@ -469,8 +471,8 @@ function refreshQr() {
   const imageMargin = 0;
 
   qrCode.update({
-    width: state.qr.size,
-    height: state.qr.size,
+    width: PREVIEW_RENDER_SIZE,
+    height: PREVIEW_RENDER_SIZE,
     data: payload || ' ',
     margin,
     qrOptions: {
@@ -480,7 +482,7 @@ function refreshQr() {
     },
     image,
     imageOptions: {
-      hideBackgroundDots: !!logoAsset,
+      hideBackgroundDots: false,
       imageSize,
       margin: imageMargin,
       crossOrigin: 'anonymous'
@@ -515,8 +517,7 @@ function buildTextLogoAsset() {
   const size = Number(state.logo.textSize) || 32;
   const padding = Math.max(0, Number(state.logo.textPadding) || 0);
   const font = state.logo.fontFamily;
-  const qrInnerSize = Math.max(1, state.qr.size - state.qr.borderSize * 2);
-  const canvasSize = qrInnerSize;
+  const canvasSize = Math.max(1, PREVIEW_RENDER_SIZE);
   const textWidth = Math.max(24, Math.round(text.length * size * 0.62));
   const textHeight = Math.max(size, Math.round(size * 1.08));
   const centerX = canvasSize / 2;
@@ -547,9 +548,14 @@ function buildTextLogoAsset() {
 function buildImageLogoAsset() {
   const size = Number(state.logo.imageSize) || 64;
   const border = Number(state.logo.imageBorder) || 0;
-  const outerSize = size + border * 2;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${outerSize}" height="${outerSize}" viewBox="0 0 ${outerSize} ${outerSize}"><rect x="0" y="0" width="${outerSize}" height="${outerSize}" rx="${Math.min(18, border + 8)}" fill="#ffffff"/><image href="${state.logo.imageDataUrl}" x="${border}" y="${border}" width="${size}" height="${size}" preserveAspectRatio="xMidYMid meet"/></svg>`;
-  return { dataUrl: svgToDataUrl(svg), outerSize };
+  const fullSize = Math.max(1, PREVIEW_RENDER_SIZE);
+  const scaledSize = Math.max(24, Math.round((size / Math.max(100, state.qr.size)) * fullSize));
+  const scaledBorder = Math.max(0, Math.round((border / Math.max(100, state.qr.size)) * fullSize));
+  const outerSize = Math.min(fullSize, scaledSize + scaledBorder * 2);
+  const x = (fullSize - outerSize) / 2;
+  const y = (fullSize - outerSize) / 2;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${fullSize}" height="${fullSize}" viewBox="0 0 ${fullSize} ${fullSize}"><rect x="${x}" y="${y}" width="${outerSize}" height="${outerSize}" rx="${Math.min(24, scaledBorder + 8)}" fill="#ffffff"/><image href="${state.logo.imageDataUrl}" x="${x + scaledBorder}" y="${y + scaledBorder}" width="${Math.max(1, outerSize - scaledBorder * 2)}" height="${Math.max(1, outerSize - scaledBorder * 2)}" preserveAspectRatio="xMidYMid meet"/></svg>`;
+  return { dataUrl: svgToDataUrl(svg), outerSize: fullSize };
 }
 
 async function onLogoImageSelected(event) {
