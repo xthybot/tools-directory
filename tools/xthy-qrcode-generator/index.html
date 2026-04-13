@@ -48,37 +48,6 @@
           </details>
         </section>
 
-        <section class="panel preview-panel">
-          <div class="panel-head">
-            <h2>即時預覽</h2>
-            <p id="validationSummary" class="validation-summary">尚未輸入資料</p>
-          </div>
-
-          <div class="preview-card">
-            <div id="qrcodePreview" class="qrcode-preview"></div>
-          </div>
-
-          <div class="export-controls">
-            <div class="field-group">
-              <label for="fileName">檔案名稱</label>
-              <input id="fileName" type="text" value="xthy-qrcode" />
-            </div>
-            <div class="field-group">
-              <label for="downloadFormat">儲存類型</label>
-              <select id="downloadFormat">
-                <option value="png">PNG</option>
-                <option value="jpg">JPG</option>
-                <option value="webp">WEBP</option>
-                <option value="svg">SVG</option>
-              </select>
-            </div>
-            <div class="export-buttons">
-              <button id="downloadBtn" type="button">儲存 QRCode</button>
-              <button id="copyBtn" type="button" class="ghost-button">複製圖片</button>
-            </div>
-          </div>
-        </section>
-
         <section class="panel options-panel">
           <div class="panel-head">
             <h2>QRCode 設定</h2>
@@ -214,6 +183,37 @@
           </div>
 
           <div id="riskBox" class="risk-box"></div>
+        </section>
+
+        <section class="panel preview-panel">
+          <div class="panel-head">
+            <h2>即時預覽</h2>
+            <p id="validationSummary" class="validation-summary">尚未輸入資料</p>
+          </div>
+
+          <div class="preview-card">
+            <div id="qrcodePreview" class="qrcode-preview"></div>
+          </div>
+
+          <div class="export-controls">
+            <div class="field-group">
+              <label for="fileName">檔案名稱</label>
+              <input id="fileName" type="text" value="xthy-qrcode" />
+            </div>
+            <div class="field-group">
+              <label for="downloadFormat">儲存類型</label>
+              <select id="downloadFormat">
+                <option value="png">PNG</option>
+                <option value="jpg">JPG</option>
+                <option value="webp">WEBP</option>
+                <option value="svg">SVG</option>
+              </select>
+            </div>
+            <div class="export-buttons">
+              <button id="downloadBtn" type="button">儲存 QRCode</button>
+              <button id="copyBtn" type="button" class="ghost-button">複製圖片</button>
+            </div>
+          </div>
         </section>
       </main>
     </div>
