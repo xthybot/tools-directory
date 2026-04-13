@@ -76,10 +76,9 @@ const state = {
     color: '#111827',
     backgroundColor: '#ffffff',
     backgroundAlpha: 100,
-    minVersion: '0',
+    minVersion: 0,
     errorCorrection: 'M',
     borderSize: 16,
-    borderColor: '#ffffff',
     dotStyle: 'square'
   },
   logo: {
@@ -125,6 +124,7 @@ const elements = {
   copyBtn: document.querySelector('#copyBtn'),
   qrSizeValue: document.querySelector('#qrSizeValue'),
   backgroundAlphaValue: document.querySelector('#backgroundAlphaValue'),
+  minVersionValue: document.querySelector('#minVersionValue'),
   borderSizeValue: document.querySelector('#borderSizeValue'),
   logoTextSizeValue: document.querySelector('#logoTextSizeValue'),
   logoTextPaddingValue: document.querySelector('#logoTextPaddingValue'),
@@ -168,11 +168,12 @@ function renderTypeOptions() {
 }
 
 function renderVersionOptions() {
-  const select = document.querySelector('#minVersion');
-  const options = ['<option value="0">Auto</option>'];
-  for (let i = 1; i <= 40; i += 1) options.push(`<option value="${i}">${i}</option>`);
-  select.innerHTML = options.join('');
-  select.value = state.qr.minVersion;
+  const input = document.querySelector('#minVersion');
+  if (!input) return;
+  input.value = String(state.qr.minVersion);
+  if (elements.minVersionValue) {
+    elements.minVersionValue.textContent = state.qr.minVersion === 0 ? 'Auto' : String(state.qr.minVersion);
+  }
 }
 
 function resetValuesForType(type) {
@@ -241,6 +242,9 @@ function bindStaticControls() {
   bindValue('#backgroundAlpha', 'qr.backgroundAlpha', (v) => {
     elements.backgroundAlphaValue.textContent = `${v}%`;
   });
+  bindValue('#minVersion', 'qr.minVersion', (v) => {
+    elements.minVersionValue.textContent = Number(v) === 0 ? 'Auto' : String(v);
+  });
   bindValue('#borderSize', 'qr.borderSize', (v) => {
     elements.borderSizeValue.textContent = `${v}px`;
   });
@@ -257,7 +261,7 @@ function bindStaticControls() {
     elements.logoImageBorderValue.textContent = `${v}px`;
   });
 
-  ['#qrColor', '#backgroundColor', '#borderColor', '#errorCorrection', '#dotStyle', '#minVersion'].forEach((selector) => {
+  ['#qrColor', '#backgroundColor', '#errorCorrection', '#dotStyle'].forEach((selector) => {
     document.querySelector(selector).addEventListener('input', handleStaticInput);
     document.querySelector(selector).addEventListener('change', handleStaticInput);
   });
@@ -278,6 +282,12 @@ function bindStaticControls() {
 
   document.querySelector('#logoMode').value = state.logo.mode;
   document.querySelector('#downloadFormat').value = state.export.format;
+
+  document.querySelectorAll('select').forEach((select) => {
+    ['pointerdown', 'mousedown', 'click'].forEach((eventName) => {
+      select.addEventListener(eventName, (event) => event.stopPropagation());
+    });
+  });
 }
 
 function bindValue(selector, path, callback) {
@@ -297,7 +307,6 @@ function handleStaticInput(event) {
   const map = {
     qrColor: ['qr', 'color'],
     backgroundColor: ['qr', 'backgroundColor'],
-    borderColor: ['qr', 'borderColor'],
     errorCorrection: ['qr', 'errorCorrection'],
     dotStyle: ['qr', 'dotStyle'],
     minVersion: ['qr', 'minVersion'],
@@ -451,13 +460,13 @@ function refreshQr() {
   }
 
   const hasTextLogo = state.logo.mode === 'text' && (state.logo.text || '').trim();
-  const logoSvg = hasTextLogo ? buildTextLogoSvg() : '';
-  const image = state.logo.mode === 'image'
-    ? state.logo.imageDataUrl
-    : (hasTextLogo ? svgToDataUrl(logoSvg) : undefined);
-  const imageSize = state.logo.mode === 'image'
-    ? Math.min(0.5, Math.max(0.12, state.logo.imageSize / state.qr.size))
-    : 0.34;
+  const hasImageLogo = state.logo.mode === 'image' && !!state.logo.imageDataUrl;
+  const logoAsset = hasTextLogo
+    ? buildTextLogoAsset()
+    : (hasImageLogo ? buildImageLogoAsset() : null);
+  const image = logoAsset?.dataUrl;
+  const imageSize = logoAsset ? Math.min(0.6, Math.max(0.08, logoAsset.outerSize / state.qr.size)) : 0.34;
+  const imageMargin = logoAsset ? 0 : 6;
 
   qrCode.update({
     width: state.qr.size,
@@ -471,9 +480,9 @@ function refreshQr() {
     },
     image,
     imageOptions: {
-      hideBackgroundDots: state.logo.mode !== 'none',
+      hideBackgroundDots: !!logoAsset,
       imageSize,
-      margin: state.logo.mode === 'image' ? state.logo.imageBorder : 6,
+      margin: imageMargin,
       crossOrigin: 'anonymous'
     },
     dotsOptions: {
@@ -501,23 +510,36 @@ function refreshQr() {
   ].join('');
 }
 
-function buildTextLogoSvg() {
+function buildTextLogoAsset() {
   const text = escapeHtml(state.logo.text || '');
-  const size = state.logo.textSize;
-  const padding = state.logo.textPadding;
+  const size = Number(state.logo.textSize) || 32;
+  const padding = Number(state.logo.textPadding) || 0;
   const font = state.logo.fontFamily;
-  const estimatedWidth = Math.max(60, Math.round(text.length * size * 0.68 + padding * 2));
-  const estimatedHeight = Math.round(size * 1.6 + padding * 0.6);
+  const textWidth = Math.max(24, Math.round(text.length * size * 0.62));
+  const textHeight = Math.max(size + 8, Math.round(size * 1.25));
+  const outerWidth = Math.max(60, textWidth + padding * 2);
+  const outerHeight = Math.max(44, textHeight + padding * 2);
   let bg = '';
-  let txtAttrs = `fill="${state.logo.textColor}"`;
-  if (state.logo.textStyle === 'box') {
-    bg = `<rect x="0" y="0" width="${estimatedWidth}" height="${estimatedHeight}" rx="16" fill="${state.logo.textBgColor}" />`;
-  } else if (state.logo.textStyle === 'bar') {
-    bg = `<rect x="0" y="${Math.round(estimatedHeight * 0.18)}" width="${estimatedWidth}" height="${Math.round(estimatedHeight * 0.64)}" rx="14" fill="${state.logo.textBgColor}" />`;
-  } else if (state.logo.textStyle === 'outline') {
-    txtAttrs += ` stroke="${state.logo.textBgColor}" stroke-width="${Math.max(1, padding / 3)}" paint-order="stroke"`;
+  let textStroke = '';
+
+  if (state.logo.textStyle === 'box' && padding > 0) {
+    bg = `<rect x="0" y="0" width="${outerWidth}" height="${outerHeight}" rx="${Math.min(16, Math.max(0, padding))}" fill="${state.logo.textBgColor}" />`;
+  } else if (state.logo.textStyle === 'bar' && padding >= 0) {
+    bg = `<rect x="0" y="${Math.round((outerHeight - textHeight) / 2)}" width="${outerWidth}" height="${textHeight}" rx="${Math.min(14, Math.round(textHeight / 3))}" fill="${state.logo.textBgColor}" />`;
+  } else if (state.logo.textStyle === 'outline' && padding > 0) {
+    textStroke = `stroke="${state.logo.textBgColor}" stroke-width="${padding}" paint-order="stroke" stroke-linejoin="round"`;
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${estimatedWidth}" height="${estimatedHeight}" viewBox="0 0 ${estimatedWidth} ${estimatedHeight}">${bg}<text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="${font}" font-size="${size}" font-weight="700" ${txtAttrs}>${text}</text></svg>`;
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${outerWidth}" height="${outerHeight}" viewBox="0 0 ${outerWidth} ${outerHeight}">${bg}<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="${font}" font-size="${size}" font-weight="700" fill="${state.logo.textColor}" ${textStroke}>${text}</text></svg>`;
+  return { dataUrl: svgToDataUrl(svg), outerSize: Math.max(outerWidth, outerHeight) };
+}
+
+function buildImageLogoAsset() {
+  const size = Number(state.logo.imageSize) || 64;
+  const border = Number(state.logo.imageBorder) || 0;
+  const outerSize = size + border * 2;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${outerSize}" height="${outerSize}" viewBox="0 0 ${outerSize} ${outerSize}"><rect x="0" y="0" width="${outerSize}" height="${outerSize}" rx="${Math.min(18, border + 8)}" fill="#ffffff"/><image href="${state.logo.imageDataUrl}" x="${border}" y="${border}" width="${size}" height="${size}" preserveAspectRatio="xMidYMid meet"/></svg>`;
+  return { dataUrl: svgToDataUrl(svg), outerSize };
 }
 
 async function onLogoImageSelected(event) {

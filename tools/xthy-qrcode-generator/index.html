@@ -62,8 +62,8 @@
             </div>
 
             <div class="field-group compact-group">
-              <label for="minVersion">Minimum Version</label>
-              <select id="minVersion"></select>
+              <label for="minVersion">Minimum Version <span id="minVersionValue">Auto</span></label>
+              <input id="minVersion" type="range" min="0" max="40" step="1" value="0" />
             </div>
 
             <div class="field-group compact-group">
@@ -103,11 +103,6 @@
             <div class="field-group compact-group">
               <label for="borderSize">邊框大小 <span id="borderSizeValue">16px</span></label>
               <input id="borderSize" type="range" min="0" max="80" step="2" value="16" />
-            </div>
-
-            <div class="field-group compact-group">
-              <label for="borderColor">邊框顏色</label>
-              <input id="borderColor" type="color" value="#ffffff" />
             </div>
 
             <div class="settings-divider"></div>
@@ -185,7 +180,6 @@
               </div>
             </div>
 
-            <div id="riskBox" class="risk-box"></div>
           </div>
         </details>
 
@@ -213,6 +207,7 @@
                 <option value="svg">SVG</option>
               </select>
             </div>
+            <div id="riskBox" class="risk-box"></div>
             <div class="export-buttons">
               <button id="downloadBtn" type="button">儲存 QRCode</button>
               <div class="copy-action-group">
