@@ -515,33 +515,33 @@ function buildTextLogoAsset() {
   const size = Number(state.logo.textSize) || 32;
   const padding = Math.max(0, Number(state.logo.textPadding) || 0);
   const font = state.logo.fontFamily;
+  const qrInnerSize = Math.max(1, state.qr.size - state.qr.borderSize * 2);
+  const canvasSize = qrInnerSize;
   const textWidth = Math.max(24, Math.round(text.length * size * 0.62));
   const textHeight = Math.max(size + 6, Math.round(size * 1.15));
-  let contentWidth = textWidth;
-  let contentHeight = textHeight;
+  const centerX = canvasSize / 2;
+  const centerY = canvasSize / 2;
   let bg = '';
   let textStroke = '';
 
   if (state.logo.textStyle === 'box') {
-    contentWidth = textWidth + padding * 2;
-    contentHeight = textHeight + padding * 2;
+    const boxWidth = Math.max(textWidth + padding * 2, textWidth);
+    const boxHeight = Math.max(textHeight + padding * 2, textHeight);
+    const boxX = (canvasSize - boxWidth) / 2;
+    const boxY = (canvasSize - boxHeight) / 2;
     if (padding > 0) {
-      bg = `<rect x="0" y="0" width="${contentWidth}" height="${contentHeight}" rx="${Math.min(16, padding)}" fill="${state.logo.textBgColor}" />`;
+      bg = `<rect x="${boxX}" y="${boxY}" width="${boxWidth}" height="${boxHeight}" rx="${Math.min(16, padding)}" fill="${state.logo.textBgColor}" />`;
     }
   } else if (state.logo.textStyle === 'bar') {
-    contentWidth = Math.max(1, state.qr.size - state.qr.borderSize * 2);
-    contentHeight = textHeight + padding * 2;
-    bg = `<rect x="0" y="0" width="${contentWidth}" height="${contentHeight}" rx="${Math.min(14, Math.round(contentHeight / 3))}" fill="${state.logo.textBgColor}" />`;
+    const barHeight = Math.max(textHeight + padding * 2, textHeight);
+    const barY = (canvasSize - barHeight) / 2;
+    bg = `<rect x="0" y="${barY}" width="${canvasSize}" height="${barHeight}" rx="${Math.min(14, Math.round(barHeight / 3))}" fill="${state.logo.textBgColor}" />`;
   } else if (state.logo.textStyle === 'outline' && padding > 0) {
     textStroke = `stroke="${state.logo.textBgColor}" stroke-width="${padding}" paint-order="stroke" stroke-linejoin="round"`;
   }
 
-  const viewWidth = Math.max(1, contentWidth);
-  const viewHeight = Math.max(1, contentHeight);
-  const textX = viewWidth / 2;
-  const textY = viewHeight / 2;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${viewWidth}" height="${viewHeight}" viewBox="0 0 ${viewWidth} ${viewHeight}">${bg}<text x="${textX}" y="${textY}" dominant-baseline="middle" text-anchor="middle" font-family="${font}" font-size="${size}" font-weight="700" fill="${state.logo.textColor}" ${textStroke}>${text}</text></svg>`;
-  return { dataUrl: svgToDataUrl(svg), outerSize: Math.max(viewWidth, viewHeight) };
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${canvasSize}" height="${canvasSize}" viewBox="0 0 ${canvasSize} ${canvasSize}">${bg}<text x="${centerX}" y="${centerY}" dominant-baseline="middle" text-anchor="middle" font-family="${font}" font-size="${size}" font-weight="700" fill="${state.logo.textColor}" ${textStroke}>${text}</text></svg>`;
+  return { dataUrl: svgToDataUrl(svg), outerSize: canvasSize };
 }
 
 function buildImageLogoAsset() {
