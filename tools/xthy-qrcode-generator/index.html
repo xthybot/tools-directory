@@ -187,14 +187,11 @@
           <div class="panel-head">
             <h2>即時預覽</h2>
             <div class="preview-head-controls">
-              <div class="preview-bg-control">
-                <label for="previewBgMode">預覽底色</label>
-                <select id="previewBgMode">
-                  <option value="light">白色</option>
-                  <option value="dark">黑色</option>
-                </select>
-              </div>
-              <p id="validationSummary" class="validation-summary">尚未輸入資料</p>
+              <label class="preview-switch" for="previewBgMode">
+                <input id="previewBgMode" type="checkbox" />
+                <span class="preview-switch__track"><span class="preview-switch__thumb"></span></span>
+                <span class="preview-switch__label">黑底預覽</span>
+              </label>
             </div>
           </div>
 

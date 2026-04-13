@@ -92,6 +92,8 @@ const state = {
     textPadding: 12,
     imageDataUrl: '',
     imageName: '',
+    imageNaturalWidth: 1,
+    imageNaturalHeight: 1,
     imageSize: 64,
     imageBorder: 8
   },
@@ -109,7 +111,6 @@ const elements = {
   codeType: document.querySelector('#codeType'),
   dynamicFields: document.querySelector('#dynamicFields'),
   qrcodePreview: document.querySelector('#qrcodePreview'),
-  validationSummary: document.querySelector('#validationSummary'),
   riskBox: document.querySelector('#riskBox'),
   scanImageInput: document.querySelector('#scanImageInput'),
   scanStatus: document.querySelector('#scanStatus'),
@@ -299,14 +300,14 @@ function bindStaticControls() {
   elements.copyBtn.addEventListener('click', copyQrCodeImage);
   if (elements.previewBgMode) {
     elements.previewBgMode.addEventListener('change', (event) => {
-      state.preview.bgMode = event.target.value;
+      state.preview.bgMode = event.target.checked ? 'dark' : 'light';
       updatePreviewBackground();
     });
   }
 
   document.querySelector('#logoMode').value = state.logo.mode;
   document.querySelector('#downloadFormat').value = state.export.format;
-  if (elements.previewBgMode) elements.previewBgMode.value = state.preview.bgMode;
+  if (elements.previewBgMode) elements.previewBgMode.checked = state.preview.bgMode === 'dark';
 
   document.querySelectorAll('select').forEach((select) => {
     ['pointerdown', 'mousedown', 'click'].forEach((eventName) => {
@@ -531,8 +532,6 @@ function refreshQr() {
     }
   });
 
-  const summary = errors.length ? `資料有 ${errors.length} 個待修正項目` : (payload.trim() ? '可儲存' : '尚未輸入資料');
-  elements.validationSummary.textContent = summary;
   elements.riskBox.innerHTML = [
     errors.length ? `<span class="notice-bad">需要修正：</span>\n- ${errors.join('\n- ')}` : '<span class="notice-ok">可儲存</span>',
     riskMessages.length ? `\n\n<span class="notice-warn">風險提示：</span>\n- ${riskMessages.join('\n- ')}` : ''
@@ -600,15 +599,27 @@ function buildImageLogoAsset(renderSize = PREVIEW_RENDER_SIZE) {
   const size = Number(state.logo.imageSize) || 64;
   const border = Number(state.logo.imageBorder) || 0;
   const fullSize = Math.max(1, renderSize);
-  const scaledSize = Math.max(24, Math.round((size / Math.max(100, state.qr.size)) * fullSize));
+  const ratio = (state.logo.imageNaturalWidth || 1) / Math.max(1, state.logo.imageNaturalHeight || 1);
+  const targetMax = Math.max(24, Math.round((size / Math.max(100, state.qr.size)) * fullSize));
   const scaledBorder = Math.max(0, Math.round((border / Math.max(100, state.qr.size)) * fullSize));
-  const totalSize = Math.min(fullSize, scaledSize + scaledBorder * 2);
-  const frameX = (fullSize - totalSize) / 2;
-  const frameY = (fullSize - totalSize) / 2;
+
+  let imageWidth = targetMax;
+  let imageHeight = Math.max(1, Math.round(targetMax / ratio));
+  if (imageHeight > targetMax) {
+    imageHeight = targetMax;
+    imageWidth = Math.max(1, Math.round(targetMax * ratio));
+  }
+
+  const frameW = Math.min(fullSize, imageWidth + scaledBorder * 2);
+  const frameH = Math.min(fullSize, imageHeight + scaledBorder * 2);
+  const frameX = (fullSize - frameW) / 2;
+  const frameY = (fullSize - frameH) / 2;
   const imageX = frameX + scaledBorder;
   const imageY = frameY + scaledBorder;
-  const imageSize = Math.max(1, totalSize - scaledBorder * 2);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${fullSize}" height="${fullSize}" viewBox="0 0 ${fullSize} ${fullSize}"><rect x="${frameX}" y="${frameY}" width="${totalSize}" height="${totalSize}" rx="${Math.min(24, scaledBorder + 8)}" fill="#ffffff"/><image href="${state.logo.imageDataUrl}" x="${imageX}" y="${imageY}" width="${imageSize}" height="${imageSize}" preserveAspectRatio="xMidYMid meet"/></svg>`;
+  imageWidth = Math.max(1, frameW - scaledBorder * 2);
+  imageHeight = Math.max(1, frameH - scaledBorder * 2);
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${fullSize}" height="${fullSize}" viewBox="0 0 ${fullSize} ${fullSize}"><rect x="${frameX}" y="${frameY}" width="${frameW}" height="${frameH}" rx="${Math.min(24, scaledBorder + 8)}" fill="#ffffff"/><image href="${state.logo.imageDataUrl}" x="${imageX}" y="${imageY}" width="${imageWidth}" height="${imageHeight}" preserveAspectRatio="xMidYMid meet"/></svg>`;
   return { dataUrl: svgToDataUrl(svg), outerSize: fullSize };
 }
 
@@ -618,6 +629,14 @@ async function onLogoImageSelected(event) {
   state.logo.imageName = file.name;
   elements.logoImageName.textContent = file.name;
   state.logo.imageDataUrl = await fileToDataUrl(file);
+  try {
+    const img = await loadImage(state.logo.imageDataUrl);
+    state.logo.imageNaturalWidth = img.naturalWidth || img.width || 1;
+    state.logo.imageNaturalHeight = img.naturalHeight || img.height || 1;
+  } catch (_) {
+    state.logo.imageNaturalWidth = 1;
+    state.logo.imageNaturalHeight = 1;
+  }
   refreshQr();
 }
 
