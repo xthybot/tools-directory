@@ -41,14 +41,14 @@ h1 { margin: 0 0 10px; font-size: clamp(32px, 5vw, 56px); }
 }
 .left-column-stack {
   display: grid;
-  gap: 18px;
+  gap: 24px;
   align-content: start;
 }
 .intro-panel {
   padding: 18px 20px;
 }
 .intro-panel h1 {
-  font-size: clamp(28px, 3.2vw, 44px);
+  font-size: clamp(24px, 2.6vw, 36px);
 }
 .panel {
   min-width: 0;
@@ -118,6 +118,8 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   position: sticky;
   top: 0;
   height: 100vh;
+  min-height: 100vh;
+  max-height: 100vh;
   overflow: auto;
 }
 .qrcode-preview {
