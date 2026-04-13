@@ -99,6 +99,9 @@ const state = {
     fileName: 'xthy-qrcode',
     format: 'png'
   },
+  preview: {
+    bgMode: 'light'
+  },
   decodedRawText: '',
 };
 
@@ -135,6 +138,7 @@ const elements = {
   previewPanel: document.querySelector('.preview-panel'),
   previewCard: document.querySelector('.preview-card'),
   previewStage: document.querySelector('.preview-stage'),
+  previewBgMode: document.querySelector('#previewBgMode'),
 };
 
 const PREVIEW_RENDER_SIZE = 1200;
@@ -170,6 +174,7 @@ function init() {
     const ro = new ResizeObserver(() => updatePreviewStageSize());
     ro.observe(elements.previewCard);
   }
+  updatePreviewBackground();
   refreshQr();
 }
 
@@ -292,9 +297,16 @@ function bindStaticControls() {
   elements.downloadFormat.addEventListener('change', (event) => { state.export.format = event.target.value; });
   elements.downloadBtn.addEventListener('click', downloadQrCode);
   elements.copyBtn.addEventListener('click', copyQrCodeImage);
+  if (elements.previewBgMode) {
+    elements.previewBgMode.addEventListener('change', (event) => {
+      state.preview.bgMode = event.target.value;
+      updatePreviewBackground();
+    });
+  }
 
   document.querySelector('#logoMode').value = state.logo.mode;
   document.querySelector('#downloadFormat').value = state.export.format;
+  if (elements.previewBgMode) elements.previewBgMode.value = state.preview.bgMode;
 
   document.querySelectorAll('select').forEach((select) => {
     ['pointerdown', 'mousedown', 'click'].forEach((eventName) => {
@@ -455,7 +467,7 @@ function refreshQr() {
   const { payload, errors } = buildQrPayload();
   const riskMessages = [];
   const backgroundColor = hexToRgba(state.qr.backgroundColor, state.qr.backgroundAlpha / 100);
-  const margin = state.qr.borderSize;
+  const margin = Math.max(0, Number(state.qr.borderSize) || 0);
 
   if (state.logo.mode === 'image' && state.logo.imageSize > state.qr.size * 0.5) {
     riskMessages.push('LOGO 圖片偏大，可能導致掃描失敗。');
@@ -476,8 +488,8 @@ function refreshQr() {
   const hasTextLogo = state.logo.mode === 'text' && (state.logo.text || '').trim();
   const hasImageLogo = state.logo.mode === 'image' && !!state.logo.imageDataUrl;
   const logoAsset = hasTextLogo
-    ? buildTextLogoAsset()
-    : (hasImageLogo ? buildImageLogoAsset() : null);
+    ? buildTextLogoAsset(PREVIEW_RENDER_SIZE)
+    : (hasImageLogo ? buildImageLogoAsset(PREVIEW_RENDER_SIZE) : null);
   currentLogoAsset = logoAsset;
   renderLogoPreviewOverlay(logoAsset);
 
@@ -536,12 +548,27 @@ function renderLogoPreviewOverlay(logoAsset = currentLogoAsset) {
   elements.logoPreviewOverlay.innerHTML = `<img src="${logoAsset.dataUrl}" alt="logo preview" style="width:100%;height:100%;object-fit:contain;display:block;" />`;
 }
 
-function buildTextLogoAsset() {
+function buildQrRenderer(renderSize) {
+  return new QRCodeStyling({
+    width: renderSize,
+    height: renderSize,
+    type: 'svg',
+    data: ' ',
+    qrOptions: { typeNumber: 0, mode: 'Byte', errorCorrectionLevel: state.qr.errorCorrection },
+    dotsOptions: { color: state.qr.color, type: state.qr.dotStyle },
+    cornersSquareOptions: { color: state.qr.color, type: state.qr.dotStyle === 'dots' ? 'extra-rounded' : state.qr.dotStyle },
+    cornersDotOptions: { color: state.qr.color, type: state.qr.dotStyle === 'dots' ? 'dot' : 'square' },
+    backgroundOptions: { color: hexToRgba(state.qr.backgroundColor, state.qr.backgroundAlpha / 100) },
+    imageOptions: { crossOrigin: 'anonymous', margin: 0 }
+  });
+}
+
+function buildTextLogoAsset(renderSize = PREVIEW_RENDER_SIZE) {
   const text = escapeHtml(state.logo.text || '');
   const size = Number(state.logo.textSize) || 32;
   const padding = Math.max(0, Number(state.logo.textPadding) || 0);
   const font = state.logo.fontFamily;
-  const canvasSize = Math.max(1, PREVIEW_RENDER_SIZE);
+  const canvasSize = Math.max(1, renderSize);
   const textWidth = Math.max(24, Math.round(text.length * size * 0.62));
   const textHeight = Math.max(size, Math.round(size * 1.08));
   const centerX = canvasSize / 2;
@@ -569,10 +596,10 @@ function buildTextLogoAsset() {
   return { dataUrl: svgToDataUrl(svg), outerSize: canvasSize };
 }
 
-function buildImageLogoAsset() {
+function buildImageLogoAsset(renderSize = PREVIEW_RENDER_SIZE) {
   const size = Number(state.logo.imageSize) || 64;
   const border = Number(state.logo.imageBorder) || 0;
-  const fullSize = Math.max(1, PREVIEW_RENDER_SIZE);
+  const fullSize = Math.max(1, renderSize);
   const scaledSize = Math.max(24, Math.round((size / Math.max(100, state.qr.size)) * fullSize));
   const scaledBorder = Math.max(0, Math.round((border / Math.max(100, state.qr.size)) * fullSize));
   const totalSize = Math.min(fullSize, scaledSize + scaledBorder * 2);
@@ -756,7 +783,36 @@ async function copyQrCodeImage() {
 }
 
 async function buildComposedCanvas(flattenBackground = null) {
-  const qrBlob = await qrCode.getRawData('png');
+  const renderSize = Math.max(100, Number(state.qr.size) || 280);
+  const renderer = buildQrRenderer(renderSize);
+  const { payload } = buildQrPayload();
+  renderer.update({
+    width: renderSize,
+    height: renderSize,
+    data: payload || ' ',
+    margin: Math.max(0, Number(state.qr.borderSize) || 0),
+    qrOptions: {
+      typeNumber: Number(state.qr.minVersion),
+      mode: 'Byte',
+      errorCorrectionLevel: state.qr.errorCorrection,
+    },
+    dotsOptions: {
+      color: state.qr.color,
+      type: state.qr.dotStyle,
+    },
+    cornersSquareOptions: {
+      color: state.qr.color,
+      type: state.qr.dotStyle === 'dots' ? 'extra-rounded' : state.qr.dotStyle,
+    },
+    cornersDotOptions: {
+      color: state.qr.color,
+      type: state.qr.dotStyle === 'dots' ? 'dot' : 'square',
+    },
+    backgroundOptions: {
+      color: hexToRgba(state.qr.backgroundColor, state.qr.backgroundAlpha / 100),
+    }
+  });
+  const qrBlob = await renderer.getRawData('png');
   const qrImg = await loadImage(URL.createObjectURL(qrBlob));
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
@@ -767,20 +823,60 @@ async function buildComposedCanvas(flattenBackground = null) {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
   ctx.drawImage(qrImg, 0, 0);
-  if (currentLogoAsset?.dataUrl) {
-    const overlayImg = await loadImage(currentLogoAsset.dataUrl);
+  const exportLogoAsset = state.logo.mode === 'text' && (state.logo.text || '').trim()
+    ? buildTextLogoAsset(renderSize)
+    : (state.logo.mode === 'image' && state.logo.imageDataUrl ? buildImageLogoAsset(renderSize) : null);
+  if (exportLogoAsset?.dataUrl) {
+    const overlayImg = await loadImage(exportLogoAsset.dataUrl);
     ctx.drawImage(overlayImg, 0, 0, canvas.width, canvas.height);
   }
   return canvas;
 }
 
 async function buildComposedSvgBlob() {
-  const raw = await qrCode.getRawData('svg');
+  const renderSize = Math.max(100, Number(state.qr.size) || 280);
+  const renderer = buildQrRenderer(renderSize);
+  const { payload } = buildQrPayload();
+  renderer.update({
+    width: renderSize,
+    height: renderSize,
+    data: payload || ' ',
+    margin: Math.max(0, Number(state.qr.borderSize) || 0),
+    qrOptions: {
+      typeNumber: Number(state.qr.minVersion),
+      mode: 'Byte',
+      errorCorrectionLevel: state.qr.errorCorrection,
+    },
+    dotsOptions: {
+      color: state.qr.color,
+      type: state.qr.dotStyle,
+    },
+    cornersSquareOptions: {
+      color: state.qr.color,
+      type: state.qr.dotStyle === 'dots' ? 'extra-rounded' : state.qr.dotStyle,
+    },
+    cornersDotOptions: {
+      color: state.qr.color,
+      type: state.qr.dotStyle === 'dots' ? 'dot' : 'square',
+    },
+    backgroundOptions: {
+      color: hexToRgba(state.qr.backgroundColor, state.qr.backgroundAlpha / 100),
+    }
+  });
+  const raw = await renderer.getRawData('svg');
   let svgText = await raw.text();
-  if (currentLogoAsset?.dataUrl) {
-    svgText = svgText.replace('</svg>', `<image href="${currentLogoAsset.dataUrl}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"/></svg>`);
+  const exportLogoAsset = state.logo.mode === 'text' && (state.logo.text || '').trim()
+    ? buildTextLogoAsset(renderSize)
+    : (state.logo.mode === 'image' && state.logo.imageDataUrl ? buildImageLogoAsset(renderSize) : null);
+  if (exportLogoAsset?.dataUrl) {
+    svgText = svgText.replace('</svg>', `<image href="${exportLogoAsset.dataUrl}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"/></svg>`);
   }
   return new Blob([svgText], { type: 'image/svg+xml' });
+}
+
+function updatePreviewBackground() {
+  if (!elements.previewCard) return;
+  elements.previewCard.classList.toggle('preview-bg-dark', state.preview.bgMode === 'dark');
 }
 
 function updatePreviewStageSize() {
