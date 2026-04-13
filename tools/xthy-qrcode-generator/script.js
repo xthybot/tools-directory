@@ -153,6 +153,8 @@ function init() {
   renderTypeOptions();
   renderVersionOptions();
   bindStaticControls();
+  syncCollapsibleState();
+  window.addEventListener('resize', syncCollapsibleState);
   resetValuesForType(state.type);
   renderDynamicFields();
   refreshQr();
@@ -710,6 +712,17 @@ function showCopyStatus(message, isError = false) {
       elements.copyStatus.textContent = '';
     }
   }, 2400);
+}
+
+function syncCollapsibleState() {
+  const isMobile = window.matchMedia('(max-width: 800px)').matches;
+  document.querySelectorAll('.mobile-collapsible').forEach((detail) => {
+    if (isMobile) {
+      detail.removeAttribute('open');
+    } else {
+      detail.setAttribute('open', 'open');
+    }
+  });
 }
 
 function triggerBlobDownload(blob, fileName) {

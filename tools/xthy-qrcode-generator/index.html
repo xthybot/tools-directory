@@ -20,7 +20,7 @@
             <p class="subtitle">可建立、掃描、驗證並匯出多種 QRCode，支援手機操作。</p>
           </section>
 
-          <details class="panel form-panel mobile-collapsible" open>
+          <details class="panel form-panel mobile-collapsible">
             <summary class="panel-summary">
               <span>內容設定</span>
               <span class="panel-summary__icon" aria-hidden="true">⌄</span>
@@ -50,7 +50,7 @@
           </details>
         </section>
 
-        <details class="panel options-panel mobile-collapsible" open>
+        <details class="panel options-panel mobile-collapsible">
           <summary class="panel-summary">
             <span>QRCode 設定</span>
             <span class="panel-summary__icon" aria-hidden="true">⌄</span>
@@ -216,7 +216,10 @@
             </div>
             <div class="export-buttons">
               <button id="downloadBtn" type="button">儲存 QRCode</button>
-              <button id="copyBtn" type="button" class="ghost-button">複製圖片</button>
+              <div class="copy-action-group">
+                <button id="copyBtn" type="button" class="ghost-button">複製圖片</button>
+                <span id="copyStatus" class="copy-status" aria-live="polite"></span>
+              </div>
             </div>
           </div>
         </section>
