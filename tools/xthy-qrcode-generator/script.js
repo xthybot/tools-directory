@@ -151,6 +151,7 @@ const qrCode = new QRCodeStyling({
 qrCode.append(elements.qrcodePreview);
 
 let cameraScanner = null;
+let currentLogoAsset = null;
 
 function init() {
   renderTypeOptions();
@@ -467,7 +468,8 @@ function refreshQr() {
   const logoAsset = hasTextLogo
     ? buildTextLogoAsset()
     : (hasImageLogo ? buildImageLogoAsset() : null);
-  renderLogoPreviewOverlay();
+  currentLogoAsset = logoAsset;
+  renderLogoPreviewOverlay(logoAsset);
 
   const image = undefined;
   const imageSize = 0.34;
@@ -515,33 +517,13 @@ function refreshQr() {
   ].join('');
 }
 
-function renderLogoPreviewOverlay() {
+function renderLogoPreviewOverlay(logoAsset = currentLogoAsset) {
   if (!elements.logoPreviewOverlay) return;
-  if (state.logo.mode === 'text' && (state.logo.text || '').trim()) {
-    const size = Number(state.logo.textSize) || 32;
-    const padding = Math.max(0, Number(state.logo.textPadding) || 0);
-    const text = escapeHtml(state.logo.text || '');
-    const font = state.logo.fontFamily;
-    const textWidth = Math.max(24, Math.round(text.length * size * 0.62));
-    const textHeight = Math.max(size, Math.round(size * 1.08));
-    let boxStyle = '';
-    if (state.logo.textStyle === 'box') {
-      boxStyle = `background:${state.logo.textBgColor};padding:${padding}px;border-radius:${Math.min(16, padding)}px;`;
-    } else if (state.logo.textStyle === 'bar') {
-      boxStyle = `background:${state.logo.textBgColor};width:100%;padding:${padding}px 0;display:flex;justify-content:center;`;
-    }
-    const outlineStyle = state.logo.textStyle === 'outline' && padding > 0
-      ? `-webkit-text-stroke:${padding}px ${state.logo.textBgColor};paint-order:stroke fill;`
-      : '';
-    elements.logoPreviewOverlay.innerHTML = `<div class="logo-preview-text" style="${boxStyle}color:${state.logo.textColor};font-family:${font};font-size:${size}px;font-weight:700;line-height:${textHeight}px;text-align:center;${outlineStyle}">${text}</div>`;
+  if (!logoAsset?.dataUrl) {
+    elements.logoPreviewOverlay.innerHTML = '';
     return;
   }
-  if (state.logo.mode === 'image' && state.logo.imageDataUrl) {
-    const full = 'width:100%;height:100%;object-fit:contain;display:block;';
-    elements.logoPreviewOverlay.innerHTML = `<img src="${state.logo.imageDataUrl}" alt="logo preview" style="${full}" />`;
-    return;
-  }
-  elements.logoPreviewOverlay.innerHTML = '';
+  elements.logoPreviewOverlay.innerHTML = `<img src="${logoAsset.dataUrl}" alt="logo preview" style="width:100%;height:100%;object-fit:contain;display:block;" />`;
 }
 
 function buildTextLogoAsset() {
@@ -570,7 +552,7 @@ function buildTextLogoAsset() {
     const barY = (canvasSize - barHeight) / 2;
     bg = `<rect x="0" y="${barY}" width="${canvasSize}" height="${barHeight}" fill="${state.logo.textBgColor}" />`;
   } else if (state.logo.textStyle === 'outline' && padding > 0) {
-    textStroke = `stroke="${state.logo.textBgColor}" stroke-width="${padding}" paint-order="stroke" stroke-linejoin="round"`;
+    textStroke = `stroke="${state.logo.textBgColor}" stroke-width="${padding}" paint-order="stroke fill" stroke-linejoin="round" stroke-linecap="round"`;
   }
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${canvasSize}" height="${canvasSize}" viewBox="0 0 ${canvasSize} ${canvasSize}"><rect x="0" y="0" width="${canvasSize}" height="${canvasSize}" fill="transparent"/>${bg}<text x="${centerX}" y="${centerY}" dominant-baseline="central" text-anchor="middle" font-family="${font}" font-size="${size}px" font-weight="700" fill="${state.logo.textColor}" ${textStroke}>${text}</text></svg>`;
@@ -740,36 +722,52 @@ async function downloadQrCode() {
   const ext = state.export.format;
   const fileName = (state.export.fileName || 'xthy-qrcode').replace(/\.+$/,'');
   if (ext === 'svg') {
-    await qrCode.download({ extension: 'svg', name: fileName });
+    const blob = await buildComposedSvgBlob();
+    triggerBlobDownload(blob, `${fileName}.svg`);
     return;
   }
-  if (ext === 'png') {
-    await qrCode.download({ extension: 'png', name: fileName });
-    return;
-  }
-  const pngBlob = await qrCode.getRawData('png');
-  const img = await loadImage(URL.createObjectURL(pngBlob));
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = img.width;
-  canvas.height = img.height;
-  if (ext === 'jpg') {
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-  ctx.drawImage(img, 0, 0);
-  const mime = ext === 'webp' ? 'image/webp' : 'image/jpeg';
+  const canvas = await buildComposedCanvas(ext === 'jpg' ? '#ffffff' : null);
+  const mime = ext === 'png' ? 'image/png' : (ext === 'webp' ? 'image/webp' : 'image/jpeg');
   canvas.toBlob((blob) => triggerBlobDownload(blob, `${fileName}.${ext}`), mime, 0.96);
 }
 
 async function copyQrCodeImage() {
   try {
-    const blob = await qrCode.getRawData('png');
+    const canvas = await buildComposedCanvas();
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 1));
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
     showCopyStatus('已複製圖片');
   } catch (error) {
     showCopyStatus(`複製失敗：${error.message}`, true);
   }
+}
+
+async function buildComposedCanvas(flattenBackground = null) {
+  const qrBlob = await qrCode.getRawData('png');
+  const qrImg = await loadImage(URL.createObjectURL(qrBlob));
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = qrImg.width;
+  canvas.height = qrImg.height;
+  if (flattenBackground) {
+    ctx.fillStyle = flattenBackground;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  ctx.drawImage(qrImg, 0, 0);
+  if (currentLogoAsset?.dataUrl) {
+    const overlayImg = await loadImage(currentLogoAsset.dataUrl);
+    ctx.drawImage(overlayImg, 0, 0, canvas.width, canvas.height);
+  }
+  return canvas;
+}
+
+async function buildComposedSvgBlob() {
+  const raw = await qrCode.getRawData('svg');
+  let svgText = await raw.text();
+  if (currentLogoAsset?.dataUrl) {
+    svgText = svgText.replace('</svg>', `<image href="${currentLogoAsset.dataUrl}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"/></svg>`);
+  }
+  return new Blob([svgText], { type: 'image/svg+xml' });
 }
 
 function showCopyStatus(message, isError = false) {
