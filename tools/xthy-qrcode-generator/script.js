@@ -90,12 +90,14 @@ const state = {
     fontFamily: 'Inter, Arial, sans-serif',
     textSize: 32,
     textPadding: 12,
+    textCornerStyle: 'rounded',
     imageDataUrl: '',
     imageName: '',
     imageNaturalWidth: 1,
     imageNaturalHeight: 1,
     imageSize: 64,
-    imageBorder: 8
+    imageBorder: 8,
+    imageCornerStyle: 'rounded'
   },
   export: {
     fileName: 'xthy-qrcode',
@@ -141,6 +143,8 @@ const elements = {
   previewCard: document.querySelector('.preview-card'),
   previewStage: document.querySelector('.preview-stage'),
   previewBgMode: document.querySelector('#previewBgMode'),
+  logoTextCornerStyle: document.querySelector('#logoTextCornerStyle'),
+  logoImageCornerStyle: document.querySelector('#logoImageCornerStyle'),
 };
 
 const PREVIEW_RENDER_SIZE = 1200;
@@ -192,7 +196,7 @@ function renderVersionOptions() {
   if (!input) return;
   input.value = String(state.qr.minVersion);
   if (elements.minVersionValue) {
-    elements.minVersionValue.textContent = state.qr.minVersion === 0 ? 'Auto' : String(state.qr.minVersion);
+    elements.minVersionValue.textContent = state.qr.minVersion === 0 ? '自動' : String(state.qr.minVersion);
   }
 }
 
@@ -263,7 +267,7 @@ function bindStaticControls() {
     elements.backgroundAlphaValue.textContent = `${v}%`;
   });
   bindValue('#minVersion', 'qr.minVersion', (v) => {
-    elements.minVersionValue.textContent = Number(v) === 0 ? 'Auto' : String(v);
+    elements.minVersionValue.textContent = Number(v) === 0 ? '自動' : String(v);
   });
   bindValue('#borderSize', 'qr.borderSize', (v) => {
     elements.borderSizeValue.textContent = `${v}px`;
@@ -295,7 +299,11 @@ function bindStaticControls() {
   elements.scanImageInput.addEventListener('change', onScanImageSelected);
   elements.startCameraBtn.addEventListener('click', startCameraScan);
   elements.stopCameraBtn.addEventListener('click', stopCameraScan);
-  elements.fileName.addEventListener('input', (event) => { state.export.fileName = event.target.value.trim() || 'xthy-qrcode'; });
+  elements.fileName.addEventListener('input', (event) => {
+    state.export.fileName = event.target.value.trim();
+    updateFileNamePlaceholder();
+    refreshQr();
+  });
   elements.downloadFormat.addEventListener('change', (event) => { state.export.format = event.target.value; });
   elements.downloadBtn.addEventListener('click', downloadQrCode);
   elements.copyBtn.addEventListener('click', copyQrCodeImage);
@@ -306,9 +314,13 @@ function bindStaticControls() {
     });
   }
 
+  if (elements.logoTextCornerStyle) bindSegmentedControl(elements.logoTextCornerStyle, 'textCornerStyle');
+  if (elements.logoImageCornerStyle) bindSegmentedControl(elements.logoImageCornerStyle, 'imageCornerStyle');
+
   document.querySelector('#logoMode').value = state.logo.mode;
   document.querySelector('#downloadFormat').value = state.export.format;
   if (elements.previewBgMode) elements.previewBgMode.checked = state.preview.bgMode === 'dark';
+  updateFileNamePlaceholder();
 
   document.querySelectorAll('select').forEach((select) => {
     ['pointerdown', 'mousedown', 'click'].forEach((eventName) => {
@@ -486,6 +498,9 @@ function refreshQr() {
   if (state.type === 'twqr' && !state.values.transactionAmount) {
     riskMessages.push('TWQR 若用於固定收款，建議填入交易金額。');
   }
+  if (!state.export.fileName.trim()) {
+    riskMessages.push(`未自訂檔案名稱，將使用預設：${getSuggestedFileName()}`);
+  }
 
   const hasTextLogo = state.logo.mode === 'text' && (state.logo.text || '').trim();
   const hasImageLogo = state.logo.mode === 'image' && !!state.logo.imageDataUrl;
@@ -534,11 +549,67 @@ function refreshQr() {
   });
 
   if (elements.fixBox) {
-    elements.fixBox.innerHTML = errors.length ? `- ${errors.join('\n- ')}` : '無';
+    elements.fixBox.className = 'validation-card__body';
+    if (errors.length) {
+      elements.fixBox.innerHTML = `- ${errors.join('\n- ')}`;
+      elements.fixBox.classList.add('is-empty-fix');
+    } else {
+      elements.fixBox.textContent = '無';
+      elements.fixBox.classList.add('is-empty-none');
+    }
   }
   if (elements.riskBox) {
-    elements.riskBox.innerHTML = riskMessages.length ? `- ${riskMessages.join('\n- ')}` : '無';
+    elements.riskBox.className = 'validation-card__body';
+    if (riskMessages.length) {
+      elements.riskBox.innerHTML = `- ${riskMessages.join('\n- ')}`;
+      elements.riskBox.classList.add('is-empty-risk');
+    } else {
+      elements.riskBox.textContent = '無';
+      elements.riskBox.classList.add('is-empty-none');
+    }
   }
+}
+
+function bindSegmentedControl(container, key) {
+  const buttons = Array.from(container.querySelectorAll('[data-corner-style]'));
+  const apply = (value) => {
+    state.logo[key] = value;
+    buttons.forEach((btn) => btn.classList.toggle('is-active', btn.dataset.cornerStyle === value));
+    refreshQr();
+  };
+  buttons.forEach((btn) => {
+    btn.classList.toggle('is-active', btn.dataset.cornerStyle === state.logo[key]);
+    btn.addEventListener('click', () => apply(btn.dataset.cornerStyle));
+  });
+}
+
+function getSuggestedFileName() {
+  switch (state.type) {
+    case 'wifi':
+      return (state.values.ssid || '').trim() || 'wifi-qrcode';
+    case 'url': {
+      const raw = (state.values.url || '').trim();
+      try {
+        return raw ? new URL(raw).hostname.replace(/^www\./, '') : 'url-qrcode';
+      } catch {
+        return raw || 'url-qrcode';
+      }
+    }
+    case 'text':
+      return ((state.values.text || '').trim().slice(0, 5)) || 'text-qrcode';
+    case 'phone':
+    case 'sms':
+      return (state.values.number || '').trim() || 'phone-qrcode';
+    case 'twqr':
+      return (state.values.merchantName || '').trim() || 'twqr-qrcode';
+    default:
+      return 'xthy-qrcode';
+  }
+}
+
+function updateFileNamePlaceholder() {
+  if (!elements.fileName) return;
+  elements.fileName.placeholder = getSuggestedFileName();
 }
 
 function renderLogoPreviewOverlay(logoAsset = currentLogoAsset) {
@@ -584,12 +655,12 @@ function buildTextLogoAsset(renderSize = PREVIEW_RENDER_SIZE) {
     const boxX = (canvasSize - boxWidth) / 2;
     const boxY = (canvasSize - boxHeight) / 2;
     if (padding > 0) {
-      bg = `<rect x="${boxX}" y="${boxY}" width="${boxWidth}" height="${boxHeight}" rx="${Math.min(16, padding)}" fill="${state.logo.textBgColor}" />`;
+      bg = `<rect x="${boxX}" y="${boxY}" width="${boxWidth}" height="${boxHeight}" rx="${state.logo.textCornerStyle === 'square' ? 0 : Math.min(16, padding)}" fill="${state.logo.textBgColor}" />`;
     }
   } else if (state.logo.textStyle === 'bar') {
     const barHeight = textHeight + padding * 2;
     const barY = (canvasSize - barHeight) / 2;
-    bg = `<rect x="0" y="${barY}" width="${canvasSize}" height="${barHeight}" fill="${state.logo.textBgColor}" />`;
+    bg = `<rect x="0" y="${barY}" width="${canvasSize}" height="${barHeight}" rx="${state.logo.textCornerStyle === 'square' ? 0 : Math.min(14, Math.round(barHeight / 3))}" fill="${state.logo.textBgColor}" />`;
   } else if (state.logo.textStyle === 'outline' && padding > 0) {
     textStroke = `stroke="${state.logo.textBgColor}" stroke-width="${padding}" paint-order="stroke fill" stroke-linejoin="round" stroke-linecap="round"`;
   }
@@ -622,7 +693,7 @@ function buildImageLogoAsset(renderSize = PREVIEW_RENDER_SIZE) {
   imageWidth = Math.max(1, frameW - scaledBorder * 2);
   imageHeight = Math.max(1, frameH - scaledBorder * 2);
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${fullSize}" height="${fullSize}" viewBox="0 0 ${fullSize} ${fullSize}"><rect x="${frameX}" y="${frameY}" width="${frameW}" height="${frameH}" rx="${Math.min(24, scaledBorder + 8)}" fill="#ffffff"/><image href="${state.logo.imageDataUrl}" x="${imageX}" y="${imageY}" width="${imageWidth}" height="${imageHeight}" preserveAspectRatio="xMidYMid meet"/></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${fullSize}" height="${fullSize}" viewBox="0 0 ${fullSize} ${fullSize}"><rect x="${frameX}" y="${frameY}" width="${frameW}" height="${frameH}" rx="${state.logo.imageCornerStyle === 'square' ? 0 : Math.min(24, scaledBorder + 8)}" fill="#ffffff"/><image href="${state.logo.imageDataUrl}" x="${imageX}" y="${imageY}" width="${imageWidth}" height="${imageHeight}" preserveAspectRatio="xMidYMid meet"/></svg>`;
   return { dataUrl: svgToDataUrl(svg), outerSize: fullSize };
 }
 
@@ -782,7 +853,7 @@ function parseTwqr(text) {
 
 async function downloadQrCode() {
   const ext = state.export.format;
-  const fileName = (state.export.fileName || 'xthy-qrcode').replace(/\.+$/,'');
+  const fileName = (state.export.fileName || getSuggestedFileName() || 'xthy-qrcode').replace(/\.+$/,'');
   if (ext === 'svg') {
     const blob = await buildComposedSvgBlob();
     triggerBlobDownload(blob, `${fileName}.svg`);

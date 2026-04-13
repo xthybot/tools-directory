@@ -62,7 +62,7 @@
             </div>
 
             <div class="field-group compact-group">
-              <label for="minVersion">Minimum Version <span id="minVersionValue">Auto</span></label>
+              <label for="minVersion">密度 <span id="minVersionValue">自動</span></label>
               <input id="minVersion" type="range" min="0" max="40" step="1" value="0" />
             </div>
 
@@ -160,6 +160,13 @@
                 <label for="logoTextPadding">背景寬度 / 描邊粗細 <span id="logoTextPaddingValue">12px</span></label>
                 <input id="logoTextPadding" type="range" min="0" max="40" step="1" value="12" />
               </div>
+              <div class="field-group compact-group">
+                <label>文字邊框角樣式</label>
+                <div class="segmented-control" id="logoTextCornerStyle">
+                  <button type="button" class="segmented-control__btn is-active" data-corner-style="rounded">圓角</button>
+                  <button type="button" class="segmented-control__btn" data-corner-style="square">直角</button>
+                </div>
+              </div>
             </div>
 
             <div id="logoImageFields" class="mode-panel" hidden>
@@ -177,6 +184,13 @@
               <div class="field-group compact-group">
                 <label for="logoImageBorder">圖片邊框 <span id="logoImageBorderValue">8px</span></label>
                 <input id="logoImageBorder" type="range" min="0" max="30" step="1" value="8" />
+              </div>
+              <div class="field-group compact-group">
+                <label>圖片邊框角樣式</label>
+                <div class="segmented-control" id="logoImageCornerStyle">
+                  <button type="button" class="segmented-control__btn is-active" data-corner-style="rounded">圓角</button>
+                  <button type="button" class="segmented-control__btn" data-corner-style="square">直角</button>
+                </div>
               </div>
             </div>
 
@@ -205,7 +219,7 @@
           <div class="export-controls">
             <div class="field-group">
               <label for="fileName">檔案名稱</label>
-              <input id="fileName" type="text" value="xthy-qrcode" />
+              <input id="fileName" type="text" placeholder="請輸入檔案名稱" />
             </div>
             <div class="field-group">
               <label for="downloadFormat">儲存類型</label>
