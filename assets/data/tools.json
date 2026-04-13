@@ -3,21 +3,45 @@
     "title": "A4 合併列印工具",
     "icon": "assets/icons/example-local.svg",
     "description": "把多張圖片整理成適合 A4 列印的版面，方便預覽與輸出。",
-    "tags": ["列印", "排版"],
+    "tags": [
+      "列印",
+      "排版"
+    ],
     "link": "tools/a4-merge-print-tool/index.html"
   },
   {
     "title": "移除 Gemini NanoBanana 浮水印",
     "icon": "assets/icons/example-local.svg",
     "description": "只限於去除Gemini NanoBanana生成的浮水印。",
-    "tags": ["AI圖片", "浮水印", "修圖"],
+    "tags": [
+      "AI圖片",
+      "浮水印",
+      "修圖"
+    ],
     "link": "tools/NanoBanana_remove_watermark/index.html"
   },
   {
     "title": "Mermaid 即時預覽",
     "icon": "assets/icons/example-local.svg",
     "description": "即時預覽 Mermaid 圖表，支援主題調整與 SVG、PNG 匯出。",
-    "tags": ["圖表", "流程圖", "開發"],
+    "tags": [
+      "圖表",
+      "流程圖",
+      "開發"
+    ],
     "link": "tools/mermaid-preview/index.html"
+  },
+  {
+    "title": "Xthy QRCode 產生器",
+    "icon": "assets/icons/example-local.svg",
+    "description": "支援網址、Wi-Fi、文字、TWQR、電話、簡訊的 QRCode 產生、掃描與匯出。",
+    "tags": [
+      "QRCode",
+      "掃描",
+      "轉帳",
+      "Wi-Fi",
+      "工具"
+    ],
+    "link": "tools/xthy-qrcode-generator/index.html"
   }
 ]
