@@ -132,6 +132,9 @@ const elements = {
   logoImageBorderValue: document.querySelector('#logoImageBorderValue'),
   copyStatus: document.querySelector('#copyStatus'),
   logoPreviewOverlay: document.querySelector('#logoPreviewOverlay'),
+  previewPanel: document.querySelector('.preview-panel'),
+  previewCard: document.querySelector('.preview-card'),
+  previewStage: document.querySelector('.preview-stage'),
 };
 
 const PREVIEW_RENDER_SIZE = 1200;
@@ -159,8 +162,14 @@ function init() {
   bindStaticControls();
   syncCollapsibleState();
   window.addEventListener('resize', syncCollapsibleState);
+  window.addEventListener('resize', updatePreviewStageSize);
   resetValuesForType(state.type);
   renderDynamicFields();
+  updatePreviewStageSize();
+  if (window.ResizeObserver && elements.previewCard) {
+    const ro = new ResizeObserver(() => updatePreviewStageSize());
+    ro.observe(elements.previewCard);
+  }
   refreshQr();
 }
 
@@ -441,6 +450,7 @@ function buildTwqrPayload(values) {
 }
 
 function refreshQr() {
+  updatePreviewStageSize();
   toggleLogoPanels();
   const { payload, errors } = buildQrPayload();
   const riskMessages = [];
@@ -771,6 +781,13 @@ async function buildComposedSvgBlob() {
     svgText = svgText.replace('</svg>', `<image href="${currentLogoAsset.dataUrl}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"/></svg>`);
   }
   return new Blob([svgText], { type: 'image/svg+xml' });
+}
+
+function updatePreviewStageSize() {
+  if (!elements.previewCard || !elements.previewStage) return;
+  const rect = elements.previewCard.getBoundingClientRect();
+  const size = Math.max(120, Math.floor(Math.min(rect.width, rect.height)));
+  elements.previewStage.style.setProperty('--preview-stage-size', `${size}px`);
 }
 
 function showCopyStatus(message, isError = false) {
