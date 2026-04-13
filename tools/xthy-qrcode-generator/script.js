@@ -565,10 +565,13 @@ function buildImageLogoAsset() {
   const fullSize = Math.max(1, PREVIEW_RENDER_SIZE);
   const scaledSize = Math.max(24, Math.round((size / Math.max(100, state.qr.size)) * fullSize));
   const scaledBorder = Math.max(0, Math.round((border / Math.max(100, state.qr.size)) * fullSize));
-  const outerSize = Math.min(fullSize, scaledSize + scaledBorder * 2);
-  const x = (fullSize - outerSize) / 2;
-  const y = (fullSize - outerSize) / 2;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${fullSize}" height="${fullSize}" viewBox="0 0 ${fullSize} ${fullSize}"><rect x="${x}" y="${y}" width="${outerSize}" height="${outerSize}" rx="${Math.min(24, scaledBorder + 8)}" fill="#ffffff"/><image href="${state.logo.imageDataUrl}" x="${x + scaledBorder}" y="${y + scaledBorder}" width="${Math.max(1, outerSize - scaledBorder * 2)}" height="${Math.max(1, outerSize - scaledBorder * 2)}" preserveAspectRatio="xMidYMid meet"/></svg>`;
+  const totalSize = Math.min(fullSize, scaledSize + scaledBorder * 2);
+  const frameX = (fullSize - totalSize) / 2;
+  const frameY = (fullSize - totalSize) / 2;
+  const imageX = frameX + scaledBorder;
+  const imageY = frameY + scaledBorder;
+  const imageSize = Math.max(1, totalSize - scaledBorder * 2);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${fullSize}" height="${fullSize}" viewBox="0 0 ${fullSize} ${fullSize}"><rect x="${frameX}" y="${frameY}" width="${totalSize}" height="${totalSize}" rx="${Math.min(24, scaledBorder + 8)}" fill="#ffffff"/><image href="${state.logo.imageDataUrl}" x="${imageX}" y="${imageY}" width="${imageSize}" height="${imageSize}" preserveAspectRatio="xMidYMid meet"/></svg>`;
   return { dataUrl: svgToDataUrl(svg), outerSize: fullSize };
 }
 
