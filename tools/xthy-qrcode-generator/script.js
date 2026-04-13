@@ -130,6 +130,7 @@ const elements = {
   logoTextPaddingValue: document.querySelector('#logoTextPaddingValue'),
   logoImageSizeValue: document.querySelector('#logoImageSizeValue'),
   logoImageBorderValue: document.querySelector('#logoImageBorderValue'),
+  copyStatus: document.querySelector('#copyStatus'),
 };
 
 const qrCode = new QRCodeStyling({
@@ -693,10 +694,22 @@ async function copyQrCodeImage() {
   try {
     const blob = await qrCode.getRawData('png');
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-    elements.validationSummary.textContent = '已複製 PNG 到剪貼簿';
+    showCopyStatus('已複製圖片');
   } catch (error) {
-    elements.validationSummary.textContent = `複製失敗：${error.message}`;
+    showCopyStatus(`複製失敗：${error.message}`, true);
   }
+}
+
+function showCopyStatus(message, isError = false) {
+  if (!elements.copyStatus) return;
+  elements.copyStatus.textContent = message;
+  elements.copyStatus.style.color = isError ? 'var(--danger)' : 'var(--ok)';
+  clearTimeout(showCopyStatus._timer);
+  showCopyStatus._timer = setTimeout(() => {
+    if (elements.copyStatus.textContent === message) {
+      elements.copyStatus.textContent = '';
+    }
+  }, 2400);
 }
 
 function triggerBlobDownload(blob, fileName) {
