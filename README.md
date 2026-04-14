@@ -81,7 +81,7 @@
 - `title`：首頁顯示名稱
 - `icon`：首頁卡片圖示路徑
 - `description`：簡短說明
-- `tags`：用於首頁篩選與搜尋
+- `tags`：用於首頁篩選與搜尋；**越少越好，當作類別在使用，不要塞太多細碎標籤**
 - `link`：點開工具時要前往的頁面
 
 ## 新增一個工具的標準流程
@@ -146,7 +146,7 @@ assets/icons/
   "title": "Image Resizer",
   "icon": "assets/icons/image-resizer.svg",
   "description": "快速調整圖片尺寸並匯出。",
-  "tags": ["圖片", "轉檔", "編輯"],
+  "tags": ["圖片"],
   "link": "tools/image-resizer/"
 }
 ```
