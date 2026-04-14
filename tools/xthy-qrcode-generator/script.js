@@ -693,9 +693,14 @@ function buildImageLogoAsset(renderSize = PREVIEW_RENDER_SIZE) {
   const size = Number(state.logo.imageSize) || 64;
   const border = Number(state.logo.imageBorder) || 0;
   const fullSize = Math.max(1, renderSize);
+  const qrCanvasSize = Math.max(100, Number(state.qr.size) || 280);
+  const qrMargin = Math.max(0, Number(state.qr.borderSize) || 0);
   const ratio = (state.logo.imageNaturalWidth || 1) / Math.max(1, state.logo.imageNaturalHeight || 1);
-  const targetMax = Math.max(24, Math.round((size / Math.max(100, state.qr.size)) * fullSize));
-  const scaledBorder = Math.max(0, Math.round((border / Math.max(100, state.qr.size)) * fullSize));
+  const effectiveQrSize = Math.max(1, qrCanvasSize - qrMargin * 2);
+  const effectiveRenderSize = Math.max(1, fullSize - ((qrMargin / qrCanvasSize) * fullSize * 2));
+  const scale = effectiveRenderSize / effectiveQrSize;
+  const targetMax = Math.max(24, Math.round(size * scale));
+  const scaledBorder = Math.max(0, Math.round(border * scale));
 
   let imageWidth = targetMax;
   let imageHeight = Math.max(1, Math.round(targetMax / ratio));
