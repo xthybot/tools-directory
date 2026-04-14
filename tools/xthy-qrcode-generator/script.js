@@ -147,11 +147,15 @@ let cameraScanner = null;
 let currentLogoAsset = null;
 let previewRenderToken = 0;
 let lastMobileLayout = null;
+let isIosSafariLike = false;
 
 function init() {
+  isIosSafariLike = detectIosSafariLike();
+  updateCopyButtonLabel();
   renderTypeOptions();
   renderVersionOptions();
   bindStaticControls();
+  bindMobileCollapsibleControls();
   syncCollapsibleState();
   window.addEventListener('resize', syncCollapsibleState);
   window.addEventListener('resize', updatePreviewStageSize);
@@ -720,13 +724,39 @@ async function onScanImageSelected(event) {
 async function decodeQrFromImage(dataUrl) {
   const image = await loadImage(dataUrl);
   const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
   canvas.width = image.naturalWidth || image.width;
   canvas.height = image.naturalHeight || image.height;
   ctx.drawImage(image, 0, 0);
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const code = jsQR(imageData.data, canvas.width, canvas.height);
-  return code?.data || '';
+
+  const tries = [
+    { sx: 1, sy: 1 },
+    { sx: 0.75, sy: 0.75 },
+    { sx: 0.5, sy: 0.5 }
+  ];
+
+  for (const attempt of tries) {
+    const w = Math.max(1, Math.round(canvas.width * attempt.sx));
+    const h = Math.max(1, Math.round(canvas.height * attempt.sy));
+    const probeCanvas = document.createElement('canvas');
+    const probeCtx = probeCanvas.getContext('2d', { willReadFrequently: true });
+    probeCanvas.width = w;
+    probeCanvas.height = h;
+    probeCtx.drawImage(canvas, 0, 0, w, h);
+    const imageData = probeCtx.getImageData(0, 0, w, h);
+    const code = jsQR(imageData.data, w, h, { inversionAttempts: 'attemptBoth' });
+    if (code?.data) return code.data;
+  }
+
+  if ('BarcodeDetector' in window) {
+    try {
+      const detector = new BarcodeDetector({ formats: ['qr_code'] });
+      const results = await detector.detect(image);
+      if (results?.[0]?.rawValue) return results[0].rawValue;
+    } catch (_) {}
+  }
+
+  return '';
 }
 
 async function startCameraScan() {
@@ -847,23 +877,26 @@ async function copyQrCodeImage() {
     const canvas = await buildComposedCanvas();
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 1));
     if (!blob) throw new Error('無法建立圖片');
-    if (navigator.clipboard?.write && typeof ClipboardItem !== 'undefined') {
+
+    if (!isIosSafariLike && navigator.clipboard?.write && typeof ClipboardItem !== 'undefined') {
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
       showCopyStatus('已複製圖片到剪貼簿');
       return;
     }
+
     if (typeof File !== 'undefined') {
       const file = new File([blob], `${getSuggestedFileName() || 'qrcode'}.png`, { type: 'image/png' });
       if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
         await navigator.share({ files: [file], title: 'QRCode 圖片' });
-        showCopyStatus('此裝置不支援直接複製，已開啟分享');
+        showCopyStatus('已開啟分享 / 儲存圖片');
         return;
       }
     }
+
     triggerBlobDownload(blob, `${getSuggestedFileName() || 'qrcode'}.png`);
-    showCopyStatus('此裝置不支援直接複製，已改為下載圖片');
+    showCopyStatus('已改為下載圖片');
   } catch (error) {
-    showCopyStatus(`複製失敗：${error.message}`, true);
+    showCopyStatus(isIosSafariLike ? '此瀏覽器不支援直接複製圖片，請改用分享或下載。' : `複製失敗：${error.message}`, true);
   }
 }
 
@@ -989,11 +1022,44 @@ function syncCollapsibleState() {
   lastMobileLayout = isMobile;
   document.querySelectorAll('.mobile-collapsible').forEach((detail) => {
     if (isMobile) {
-      detail.removeAttribute('open');
+      if (!detail.dataset.mobileOpen) detail.removeAttribute('open');
+      else detail.setAttribute('open', 'open');
     } else {
       detail.setAttribute('open', 'open');
     }
   });
+}
+
+function bindMobileCollapsibleControls() {
+  document.querySelectorAll('.mobile-collapsible > .panel-summary').forEach((summary) => {
+    summary.addEventListener('click', (event) => {
+      if (!window.matchMedia('(max-width: 800px)').matches) return;
+      event.preventDefault();
+      const detail = summary.parentElement;
+      if (!detail) return;
+      const nextOpen = !detail.hasAttribute('open');
+      if (nextOpen) {
+        detail.setAttribute('open', 'open');
+        detail.dataset.mobileOpen = '1';
+      } else {
+        detail.removeAttribute('open');
+        delete detail.dataset.mobileOpen;
+      }
+    });
+  });
+}
+
+function detectIosSafariLike() {
+  const ua = navigator.userAgent || '';
+  const isIOS = /iP(ad|hone|od)/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isWebKit = /WebKit/i.test(ua);
+  const isOtherBrowserShell = /CriOS|FxiOS|EdgiOS|OPiOS|YaBrowser/i.test(ua);
+  return isIOS && isWebKit && !isOtherBrowserShell;
+}
+
+function updateCopyButtonLabel() {
+  if (!elements.copyBtn) return;
+  elements.copyBtn.textContent = isIosSafariLike ? '分享 / 儲存圖片' : '複製圖片到剪貼簿';
 }
 
 function triggerBlobDownload(blob, fileName) {
