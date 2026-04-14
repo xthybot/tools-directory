@@ -591,10 +591,10 @@ function validateLogoCoverage() {
   const failThreshold = recoverableRatio * 0.8;
 
   if (coverageRatio >= failThreshold) {
-    return { level: 'fix', message: `LOGO 覆蓋面積約 ${(coverageRatio * 100).toFixed(1)}%，已超過 ${state.qr.errorCorrection} 容錯率可接受範圍的保守上限，建議縮小 LOGO、背景或邊框。` };
+    return { level: 'fix', message: `LOGO 覆蓋面積約 ${(coverageRatio * 100).toFixed(1)}%，超過 ${(failThreshold * 100).toFixed(1)}% 上限，建議縮小LOGO、背景。` };
   }
   if (coverageRatio >= riskThreshold) {
-    return { level: 'risk', message: `LOGO 覆蓋面積約 ${(coverageRatio * 100).toFixed(1)}%，接近 ${state.qr.errorCorrection} 容錯率的保守掃描上限，部分裝置可能掃描不穩。` };
+    return { level: 'risk', message: `LOGO 覆蓋面積約 ${(coverageRatio * 100).toFixed(1)}%，超過 ${(riskThreshold * 100).toFixed(1)}% 上限，建議縮小LOGO、背景。` };
   }
   return { level: 'ok', message: '' };
 }
