@@ -200,7 +200,7 @@ function renderDynamicFields() {
     ? `<details class="scan-panel"><summary>TWQR 進階欄位</summary>${config.advancedFields.map(renderField).join('')}</details>`
     : '';
   const twqrNotice = state.type === 'twqr'
-    ? `<p class="hint">注意：<br>這類型的QR碼，即TWQR（台灣共通QR碼支付標準），需搭配支付App及行動銀行App掃碼轉帳。</p>`
+    ? `<p class="hint">注意：<br>這類型的QR碼，即TWQR（台灣共通QR碼支付標準），需搭配支付App及行動銀行App掃碼轉帳。<br>僅限台灣使用。</p>`
     : '';
   elements.dynamicFields.innerHTML = basicHtml + advancedHtml + twqrNotice;
 
@@ -225,7 +225,10 @@ function renderField(field) {
   if (field.type === 'checkbox') {
     return `<div class="field-group"><label class="inline-checkbox"><input id="field-${field.key}" data-field="${field.key}" type="checkbox" ${value ? 'checked' : ''} /> <span>${field.label}</span></label></div>`;
   }
-  const isDigitsOnlyNumber = (state.type === 'phone' || state.type === 'sms') && field.key === 'number';
+  const isDigitsOnlyNumber = (
+    ((state.type === 'phone' || state.type === 'sms') && field.key === 'number')
+    || (state.type === 'twqr' && (field.key === 'bankCode' || field.key === 'bankAccount'))
+  );
   const step = field.step ? `step="${field.step}"` : '';
   const inputType = isDigitsOnlyNumber ? 'text' : (field.type || 'text');
   const extraAttrs = isDigitsOnlyNumber ? 'inputmode="numeric" pattern="[0-9]*" autocomplete="off"' : '';
@@ -407,40 +410,33 @@ function buildQrPayload() {
 
 function buildTwqrPayload(values) {
   const errors = [];
-  const bankCode = String(values.bankCode || '').trim();
-  const bankAccount = String(values.bankAccount || '').trim();
-  const amount = values.amount;
+  const bankCode = String(values.bankCode || '').trim().replace(/\D/g, '');
+  const bankAccount = String(values.bankAccount || '').trim().replace(/\D/g, '');
+  const amount = String(values.amount || '').trim();
   const note = String(values.note || '').trim();
 
-  if (!bankCode) errors.push('請輸入銀行代碼/代號');
-  if (!bankAccount) errors.push('請輸入銀行帳號');
-  if (amount && Number(amount) < 0) errors.push('轉帳金額不可小於 0');
+  if (!/^\d{3}$/.test(bankCode)) errors.push('銀行代碼/代號需為 3 碼數字');
+  if (!/^\d{10,16}$/.test(bankAccount)) errors.push('銀行帳號需為 10 到 16 碼數字');
 
-  const merchantAccountTemplate = [
-    tlv('00', 'TWQR'),
-    tlv('01', `${bankCode}${bankAccount}`)
-  ];
+  let amountInCents = '';
+  if (amount) {
+    const parsedAmount = Number(amount);
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      errors.push('轉帳金額需大於 0');
+    } else {
+      amountInCents = String(Math.round(parsedAmount * 100));
+    }
+  }
 
-  const additionalData = [];
-  if (note) additionalData.push(tlv('05', note));
+  const params = new URLSearchParams();
+  if (bankCode) params.append('D5', bankCode);
+  if (bankAccount) params.append('D6', bankAccount.padStart(16, '0'));
+  if (amountInCents) params.append('D1', amountInCents);
+  if (note) params.append('D9', note);
+  params.append('D10', '901');
 
-  const records = [
-    tlv('00', '01'),
-    tlv('01', amount ? '12' : '11'),
-    tlv('26', merchantAccountTemplate.join('')),
-    tlv('52', '0000'),
-    tlv('53', '901')
-  ];
-
-  if (amount) records.push(tlv('54', formatAmount(amount)));
-  records.push(tlv('58', 'TW'));
-  records.push(tlv('59', `BANK ${bankCode}`.slice(0, 25)));
-  records.push(tlv('60', 'TAIPEI'));
-  if (additionalData.length) records.push(tlv('62', additionalData.join('')));
-
-  const payloadWithoutCrc = records.join('') + '6304';
-  const crc = crc16(payloadWithoutCrc);
-  return { payload: payloadWithoutCrc + crc, errors };
+  const payload = `TWQRP://個人轉帳/158/02/V1?${params.toString()}`;
+  return { payload, errors };
 }
 
 function refreshQr() {
@@ -465,6 +461,9 @@ function refreshQr() {
   }
   if (state.type === 'twqr' && !state.values.amount) {
     riskMessages.push('TWQR 若要固定金額收款，建議填入轉帳金額。');
+  }
+  if (state.type === 'twqr' && state.values.note && String(state.values.note).trim().length > 20) {
+    riskMessages.push('留言備註過長時，部分銀行 App 可能相容性較差。');
   }
   if (!state.export.fileName.trim()) {
     riskMessages.push('未設定檔案名稱');
@@ -771,7 +770,7 @@ function parseDecodedText(text) {
   if (/^https?:\/\//i.test(text)) return { type: 'url', values: { url: text } };
   if (/^tel:/i.test(text)) return { type: 'phone', values: { number: text.replace(/^tel:/i, '') } };
   if (/^sms:/i.test(text)) return parseSms(text);
-  if (/^0002\d{2}01/i.test(text) || /6304[0-9A-F]{4}$/i.test(text)) return parseTwqr(text);
+  if (/^TWQRP:/i.test(text) || /^TWQRP%3A/i.test(text) || /^0002\d{2}01/i.test(text) || /6304[0-9A-F]{4}$/i.test(text)) return parseTwqr(text);
   return { type: 'text', values: { text } };
 }
 
@@ -796,19 +795,30 @@ function parseSms(text) {
 }
 
 function parseTwqr(text) {
-  const tlvs = parseTlvStream(text);
-  const account = parseTlvStream(tlvs['26'] || '');
-  const additional = parseTlvStream(tlvs['62'] || '');
-  const accountInfo = account['01'] || '';
-  return {
-    type: 'twqr',
-    values: {
-      bankCode: accountInfo.slice(0, 3),
-      bankAccount: accountInfo.slice(3),
-      amount: tlvs['54'] || '',
-      note: additional['05'] || ''
-    }
-  };
+  try {
+    const decoded = /^TWQRP%3A/i.test(text) ? decodeURIComponent(text) : text;
+    const url = new URL(decoded);
+    const amountInCents = url.searchParams.get('D1') || '';
+    return {
+      type: 'twqr',
+      values: {
+        bankCode: url.searchParams.get('D5') || '',
+        bankAccount: (url.searchParams.get('D6') || '').replace(/^0+(?=\d{10,16}$)/, ''),
+        amount: amountInCents ? String(Number(amountInCents) / 100) : '',
+        note: url.searchParams.get('D9') || ''
+      }
+    };
+  } catch (_) {
+    return {
+      type: 'twqr',
+      values: {
+        bankCode: '',
+        bankAccount: '',
+        amount: '',
+        note: ''
+      }
+    };
+  }
 }
 
 async function downloadQrCode() {
