@@ -445,22 +445,32 @@ function buildTwqrPayload(values) {
   return { payload, errors };
 }
 
+const QR_BYTE_CAPACITY = {
+  L: [17,32,53,78,106,134,154,192,230,271,321,367,425,458,520,586,644,718,792,858,929,1003,1091,1171,1273,1367,1465,1528,1628,1732,1840,1952,2068,2188,2303,2431,2563,2699,2809,2953],
+  M: [14,26,42,62,84,106,122,152,180,213,251,287,331,362,412,450,504,560,624,666,711,779,857,911,997,1059,1125,1190,1264,1370,1452,1538,1628,1722,1809,1911,1989,2099,2213,2331],
+  Q: [11,20,32,46,60,74,86,108,130,151,177,203,241,258,292,322,364,394,442,482,509,565,611,661,715,751,805,868,908,982,1030,1112,1168,1228,1283,1351,1423,1499,1579,1663],
+  H: [7,14,24,34,44,58,64,84,98,119,137,155,177,194,220,250,280,310,338,382,403,439,461,511,535,593,625,658,698,742,790,842,898,958,983,1051,1093,1139,1219,1273]
+};
+
 function refreshQr() {
   updatePreviewStageSize();
   toggleLogoPanels();
   const { payload, errors } = buildQrPayload();
+  const fixMessages = [...errors];
   const riskMessages = [];
   const backgroundColor = hexToRgba(state.qr.backgroundColor, state.qr.backgroundAlpha / 100);
   const margin = Math.max(0, Number(state.qr.borderSize) || 0);
 
-  if (state.logo.mode === 'image' && state.logo.imageSize > state.qr.size * 0.5) {
-    riskMessages.push('LOGO 圖片偏大，可能導致掃描失敗。');
-  }
+  const versionValidation = validateMinimumVersion(payload);
+  if (versionValidation.level === 'fix') fixMessages.push(versionValidation.message);
+  else if (versionValidation.level === 'risk') riskMessages.push(versionValidation.message);
+
+  const logoValidation = validateLogoCoverage();
+  if (logoValidation.level === 'fix') fixMessages.push(logoValidation.message);
+  else if (logoValidation.level === 'risk') riskMessages.push(logoValidation.message);
+
   if (state.logo.mode === 'text' && !(state.logo.text || '').trim()) {
     riskMessages.push('目前已選文字 LOGO，但尚未輸入文字內容。');
-  }
-  if (state.logo.mode === 'text' && (state.logo.text || '').length > 8 && state.logo.textSize > 42) {
-    riskMessages.push('LOGO 文字較長且字體偏大，建議提高 ECL 或縮小字級。');
   }
   if (state.logo.mode !== 'none' && state.qr.errorCorrection === 'L') {
     riskMessages.push('有 LOGO 時不建議使用低容錯率 (L)。');
@@ -486,8 +496,8 @@ function refreshQr() {
 
   if (elements.fixBox) {
     elements.fixBox.className = 'validation-card__body';
-    if (errors.length) {
-      elements.fixBox.innerHTML = `- ${errors.join('\n- ')}`;
+    if (fixMessages.length) {
+      elements.fixBox.innerHTML = `- ${fixMessages.join('\n- ')}`;
       elements.fixBox.classList.add('is-empty-fix');
     } else {
       elements.fixBox.textContent = '無';
@@ -504,6 +514,89 @@ function refreshQr() {
       elements.riskBox.classList.add('is-empty-none');
     }
   }
+}
+
+function validateMinimumVersion(payload) {
+  const version = Number(state.qr.minVersion) || 0;
+  if (!payload || version <= 0) return { level: 'ok', message: '' };
+  const ecl = state.qr.errorCorrection;
+  const capacity = QR_BYTE_CAPACITY[ecl]?.[version - 1];
+  if (!capacity) return { level: 'ok', message: '' };
+  const byteLength = new TextEncoder().encode(payload).length;
+  if (byteLength > capacity) {
+    return { level: 'fix', message: `Minimum Version ${version} 在 ${ecl} 容錯率下最多約可容納 ${capacity} bytes，目前內容約 ${byteLength} bytes，無法塞入。` };
+  }
+  const usage = byteLength / capacity;
+  if (usage >= 0.9) {
+    return { level: 'risk', message: `Minimum Version ${version} 內容使用量約 ${(usage * 100).toFixed(1)}%，接近上限，建議提高版本或改自動。` };
+  }
+  return { level: 'ok', message: '' };
+}
+
+function getTextLogoMetrics(renderSize = Math.max(100, Number(state.qr.size) || 280)) {
+  const text = String(state.logo.text || '');
+  if (!text.trim()) return null;
+  const size = Number(state.logo.textSize) || 32;
+  const padding = Math.max(0, Number(state.logo.textPadding) || 0);
+  const canvasSize = Math.max(1, renderSize);
+  const textWidth = Math.max(24, Math.round(text.length * size * 0.62));
+  const textHeight = Math.max(size, Math.round(size * 1.08));
+  if (state.logo.textStyle === 'box') {
+    return { width: textWidth + padding * 2, height: textHeight + padding * 2 };
+  }
+  if (state.logo.textStyle === 'bar') {
+    return { width: canvasSize, height: textHeight + padding * 2 };
+  }
+  if (state.logo.textStyle === 'outline') {
+    return { width: textWidth + padding * 2, height: textHeight + padding * 2 };
+  }
+  return { width: textWidth, height: textHeight };
+}
+
+function getImageLogoMetrics(renderSize = Math.max(100, Number(state.qr.size) || 280)) {
+  if (!state.logo.imageDataUrl) return null;
+  const sizePercent = Math.max(0, Number(state.logo.imageSize) || 0);
+  const border = Number(state.logo.imageBorder) || 0;
+  const fullSize = Math.max(1, renderSize);
+  const qrCanvasSize = Math.max(100, Number(state.qr.size) || 280);
+  const ratio = (state.logo.imageNaturalWidth || 1) / Math.max(1, state.logo.imageNaturalHeight || 1);
+  const scale = fullSize / qrCanvasSize;
+  const targetMax = Math.max(1, qrCanvasSize * (sizePercent / 100) * scale);
+  const scaledBorder = Math.max(0, border * scale);
+  let imageWidth = targetMax;
+  let imageHeight = Math.max(1, targetMax / ratio);
+  if (imageHeight > targetMax) {
+    imageHeight = targetMax;
+    imageWidth = Math.max(1, targetMax * ratio);
+  }
+  return {
+    width: Math.min(fullSize, imageWidth + scaledBorder * 2),
+    height: Math.min(fullSize, imageHeight + scaledBorder * 2)
+  };
+}
+
+function validateLogoCoverage() {
+  const qrSize = Math.max(100, Number(state.qr.size) || 280);
+  const qrArea = qrSize * qrSize;
+  let metrics = null;
+  if (state.logo.mode === 'text') metrics = getTextLogoMetrics(qrSize);
+  if (state.logo.mode === 'image') metrics = getImageLogoMetrics(qrSize);
+  if (!metrics) return { level: 'ok', message: '' };
+
+  const coveredArea = metrics.width * metrics.height;
+  const coverageRatio = coveredArea / qrArea;
+  const eclMap = { L: 0.07, M: 0.15, Q: 0.25, H: 0.30 };
+  const recoverableRatio = eclMap[state.qr.errorCorrection] || 0.15;
+  const riskThreshold = recoverableRatio * 0.55;
+  const failThreshold = recoverableRatio * 0.8;
+
+  if (coverageRatio >= failThreshold) {
+    return { level: 'fix', message: `LOGO 覆蓋面積約 ${(coverageRatio * 100).toFixed(1)}%，已超過 ${state.qr.errorCorrection} 容錯率可接受範圍的保守上限，建議縮小 LOGO、背景或邊框。` };
+  }
+  if (coverageRatio >= riskThreshold) {
+    return { level: 'risk', message: `LOGO 覆蓋面積約 ${(coverageRatio * 100).toFixed(1)}%，接近 ${state.qr.errorCorrection} 容錯率的保守掃描上限，部分裝置可能掃描不穩。` };
+  }
+  return { level: 'ok', message: '' };
 }
 
 function bindSegmentedControl(container, key) {
