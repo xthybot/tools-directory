@@ -62,6 +62,17 @@ input {
   letter-spacing: 0.04em;
 }
 
+.hero__badge--logo {
+  padding: 10px 16px;
+}
+
+.hero__badge-logo {
+  display: block;
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+}
+
 .hero__title {
   margin: 20px 0 16px;
   max-width: 760px;
