@@ -95,7 +95,7 @@ const state = {
     imageName: '',
     imageNaturalWidth: 1,
     imageNaturalHeight: 1,
-    imageSize: 64,
+    imageSize: 23,
     imageBorder: 8,
     imageBorderColor: '#ffffff',
     imageCornerStyle: 'rounded'
@@ -292,7 +292,7 @@ function bindStaticControls() {
     elements.logoTextPaddingValue.textContent = `${v}px`;
   });
   bindValue('#logoImageSize', 'logo.imageSize', (v) => {
-    elements.logoImageSizeValue.textContent = `${v}px`;
+    elements.logoImageSizeValue.textContent = `${v}%`;
   });
   bindValue('#logoImageBorder', 'logo.imageBorder', (v) => {
     elements.logoImageBorderValue.textContent = `${v}px`;
@@ -685,20 +685,16 @@ function buildTextLogoAsset(renderSize = PREVIEW_RENDER_SIZE) {
 }
 
 function buildImageLogoAsset(renderSize = PREVIEW_RENDER_SIZE) {
-  const size = Number(state.logo.imageSize) || 64;
+  const sizePercent = Math.max(0, Number(state.logo.imageSize) || 0);
   const border = Number(state.logo.imageBorder) || 0;
   const fullSize = Math.max(1, renderSize);
   const qrCanvasSize = Math.max(100, Number(state.qr.size) || 280);
-  const qrMargin = Math.max(0, Number(state.qr.borderSize) || 0);
   const ratio = (state.logo.imageNaturalWidth || 1) / Math.max(1, state.logo.imageNaturalHeight || 1);
 
-  const outerSize = Math.max(1, size + border * 2);
   const scale = fullSize / qrCanvasSize;
-  const scaledOuterSize = outerSize * scale;
-  const scaledBorder = border * scale;
-  const targetMax = Math.max(1, scaledOuterSize - scaledBorder * 2);
+  const targetMax = Math.max(1, qrCanvasSize * (sizePercent / 100) * scale);
+  const scaledBorder = Math.max(0, border * scale);
   const center = fullSize / 2;
-  const qrOffset = qrMargin * scale;
 
   let imageWidth = targetMax;
   let imageHeight = Math.max(1, targetMax / ratio);
@@ -707,8 +703,8 @@ function buildImageLogoAsset(renderSize = PREVIEW_RENDER_SIZE) {
     imageWidth = Math.max(1, targetMax * ratio);
   }
 
-  const frameW = Math.min(fullSize - qrOffset * 2, imageWidth + scaledBorder * 2);
-  const frameH = Math.min(fullSize - qrOffset * 2, imageHeight + scaledBorder * 2);
+  const frameW = Math.min(fullSize, imageWidth + scaledBorder * 2);
+  const frameH = Math.min(fullSize, imageHeight + scaledBorder * 2);
   const frameX = center - frameW / 2;
   const frameY = center - frameH / 2;
   const imageX = frameX + scaledBorder;
