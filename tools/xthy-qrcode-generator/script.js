@@ -762,6 +762,7 @@ async function decodeQrFromImage(dataUrl) {
 async function startCameraScan() {
   try {
     elements.cameraReader.hidden = false;
+    elements.cameraReader.scrollIntoView({ behavior: 'smooth', block: 'start' });
     elements.startCameraBtn.disabled = true;
     elements.stopCameraBtn.disabled = false;
     cameraScanner = new Html5Qrcode('cameraReader');
