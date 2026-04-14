@@ -186,6 +186,7 @@ button, .upload-button {
 .segmented-control {
   display: inline-flex;
   width: 100%;
+  flex-wrap: nowrap;
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--border);
@@ -193,12 +194,15 @@ button, .upload-button {
 }
 .segmented-control__btn {
   flex: 1 1 0;
+  min-width: 0;
   min-height: 40px;
   border: 0;
   border-right: 1px solid var(--border);
   border-radius: 0;
   background: transparent;
   color: var(--soft);
+  padding: 10px 12px;
+  white-space: nowrap;
 }
 .segmented-control__btn:last-child { border-right: 0; }
 .segmented-control__btn.is-active {

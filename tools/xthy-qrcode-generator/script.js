@@ -120,13 +120,11 @@ const elements = {
   startCameraBtn: document.querySelector('#startCameraBtn'),
   stopCameraBtn: document.querySelector('#stopCameraBtn'),
   cameraReader: document.querySelector('#cameraReader'),
-  logoMode: document.querySelector('#logoMode'),
   logoTextFields: document.querySelector('#logoTextFields'),
   logoImageFields: document.querySelector('#logoImageFields'),
   logoImageInput: document.querySelector('#logoImageInput'),
   logoImageName: document.querySelector('#logoImageName'),
   fileName: document.querySelector('#fileName'),
-  downloadFormat: document.querySelector('#downloadFormat'),
   downloadBtn: document.querySelector('#downloadBtn'),
   copyBtn: document.querySelector('#copyBtn'),
   qrSizeValue: document.querySelector('#qrSizeValue'),
@@ -145,6 +143,10 @@ const elements = {
   previewBgMode: document.querySelector('#previewBgMode'),
   logoTextCornerStyle: document.querySelector('#logoTextCornerStyle'),
   logoImageCornerStyle: document.querySelector('#logoImageCornerStyle'),
+  errorCorrectionControl: document.querySelector('#errorCorrectionControl'),
+  dotStyleControl: document.querySelector('#dotStyleControl'),
+  logoModeControl: document.querySelector('#logoModeControl'),
+  downloadFormatControl: document.querySelector('#downloadFormatControl'),
 };
 
 const PREVIEW_RENDER_SIZE = 1200;
@@ -241,14 +243,23 @@ function renderField(field) {
   if (field.type === 'checkbox') {
     return `<div class="field-group"><label class="inline-checkbox"><input id="field-${field.key}" data-field="${field.key}" type="checkbox" ${value ? 'checked' : ''} /> <span>${field.label}</span></label></div>`;
   }
+  const isDigitsOnlyNumber = (state.type === 'phone' || state.type === 'sms') && field.key === 'number';
   const step = field.step ? `step="${field.step}"` : '';
-  return `<div class="field-group"><label for="field-${field.key}">${field.label}${field.required ? ' *' : ''}</label><input id="field-${field.key}" data-field="${field.key}" type="${field.type || 'text'}" value="${escapeAttr(value)}" placeholder="${field.placeholder || ''}" ${step} /></div>`;
+  const inputType = isDigitsOnlyNumber ? 'text' : (field.type || 'text');
+  const extraAttrs = isDigitsOnlyNumber ? 'inputmode="numeric" pattern="[0-9]*" autocomplete="off"' : '';
+  return `<div class="field-group"><label for="field-${field.key}">${field.label}${field.required ? ' *' : ''}</label><input id="field-${field.key}" data-field="${field.key}" type="${inputType}" value="${escapeAttr(value)}" placeholder="${field.placeholder || ''}" ${step} ${extraAttrs} /></div>`;
 }
 
 function handleDynamicInput(event) {
   const key = event.target.dataset.field;
   if (!key) return;
-  state.values[key] = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
+  if ((state.type === 'phone' || state.type === 'sms') && key === 'number' && event.target.type !== 'checkbox') {
+    const digitsOnly = String(event.target.value || '').replace(/\D/g, '');
+    event.target.value = digitsOnly;
+    state.values[key] = digitsOnly;
+  } else {
+    state.values[key] = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
+  }
   refreshQr();
 }
 
@@ -285,12 +296,12 @@ function bindStaticControls() {
     elements.logoImageBorderValue.textContent = `${v}px`;
   });
 
-  ['#qrColor', '#backgroundColor', '#errorCorrection', '#dotStyle'].forEach((selector) => {
+  ['#qrColor', '#backgroundColor'].forEach((selector) => {
     document.querySelector(selector).addEventListener('input', handleStaticInput);
     document.querySelector(selector).addEventListener('change', handleStaticInput);
   });
 
-  ['#logoMode', '#logoText', '#logoTextColor', '#logoTextBgColor', '#logoTextStyle', '#logoFontFamily'].forEach((selector) => {
+  ['#logoText', '#logoTextColor', '#logoTextBgColor', '#logoTextStyle', '#logoFontFamily'].forEach((selector) => {
     document.querySelector(selector).addEventListener('input', handleStaticInput);
     document.querySelector(selector).addEventListener('change', handleStaticInput);
   });
@@ -304,7 +315,6 @@ function bindStaticControls() {
     updateFileNamePlaceholder();
     refreshQr();
   });
-  elements.downloadFormat.addEventListener('change', (event) => { state.export.format = event.target.value; });
   elements.downloadBtn.addEventListener('click', downloadQrCode);
   elements.copyBtn.addEventListener('click', copyQrCodeImage);
   if (elements.previewBgMode) {
@@ -316,17 +326,13 @@ function bindStaticControls() {
 
   if (elements.logoTextCornerStyle) bindSegmentedControl(elements.logoTextCornerStyle, 'textCornerStyle');
   if (elements.logoImageCornerStyle) bindSegmentedControl(elements.logoImageCornerStyle, 'imageCornerStyle');
+  if (elements.errorCorrectionControl) bindSegmentedValueControl(elements.errorCorrectionControl, 'qr', 'errorCorrection');
+  if (elements.dotStyleControl) bindSegmentedValueControl(elements.dotStyleControl, 'qr', 'dotStyle');
+  if (elements.logoModeControl) bindSegmentedValueControl(elements.logoModeControl, 'logo', 'mode', () => toggleLogoPanels());
+  if (elements.downloadFormatControl) bindSegmentedValueControl(elements.downloadFormatControl, 'export', 'format', null, { refresh: false });
 
-  document.querySelector('#logoMode').value = state.logo.mode;
-  document.querySelector('#downloadFormat').value = state.export.format;
   if (elements.previewBgMode) elements.previewBgMode.checked = state.preview.bgMode === 'dark';
   updateFileNamePlaceholder();
-
-  document.querySelectorAll('select').forEach((select) => {
-    ['pointerdown', 'mousedown', 'click'].forEach((eventName) => {
-      select.addEventListener(eventName, (event) => event.stopPropagation());
-    });
-  });
 }
 
 function bindValue(selector, path, callback, options = {}) {
@@ -346,10 +352,7 @@ function handleStaticInput(event) {
   const map = {
     qrColor: ['qr', 'color'],
     backgroundColor: ['qr', 'backgroundColor'],
-    errorCorrection: ['qr', 'errorCorrection'],
-    dotStyle: ['qr', 'dotStyle'],
     minVersion: ['qr', 'minVersion'],
-    logoMode: ['logo', 'mode'],
     logoText: ['logo', 'text'],
     logoTextColor: ['logo', 'textColor'],
     logoTextBgColor: ['logo', 'textBgColor'],
@@ -499,7 +502,7 @@ function refreshQr() {
     riskMessages.push('TWQR 若用於固定收款，建議填入交易金額。');
   }
   if (!state.export.fileName.trim()) {
-    riskMessages.push(`未自訂檔案名稱，將使用預設：${getSuggestedFileName()}`);
+    riskMessages.push('未設定檔案名稱');
   }
 
   const hasTextLogo = state.logo.mode === 'text' && (state.logo.text || '').trim();
@@ -583,25 +586,40 @@ function bindSegmentedControl(container, key) {
   });
 }
 
+function bindSegmentedValueControl(container, group, key, afterChange = null, options = {}) {
+  const buttons = Array.from(container.querySelectorAll('[data-segment-value]'));
+  const sync = () => {
+    buttons.forEach((btn) => btn.classList.toggle('is-active', btn.dataset.segmentValue === String(state[group][key])));
+  };
+  const apply = (value) => {
+    state[group][key] = value;
+    sync();
+    afterChange?.(value);
+    if (options.refresh !== false) refreshQr();
+  };
+  buttons.forEach((btn) => btn.addEventListener('click', () => apply(btn.dataset.segmentValue)));
+  sync();
+}
+
 function getSuggestedFileName() {
   switch (state.type) {
     case 'wifi':
-      return (state.values.ssid || '').trim() || 'wifi-qrcode';
+      return (state.values.ssid || '').trim() || 'qrcode';
     case 'url': {
       const raw = (state.values.url || '').trim();
       try {
-        return raw ? new URL(raw).hostname.replace(/^www\./, '') : 'url-qrcode';
+        return raw ? new URL(raw).hostname.replace(/^www\./, '') : 'qrcode';
       } catch {
-        return raw || 'url-qrcode';
+        return raw || 'qrcode';
       }
     }
     case 'text':
-      return ((state.values.text || '').trim().slice(0, 5)) || 'text-qrcode';
+      return ((state.values.text || '').trim().slice(0, 5)) || 'qrcode';
     case 'phone':
     case 'sms':
-      return (state.values.number || '').trim() || 'phone-qrcode';
+      return (state.values.number || '').trim() || 'qrcode';
     case 'twqr':
-      return (state.values.merchantName || '').trim() || 'twqr-qrcode';
+      return (state.values.merchantName || '').trim() || 'qrcode';
     default:
       return 'qrcode';
   }
@@ -869,7 +887,7 @@ async function copyQrCodeImage() {
     const canvas = await buildComposedCanvas();
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 1));
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-    showCopyStatus('已複製圖片');
+    showCopyStatus('已複製圖片到剪貼簿');
   } catch (error) {
     showCopyStatus(`複製失敗：${error.message}`, true);
   }

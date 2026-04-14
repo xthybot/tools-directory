@@ -67,22 +67,22 @@
             </div>
 
             <div class="field-group compact-group">
-              <label for="errorCorrection">容錯率 (ECL)</label>
-              <select id="errorCorrection">
-                <option value="L">低 (7%)</option>
-                <option value="M" selected>中 (15%)</option>
-                <option value="Q">高 (25%)</option>
-                <option value="H">超高 (30%)</option>
-              </select>
+              <label>容錯率 (ECL)</label>
+              <div class="segmented-control" id="errorCorrectionControl">
+                <button type="button" class="segmented-control__btn" data-segment-value="L">低 (7%)</button>
+                <button type="button" class="segmented-control__btn is-active" data-segment-value="M">中 (15%)</button>
+                <button type="button" class="segmented-control__btn" data-segment-value="Q">高 (25%)</button>
+                <button type="button" class="segmented-control__btn" data-segment-value="H">超高 (30%)</button>
+              </div>
             </div>
 
             <div class="field-group compact-group">
-              <label for="dotStyle">點樣式</label>
-              <select id="dotStyle">
-                <option value="square">方形</option>
-                <option value="rounded">圓角</option>
-                <option value="dots">圓形</option>
-              </select>
+              <label>點樣式</label>
+              <div class="segmented-control" id="dotStyleControl">
+                <button type="button" class="segmented-control__btn is-active" data-segment-value="square">方形</button>
+                <button type="button" class="segmented-control__btn" data-segment-value="rounded">圓角</button>
+                <button type="button" class="segmented-control__btn" data-segment-value="dots">圓形</button>
+              </div>
             </div>
 
             <div class="field-group compact-group">
@@ -112,12 +112,12 @@
             </div>
 
             <div class="field-group compact-group">
-              <label for="logoMode">LOGO 模式</label>
-              <select id="logoMode">
-                <option value="none">不放</option>
-                <option value="text">文字</option>
-                <option value="image">圖片</option>
-              </select>
+              <label>LOGO 模式</label>
+              <div class="segmented-control" id="logoModeControl">
+                <button type="button" class="segmented-control__btn is-active" data-segment-value="none">不放</button>
+                <button type="button" class="segmented-control__btn" data-segment-value="text">文字</button>
+                <button type="button" class="segmented-control__btn" data-segment-value="image">圖片</button>
+              </div>
             </div>
 
             <div id="logoTextFields" class="mode-panel" hidden>
@@ -223,12 +223,12 @@
             </div>
             <div class="field-group">
               <label for="downloadFormat">儲存類型</label>
-              <select id="downloadFormat">
-                <option value="png">PNG</option>
-                <option value="jpg">JPG</option>
-                <option value="webp">WEBP</option>
-                <option value="svg">SVG</option>
-              </select>
+              <div class="segmented-control" id="downloadFormatControl">
+                <button type="button" class="segmented-control__btn is-active" data-segment-value="png">PNG</button>
+                <button type="button" class="segmented-control__btn" data-segment-value="jpg">JPG</button>
+                <button type="button" class="segmented-control__btn" data-segment-value="webp">WEBP</button>
+                <button type="button" class="segmented-control__btn" data-segment-value="svg">SVG</button>
+              </div>
             </div>
             <div class="validation-grid">
               <div class="validation-card validation-card--fixes">
@@ -236,14 +236,14 @@
                 <div id="fixBox" class="validation-card__body">無</div>
               </div>
               <div class="validation-card validation-card--risks">
-                <h3>風險提示</h3>
+                <h3>提示</h3>
                 <div id="riskBox" class="validation-card__body">無</div>
               </div>
             </div>
             <div class="export-buttons">
               <button id="downloadBtn" type="button">儲存 QRCode</button>
               <div class="copy-action-group">
-                <button id="copyBtn" type="button" class="ghost-button">複製圖片</button>
+                <button id="copyBtn" type="button" class="ghost-button">複製圖片到剪貼簿</button>
                 <span id="copyStatus" class="copy-status" aria-live="polite"></span>
               </div>
             </div>
