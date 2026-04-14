@@ -591,24 +591,23 @@ function validateLogoCoverage() {
   const failThreshold = recoverableRatio;
   const recommendedCoverageRatio = Math.max(0.01, riskThreshold * 0.9);
   const recommendedLogoPercent = Math.max(1, Math.floor(Math.sqrt(recommendedCoverageRatio) * 100));
-  const minimumVersionSuggestion = getRecommendedMinimumVersion();
-  const adviceSuffix = `\n- 建議至少升到 Version ${minimumVersionSuggestion}（目前容錯率 ${state.qr.errorCorrection}）\n- 建議把 LOGO 縮到 ${recommendedLogoPercent}% 以下`;
+  const adviceSuffix = `\n- 建議至少提升到 ${getNextEclLabel(state.qr.errorCorrection)}\n- 建議把 LOGO 縮到 ${recommendedLogoPercent}% 以下`;
 
   if (coverageRatio >= failThreshold) {
-    return { level: 'fix', message: `LOGO 覆蓋面積約 ${(coverageRatio * 100).toFixed(1)}%，超過 ${(failThreshold * 100).toFixed(1)}% 上限，建議縮小LOGO、背景。${adviceSuffix}` };
+    return { level: 'fix', message: `LOGO 覆蓋面積超過 ${(failThreshold * 100).toFixed(1)}% 上限(${(coverageRatio * 100).toFixed(1)}%)，建議縮小LOGO。${adviceSuffix}` };
   }
   if (coverageRatio >= riskThreshold) {
-    return { level: 'risk', message: `LOGO 覆蓋面積約 ${(coverageRatio * 100).toFixed(1)}%，接近 ${(failThreshold * 100).toFixed(1)}% 上限，建議縮小LOGO、背景。${adviceSuffix}` };
+    return { level: 'risk', message: `LOGO 覆蓋面積接近 ${(failThreshold * 100).toFixed(1)}% 上限(${(coverageRatio * 100).toFixed(1)}%)，建議縮小LOGO。${adviceSuffix}` };
   }
   return { level: 'ok', message: '' };
 }
 
-function getRecommendedMinimumVersion(ecl = state.qr.errorCorrection) {
-  const { payload } = buildQrPayload();
-  const byteLength = new TextEncoder().encode(payload || '').length;
-  const table = QR_BYTE_CAPACITY[ecl] || [];
-  const found = table.findIndex((capacity) => byteLength <= capacity);
-  return found >= 0 ? found + 1 : 40;
+function getNextEclLabel(currentEcl = state.qr.errorCorrection) {
+  const order = ['L', 'M', 'Q', 'H'];
+  const labels = { L: '低', M: '中', Q: '高', H: '超高' };
+  const index = order.indexOf(currentEcl);
+  const next = index >= 0 && index < order.length - 1 ? order[index + 1] : currentEcl;
+  return labels[next] || '中';
 }
 
 function bindSegmentedControl(container, key) {
