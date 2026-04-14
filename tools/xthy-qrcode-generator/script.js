@@ -95,7 +95,6 @@ const elements = {
   scanImageInput: document.querySelector('#scanImageInput'),
   scanStatus: document.querySelector('#scanStatus'),
   startCameraBtn: document.querySelector('#startCameraBtn'),
-  stopCameraBtn: document.querySelector('#stopCameraBtn'),
   cameraReader: document.querySelector('#cameraReader'),
   logoTextFields: document.querySelector('#logoTextFields'),
   logoImageFields: document.querySelector('#logoImageFields'),
@@ -302,7 +301,6 @@ function bindStaticControls() {
     if (cameraScanner) stopCameraScan();
     else startCameraScan();
   });
-  elements.stopCameraBtn.addEventListener('click', stopCameraScan);
   elements.fileName.addEventListener('input', (event) => {
     state.export.fileName = event.target.value.trim();
     updateFileNamePlaceholder();
@@ -770,8 +768,6 @@ async function startCameraScan() {
     elements.startCameraBtn.disabled = false;
     elements.startCameraBtn.textContent = '關閉鏡頭';
     elements.startCameraBtn.classList.add('ghost-button');
-    elements.stopCameraBtn.disabled = false;
-    elements.stopCameraBtn.hidden = true;
     cameraScanner = new Html5Qrcode('cameraReader');
     await cameraScanner.start(
       { facingMode: 'environment' },
@@ -799,8 +795,6 @@ async function stopCameraScan() {
   elements.startCameraBtn.disabled = false;
   elements.startCameraBtn.textContent = '開啟鏡頭掃描';
   elements.startCameraBtn.classList.remove('ghost-button');
-  elements.stopCameraBtn.disabled = true;
-  elements.stopCameraBtn.hidden = true;
 }
 
 function applyDecodedText(text) {
