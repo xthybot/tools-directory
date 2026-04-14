@@ -72,7 +72,7 @@
   "icon": "assets/icons/example-local.svg",
   "description": "工具用途簡介",
   "tags": ["標籤1", "標籤2"],
-  "link": "tools/your-tool/index.html"
+  "link": "tools/your-tool/"
 }
 ```
 
@@ -125,7 +125,7 @@ tools/image-resizer/
 - 其他必要靜態資源
 
 原則只有一個：
-**最後要能直接從 `tools/xxx/index.html` 在瀏覽器中打開使用。**
+**最後要能直接從 `tools/xxx/` 在瀏覽器中打開使用。**
 
 ### 4. 準備首頁 icon
 
@@ -147,7 +147,7 @@ assets/icons/
   "icon": "assets/icons/image-resizer.svg",
   "description": "快速調整圖片尺寸並匯出。",
   "tags": ["圖片", "轉檔", "編輯"],
-  "link": "tools/image-resizer/index.html"
+  "link": "tools/image-resizer/"
 }
 ```
 

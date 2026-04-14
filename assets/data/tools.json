@@ -7,7 +7,7 @@
       "列印",
       "排版"
     ],
-    "link": "tools/a4-merge-print-tool/index.html"
+    "link": "tools/a4-merge-print-tool/"
   },
   {
     "title": "移除 Gemini NanoBanana 浮水印",
@@ -18,7 +18,7 @@
       "浮水印",
       "修圖"
     ],
-    "link": "tools/NanoBanana_remove_watermark/index.html"
+    "link": "tools/NanoBanana_remove_watermark/"
   },
   {
     "title": "Mermaid 即時預覽",
@@ -29,7 +29,7 @@
       "流程圖",
       "開發"
     ],
-    "link": "tools/mermaid-preview/index.html"
+    "link": "tools/mermaid-preview/"
   },
   {
     "title": "Xthy QRCode 產生器",
@@ -42,6 +42,6 @@
       "Wi-Fi",
       "工具"
     ],
-    "link": "tools/xthy-qrcode-generator/index.html"
+    "link": "tools/xthy-qrcode-generator/"
   }
 ]
