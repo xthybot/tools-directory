@@ -146,6 +146,7 @@ qrCode.append(elements.qrcodePreview);
 let cameraScanner = null;
 let currentLogoAsset = null;
 let previewRenderToken = 0;
+let lastMobileLayout = null;
 
 function init() {
   renderTypeOptions();
@@ -699,13 +700,20 @@ async function onScanImageSelected(event) {
   const file = event.target.files?.[0];
   if (!file) return;
   try {
-    const dataUrl = await fileToDataUrl(file);
-    const text = await decodeQrFromImage(dataUrl);
+    let text = '';
+    try {
+      text = await scanQrFileWithHtml5Qrcode(file);
+    } catch (_) {
+      const dataUrl = await fileToDataUrl(file);
+      text = await decodeQrFromImage(dataUrl);
+    }
     if (!text) throw new Error('找不到 QRCode');
     applyDecodedText(text);
     elements.scanStatus.textContent = `已成功解析：${truncate(text, 120)}`;
   } catch (error) {
     elements.scanStatus.textContent = `掃描失敗：${error.message}`;
+  } finally {
+    event.target.value = '';
   }
 }
 
@@ -838,8 +846,22 @@ async function copyQrCodeImage() {
   try {
     const canvas = await buildComposedCanvas();
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 1));
-    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-    showCopyStatus('已複製圖片到剪貼簿');
+    if (!blob) throw new Error('無法建立圖片');
+    if (navigator.clipboard?.write && typeof ClipboardItem !== 'undefined') {
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      showCopyStatus('已複製圖片到剪貼簿');
+      return;
+    }
+    if (typeof File !== 'undefined') {
+      const file = new File([blob], `${getSuggestedFileName() || 'qrcode'}.png`, { type: 'image/png' });
+      if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
+        await navigator.share({ files: [file], title: 'QRCode 圖片' });
+        showCopyStatus('此裝置不支援直接複製，已開啟分享');
+        return;
+      }
+    }
+    triggerBlobDownload(blob, `${getSuggestedFileName() || 'qrcode'}.png`);
+    showCopyStatus('此裝置不支援直接複製，已改為下載圖片');
   } catch (error) {
     showCopyStatus(`複製失敗：${error.message}`, true);
   }
@@ -963,6 +985,8 @@ function showCopyStatus(message, isError = false) {
 
 function syncCollapsibleState() {
   const isMobile = window.matchMedia('(max-width: 800px)').matches;
+  if (lastMobileLayout === isMobile) return;
+  lastMobileLayout = isMobile;
   document.querySelectorAll('.mobile-collapsible').forEach((detail) => {
     if (isMobile) {
       detail.removeAttribute('open');
@@ -978,10 +1002,31 @@ function triggerBlobDownload(blob, fileName) {
   const link = document.createElement('a');
   link.href = url;
   link.download = fileName;
+  link.rel = 'noopener';
   document.body.appendChild(link);
   link.click();
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function scanQrFileWithHtml5Qrcode(file) {
+  const mount = document.createElement('div');
+  mount.id = `scan-file-${Date.now()}`;
+  mount.style.position = 'fixed';
+  mount.style.left = '-99999px';
+  mount.style.top = '0';
+  mount.style.width = '1px';
+  mount.style.height = '1px';
+  mount.style.opacity = '0';
+  document.body.appendChild(mount);
+
+  const scanner = new Html5Qrcode(mount.id);
+  try {
+    return await scanner.scanFile(file, true);
+  } finally {
+    try { await scanner.clear(); } catch (_) {}
+    mount.remove();
+  }
 }
 
 function tlv(id, value) {
