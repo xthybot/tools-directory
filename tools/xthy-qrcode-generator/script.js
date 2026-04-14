@@ -100,7 +100,7 @@ const state = {
     imageCornerStyle: 'rounded'
   },
   export: {
-    fileName: 'xthy-qrcode',
+    fileName: '',
     format: 'png'
   },
   preview: {
@@ -603,7 +603,7 @@ function getSuggestedFileName() {
     case 'twqr':
       return (state.values.merchantName || '').trim() || 'twqr-qrcode';
     default:
-      return 'xthy-qrcode';
+      return 'qrcode';
   }
 }
 
@@ -853,7 +853,7 @@ function parseTwqr(text) {
 
 async function downloadQrCode() {
   const ext = state.export.format;
-  const fileName = (state.export.fileName || getSuggestedFileName() || 'xthy-qrcode').replace(/\.+$/,'');
+  const fileName = (state.export.fileName.trim() || getSuggestedFileName() || 'qrcode').replace(/\.+$/,'');
   if (ext === 'svg') {
     const blob = await buildComposedSvgBlob();
     triggerBlobDownload(blob, `${fileName}.svg`);
