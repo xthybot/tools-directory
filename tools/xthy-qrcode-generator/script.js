@@ -168,6 +168,7 @@ qrCode.append(elements.qrcodePreview);
 
 let cameraScanner = null;
 let currentLogoAsset = null;
+let previewRenderToken = 0;
 
 function init() {
   renderTypeOptions();
@@ -513,45 +514,7 @@ function refreshQr() {
     ? buildTextLogoAsset(PREVIEW_RENDER_SIZE)
     : (hasImageLogo ? buildImageLogoAsset(PREVIEW_RENDER_SIZE) : null);
   currentLogoAsset = logoAsset;
-  renderLogoPreviewOverlay(logoAsset);
-
-  const image = undefined;
-  const imageSize = 0.34;
-  const imageMargin = 0;
-
-  qrCode.update({
-    width: PREVIEW_RENDER_SIZE,
-    height: PREVIEW_RENDER_SIZE,
-    data: payload || ' ',
-    margin,
-    qrOptions: {
-      typeNumber: Number(state.qr.minVersion),
-      mode: 'Byte',
-      errorCorrectionLevel: state.qr.errorCorrection,
-    },
-    image,
-    imageOptions: {
-      hideBackgroundDots: false,
-      imageSize,
-      margin: imageMargin,
-      crossOrigin: 'anonymous'
-    },
-    dotsOptions: {
-      color: state.qr.color,
-      type: state.qr.dotStyle,
-    },
-    cornersSquareOptions: {
-      color: state.qr.color,
-      type: state.qr.dotStyle === 'dots' ? 'extra-rounded' : state.qr.dotStyle,
-    },
-    cornersDotOptions: {
-      color: state.qr.color,
-      type: state.qr.dotStyle === 'dots' ? 'dot' : 'square',
-    },
-    backgroundOptions: {
-      color: backgroundColor,
-    }
-  });
+  renderPreviewComposite(payload, margin, backgroundColor, logoAsset);
 
   if (elements.fixBox) {
     elements.fixBox.className = 'validation-card__body';
@@ -632,13 +595,45 @@ function updateFileNamePlaceholder() {
   elements.fileName.placeholder = getSuggestedFileName();
 }
 
-function renderLogoPreviewOverlay(logoAsset = currentLogoAsset) {
-  if (!elements.logoPreviewOverlay) return;
-  if (!logoAsset?.dataUrl) {
-    elements.logoPreviewOverlay.innerHTML = '';
-    return;
+async function renderPreviewComposite(payload, margin, backgroundColor, logoAsset = currentLogoAsset) {
+  if (!elements.qrcodePreview) return;
+  const token = ++previewRenderToken;
+  const renderer = buildQrRenderer(PREVIEW_RENDER_SIZE);
+  renderer.update({
+    width: PREVIEW_RENDER_SIZE,
+    height: PREVIEW_RENDER_SIZE,
+    data: payload || ' ',
+    margin,
+    qrOptions: {
+      typeNumber: Number(state.qr.minVersion),
+      mode: 'Byte',
+      errorCorrectionLevel: state.qr.errorCorrection,
+    },
+    dotsOptions: {
+      color: state.qr.color,
+      type: state.qr.dotStyle,
+    },
+    cornersSquareOptions: {
+      color: state.qr.color,
+      type: state.qr.dotStyle === 'dots' ? 'extra-rounded' : state.qr.dotStyle,
+    },
+    cornersDotOptions: {
+      color: state.qr.color,
+      type: state.qr.dotStyle === 'dots' ? 'dot' : 'square',
+    },
+    backgroundOptions: {
+      color: backgroundColor,
+    }
+  });
+  const raw = await renderer.getRawData('svg');
+  if (token !== previewRenderToken) return;
+  let svgText = await raw.text();
+  if (token !== previewRenderToken) return;
+  if (logoAsset?.dataUrl) {
+    svgText = svgText.replace('</svg>', `<image href="${logoAsset.dataUrl}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"/></svg>`);
   }
-  elements.logoPreviewOverlay.innerHTML = `<img src="${logoAsset.dataUrl}" alt="logo preview" style="width:100%;height:100%;object-fit:contain;display:block;" />`;
+  elements.qrcodePreview.innerHTML = svgText;
+  if (elements.logoPreviewOverlay) elements.logoPreviewOverlay.innerHTML = '';
 }
 
 function buildQrRenderer(renderSize) {
