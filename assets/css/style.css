@@ -50,31 +50,22 @@ input {
   padding: 72px 0 40px;
 }
 
-.hero__badge {
-  display: inline-flex;
+.hero__brand {
+  display: flex;
   align-items: center;
-  padding: 8px 14px;
-  border: 1px solid rgba(88, 197, 254, 0.28);
-  border-radius: 999px;
-  background: rgba(88, 197, 254, 0.1);
-  color: var(--primary);
-  font-size: 14px;
-  letter-spacing: 0.04em;
-}
-
-.hero__badge--logo {
-  padding: 10px 16px;
+  gap: 18px;
 }
 
 .hero__badge-logo {
   display: block;
-  width: 140px;
-  height: 140px;
+  width: 96px;
+  height: 96px;
   object-fit: contain;
+  flex: 0 0 auto;
 }
 
 .hero__title {
-  margin: 20px 0 16px;
+  margin: 0;
   max-width: 760px;
   font-size: clamp(40px, 7vw, 72px);
   line-height: 1.05;
