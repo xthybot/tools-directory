@@ -26,13 +26,6 @@
               <span class="panel-summary__icon" aria-hidden="true">⌄</span>
             </summary>
             <div class="panel-body">
-              <div class="field-group">
-                <label for="codeType">QRCode 類型</label>
-                <select id="codeType"></select>
-              </div>
-
-              <div id="dynamicFields" class="dynamic-fields"></div>
-
               <details class="scan-panel">
                 <summary>掃描 / 匯入內容</summary>
                 <div class="scan-actions">
@@ -46,6 +39,13 @@
                 <div id="cameraReader" class="camera-reader" hidden></div>
                 <p id="scanStatus" class="hint">可上傳含 QRCode 的圖片，或使用相機即時掃描。</p>
               </details>
+
+              <div class="field-group">
+                <label for="codeType">QRCode 類型</label>
+                <select id="codeType"></select>
+              </div>
+
+              <div id="dynamicFields" class="dynamic-fields"></div>
             </div>
           </details>
         </section>
