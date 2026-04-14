@@ -97,6 +97,7 @@ const state = {
     imageNaturalHeight: 1,
     imageSize: 64,
     imageBorder: 8,
+    imageBorderColor: '#ffffff',
     imageCornerStyle: 'rounded'
   },
   export: {
@@ -301,7 +302,7 @@ function bindStaticControls() {
     document.querySelector(selector).addEventListener('change', handleStaticInput);
   });
 
-  ['#logoText', '#logoTextColor', '#logoTextBgColor', '#logoTextStyle', '#logoFontFamily'].forEach((selector) => {
+  ['#logoText', '#logoTextColor', '#logoTextBgColor', '#logoTextStyle', '#logoFontFamily', '#logoImageBorderColor'].forEach((selector) => {
     document.querySelector(selector).addEventListener('input', handleStaticInput);
     document.querySelector(selector).addEventListener('change', handleStaticInput);
   });
@@ -357,7 +358,8 @@ function handleStaticInput(event) {
     logoTextColor: ['logo', 'textColor'],
     logoTextBgColor: ['logo', 'textBgColor'],
     logoTextStyle: ['logo', 'textStyle'],
-    logoFontFamily: ['logo', 'fontFamily']
+    logoFontFamily: ['logo', 'fontFamily'],
+    logoImageBorderColor: ['logo', 'imageBorderColor']
   };
   const target = map[event.target.id];
   if (!target) return;
@@ -711,7 +713,7 @@ function buildImageLogoAsset(renderSize = PREVIEW_RENDER_SIZE) {
   imageWidth = Math.max(1, frameW - scaledBorder * 2);
   imageHeight = Math.max(1, frameH - scaledBorder * 2);
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${fullSize}" height="${fullSize}" viewBox="0 0 ${fullSize} ${fullSize}"><rect x="${frameX}" y="${frameY}" width="${frameW}" height="${frameH}" rx="${state.logo.imageCornerStyle === 'square' ? 0 : Math.min(24, scaledBorder + 8)}" fill="#ffffff"/><image href="${state.logo.imageDataUrl}" x="${imageX}" y="${imageY}" width="${imageWidth}" height="${imageHeight}" preserveAspectRatio="xMidYMid meet"/></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${fullSize}" height="${fullSize}" viewBox="0 0 ${fullSize} ${fullSize}"><rect x="${frameX}" y="${frameY}" width="${frameW}" height="${frameH}" rx="${state.logo.imageCornerStyle === 'square' ? 0 : Math.min(24, scaledBorder + 8)}" fill="${state.logo.imageBorderColor}"/><image href="${state.logo.imageDataUrl}" x="${imageX}" y="${imageY}" width="${imageWidth}" height="${imageHeight}" preserveAspectRatio="xMidYMid meet"/></svg>`;
   return { dataUrl: svgToDataUrl(svg), outerSize: fullSize };
 }
 
