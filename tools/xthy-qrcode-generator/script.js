@@ -274,7 +274,7 @@ function bindStaticControls() {
 
   bindValue('#qrSize', 'qr.size', (v) => {
     elements.qrSizeValue.textContent = `${v}px`;
-  }, { refresh: false });
+  });
   bindValue('#backgroundAlpha', 'qr.backgroundAlpha', (v) => {
     elements.backgroundAlphaValue.textContent = `${v}%`;
   });
@@ -696,23 +696,26 @@ function buildImageLogoAsset(renderSize = PREVIEW_RENDER_SIZE) {
   const qrCanvasSize = Math.max(100, Number(state.qr.size) || 280);
   const qrMargin = Math.max(0, Number(state.qr.borderSize) || 0);
   const ratio = (state.logo.imageNaturalWidth || 1) / Math.max(1, state.logo.imageNaturalHeight || 1);
-  const effectiveQrSize = Math.max(1, qrCanvasSize - qrMargin * 2);
-  const effectiveRenderSize = Math.max(1, fullSize - ((qrMargin / qrCanvasSize) * fullSize * 2));
-  const scale = effectiveRenderSize / effectiveQrSize;
-  const targetMax = Math.max(24, Math.round(size * scale));
-  const scaledBorder = Math.max(0, Math.round(border * scale));
+
+  const outerSize = Math.max(1, size + border * 2);
+  const scale = fullSize / qrCanvasSize;
+  const scaledOuterSize = outerSize * scale;
+  const scaledBorder = border * scale;
+  const targetMax = Math.max(1, scaledOuterSize - scaledBorder * 2);
+  const center = fullSize / 2;
+  const qrOffset = qrMargin * scale;
 
   let imageWidth = targetMax;
-  let imageHeight = Math.max(1, Math.round(targetMax / ratio));
+  let imageHeight = Math.max(1, targetMax / ratio);
   if (imageHeight > targetMax) {
     imageHeight = targetMax;
-    imageWidth = Math.max(1, Math.round(targetMax * ratio));
+    imageWidth = Math.max(1, targetMax * ratio);
   }
 
-  const frameW = Math.min(fullSize, imageWidth + scaledBorder * 2);
-  const frameH = Math.min(fullSize, imageHeight + scaledBorder * 2);
-  const frameX = (fullSize - frameW) / 2;
-  const frameY = (fullSize - frameH) / 2;
+  const frameW = Math.min(fullSize - qrOffset * 2, imageWidth + scaledBorder * 2);
+  const frameH = Math.min(fullSize - qrOffset * 2, imageHeight + scaledBorder * 2);
+  const frameX = center - frameW / 2;
+  const frameY = center - frameH / 2;
   const imageX = frameX + scaledBorder;
   const imageY = frameY + scaledBorder;
   imageWidth = Math.max(1, frameW - scaledBorder * 2);
