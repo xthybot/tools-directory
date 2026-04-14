@@ -540,7 +540,7 @@ function getTextLogoMetrics(renderSize = Math.max(100, Number(state.qr.size) || 
   const padding = Math.max(0, Number(state.logo.textPadding) || 0);
   const canvasSize = Math.max(1, renderSize);
   const textWidth = Math.max(24, Math.round(text.length * size * 0.62));
-  const textHeight = Math.max(size, Math.round(size * 1.08));
+  const textHeight = Math.max(24, Math.round(size * 0.9));
   if (state.logo.textStyle === 'box') {
     return { width: textWidth + padding * 2, height: textHeight + padding * 2 };
   }
@@ -730,7 +730,7 @@ function buildTextLogoAsset(renderSize = Math.max(100, Number(state.qr.size) || 
   const font = state.logo.fontFamily;
   const canvasSize = Math.max(1, renderSize);
   const textWidth = Math.max(24, Math.round(text.length * size * 0.62));
-  const textHeight = Math.max(size, Math.round(size * 1.08));
+  const textHeight = Math.max(24, Math.round(size * 0.9));
   const centerX = canvasSize / 2;
   const centerY = canvasSize / 2;
   let bg = '';
