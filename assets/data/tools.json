@@ -1,7 +1,7 @@
 [
   {
     "title": "A4 合併列印工具",
-    "icon": "🧾",
+    "icon": "assets/icons/a4-merge-print-tool.svg",
     "description": "把多張圖片整理成適合 A4 列印的版面，方便預覽與輸出。",
     "tags": [
       "列印",
@@ -11,7 +11,7 @@
   },
   {
     "title": "移除 Gemini NanoBanana 浮水印",
-    "icon": "🍌",
+    "icon": "assets/icons/nanobanana-tool.svg",
     "description": "只限於去除Gemini NanoBanana生成的浮水印。",
     "tags": [
       "AI圖片",
