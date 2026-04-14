@@ -125,21 +125,8 @@
                 <input id="logoText" type="text" maxlength="20" placeholder="例如：Xthy" />
               </div>
               <div class="field-group compact-group">
-                <label for="logoTextColor">文字顏色</label>
-                <input id="logoTextColor" type="color" value="#111827" />
-              </div>
-              <div class="field-group compact-group">
-                <label for="logoTextBgColor">背景顏色</label>
-                <input id="logoTextBgColor" type="color" value="#ffffff" />
-              </div>
-              <div class="field-group compact-group">
-                <label>背景樣式</label>
-                <div class="segmented-control" id="logoTextStyleControl">
-                  <button type="button" class="segmented-control__btn is-active" data-segment-value="box">方框</button>
-                  <button type="button" class="segmented-control__btn" data-segment-value="bar">長條</button>
-                  <button type="button" class="segmented-control__btn" data-segment-value="outline">字描邊</button>
-                  <button type="button" class="segmented-control__btn" data-segment-value="none">無</button>
-                </div>
+                <label for="logoTextSize">文字大小 <span id="logoTextSizeValue">32px</span></label>
+                <input id="logoTextSize" type="range" min="16" max="96" step="1" value="32" />
               </div>
               <div class="field-group compact-group">
                 <label for="logoFontFamily">字形</label>
@@ -152,8 +139,21 @@
                 </select>
               </div>
               <div class="field-group compact-group">
-                <label for="logoTextSize">文字大小 <span id="logoTextSizeValue">32px</span></label>
-                <input id="logoTextSize" type="range" min="16" max="96" step="1" value="32" />
+                <label for="logoTextColor">文字顏色</label>
+                <input id="logoTextColor" type="color" value="#111827" />
+              </div>
+              <div class="field-group compact-group">
+                <label>背景樣式</label>
+                <div class="segmented-control" id="logoTextStyleControl">
+                  <button type="button" class="segmented-control__btn is-active" data-segment-value="box">方框</button>
+                  <button type="button" class="segmented-control__btn" data-segment-value="bar">長條</button>
+                  <button type="button" class="segmented-control__btn" data-segment-value="outline">字描邊</button>
+                  <button type="button" class="segmented-control__btn" data-segment-value="none">無</button>
+                </div>
+              </div>
+              <div class="field-group compact-group">
+                <label for="logoTextBgColor">背景顏色</label>
+                <input id="logoTextBgColor" type="color" value="#ffffff" />
               </div>
               <div class="field-group compact-group">
                 <label for="logoTextPadding">背景寬度 / 描邊粗細 <span id="logoTextPaddingValue">12px</span></label>
