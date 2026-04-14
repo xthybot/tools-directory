@@ -508,13 +508,14 @@ function refreshQr() {
     riskMessages.push('未設定檔案名稱');
   }
 
+  const previewRenderSize = Math.max(100, Number(state.qr.size) || 280);
   const hasTextLogo = state.logo.mode === 'text' && (state.logo.text || '').trim();
   const hasImageLogo = state.logo.mode === 'image' && !!state.logo.imageDataUrl;
   const logoAsset = hasTextLogo
-    ? buildTextLogoAsset(PREVIEW_RENDER_SIZE)
-    : (hasImageLogo ? buildImageLogoAsset(PREVIEW_RENDER_SIZE) : null);
+    ? buildTextLogoAsset(previewRenderSize)
+    : (hasImageLogo ? buildImageLogoAsset(previewRenderSize) : null);
   currentLogoAsset = logoAsset;
-  renderPreviewComposite(payload, margin, backgroundColor, logoAsset);
+  renderPreviewComposite(payload, margin, backgroundColor, logoAsset, previewRenderSize);
 
   if (elements.fixBox) {
     elements.fixBox.className = 'validation-card__body';
@@ -595,13 +596,13 @@ function updateFileNamePlaceholder() {
   elements.fileName.placeholder = getSuggestedFileName();
 }
 
-async function renderPreviewComposite(payload, margin, backgroundColor, logoAsset = currentLogoAsset) {
+async function renderPreviewComposite(payload, margin, backgroundColor, logoAsset = currentLogoAsset, renderSize = Math.max(100, Number(state.qr.size) || 280)) {
   if (!elements.qrcodePreview) return;
   const token = ++previewRenderToken;
-  const renderer = buildQrRenderer(PREVIEW_RENDER_SIZE);
+  const renderer = buildQrRenderer(renderSize);
   renderer.update({
-    width: PREVIEW_RENDER_SIZE,
-    height: PREVIEW_RENDER_SIZE,
+    width: renderSize,
+    height: renderSize,
     data: payload || ' ',
     margin,
     qrOptions: {
@@ -651,7 +652,7 @@ function buildQrRenderer(renderSize) {
   });
 }
 
-function buildTextLogoAsset(renderSize = PREVIEW_RENDER_SIZE) {
+function buildTextLogoAsset(renderSize = Math.max(100, Number(state.qr.size) || 280)) {
   const text = escapeHtml(state.logo.text || '');
   const size = Number(state.logo.textSize) || 32;
   const padding = Math.max(0, Number(state.logo.textPadding) || 0);
@@ -684,7 +685,7 @@ function buildTextLogoAsset(renderSize = PREVIEW_RENDER_SIZE) {
   return { dataUrl: svgToDataUrl(svg), outerSize: canvasSize };
 }
 
-function buildImageLogoAsset(renderSize = PREVIEW_RENDER_SIZE) {
+function buildImageLogoAsset(renderSize = Math.max(100, Number(state.qr.size) || 280)) {
   const sizePercent = Math.max(0, Number(state.logo.imageSize) || 0);
   const border = Number(state.logo.imageBorder) || 0;
   const fullSize = Math.max(1, renderSize);
