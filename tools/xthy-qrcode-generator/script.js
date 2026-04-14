@@ -591,13 +591,13 @@ function validateLogoCoverage() {
   const failThreshold = recoverableRatio;
   const recommendedCoverageRatio = Math.max(0.01, riskThreshold * 0.9);
   const recommendedLogoPercent = Math.max(1, Math.floor(Math.sqrt(recommendedCoverageRatio) * 100));
-  const adviceSuffix = `\n- 建議至少提升到 ${getNextEclLabel(state.qr.errorCorrection)}\n- 建議把 LOGO 縮到 ${recommendedLogoPercent}% 以下`;
+  const adviceSuffix = `\n- 建議容錯率 ${getNextEclLabel(state.qr.errorCorrection)}\n- 建議把 LOGO 縮到 ${recommendedLogoPercent}% 以下`;
 
   if (coverageRatio >= failThreshold) {
-    return { level: 'fix', message: `LOGO 覆蓋面積超過 ${(failThreshold * 100).toFixed(1)}% 上限(${(coverageRatio * 100).toFixed(1)}%)，建議縮小LOGO。${adviceSuffix}` };
+    return { level: 'fix', message: `LOGO 覆蓋面積超過 ${(failThreshold * 100).toFixed(1)}% 上限(${(coverageRatio * 100).toFixed(1)}%)。${adviceSuffix}` };
   }
   if (coverageRatio >= riskThreshold) {
-    return { level: 'risk', message: `LOGO 覆蓋面積接近 ${(failThreshold * 100).toFixed(1)}% 上限(${(coverageRatio * 100).toFixed(1)}%)，建議縮小LOGO。${adviceSuffix}` };
+    return { level: 'risk', message: `LOGO 覆蓋面積接近 ${(failThreshold * 100).toFixed(1)}% 上限(${(coverageRatio * 100).toFixed(1)}%)。${adviceSuffix}` };
   }
   return { level: 'ok', message: '' };
 }
