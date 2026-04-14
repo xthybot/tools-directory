@@ -589,14 +589,27 @@ function validateLogoCoverage() {
   const recoverableRatio = eclMap[state.qr.errorCorrection] || 0.15;
   const riskThreshold = recoverableRatio * 0.55;
   const failThreshold = recoverableRatio * 0.8;
+  const recommendedCoverageRatio = Math.max(0.01, riskThreshold * 0.9);
+  const recommendedLogoPercent = Math.max(1, Math.floor(Math.sqrt(recommendedCoverageRatio) * 100));
+  const minimumVersionSuggestion = getRecommendedMinimumVersion();
+  const adviceSuffix = `\n- 建議至少升到 Version ${minimumVersionSuggestion}\n- 建議把 LOGO 縮到 ${recommendedLogoPercent}% 以下`;
 
   if (coverageRatio >= failThreshold) {
-    return { level: 'fix', message: `LOGO 覆蓋面積約 ${(coverageRatio * 100).toFixed(1)}%，超過 ${(failThreshold * 100).toFixed(1)}% 上限，建議縮小LOGO、背景。` };
+    return { level: 'fix', message: `LOGO 覆蓋面積約 ${(coverageRatio * 100).toFixed(1)}%，超過 ${(failThreshold * 100).toFixed(1)}% 上限，建議縮小LOGO、背景。${adviceSuffix}` };
   }
   if (coverageRatio >= riskThreshold) {
-    return { level: 'risk', message: `LOGO 覆蓋面積約 ${(coverageRatio * 100).toFixed(1)}%，超過 ${(riskThreshold * 100).toFixed(1)}% 上限，建議縮小LOGO、背景。` };
+    return { level: 'risk', message: `LOGO 覆蓋面積約 ${(coverageRatio * 100).toFixed(1)}%，超過 ${(riskThreshold * 100).toFixed(1)}% 上限，建議縮小LOGO、背景。${adviceSuffix}` };
   }
   return { level: 'ok', message: '' };
+}
+
+function getRecommendedMinimumVersion() {
+  const { payload } = buildQrPayload();
+  const byteLength = new TextEncoder().encode(payload || '').length;
+  const ecl = state.qr.errorCorrection;
+  const table = QR_BYTE_CAPACITY[ecl] || [];
+  const found = table.findIndex((capacity) => byteLength <= capacity);
+  return found >= 0 ? found + 1 : 40;
 }
 
 function bindSegmentedControl(container, key) {
