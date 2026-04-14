@@ -134,13 +134,13 @@
                 <input id="logoTextBgColor" type="color" value="#ffffff" />
               </div>
               <div class="field-group compact-group">
-                <label for="logoTextStyle">背景樣式</label>
-                <select id="logoTextStyle">
-                  <option value="box">方框</option>
-                  <option value="bar">長條</option>
-                  <option value="outline">字描邊</option>
-                  <option value="none">無</option>
-                </select>
+                <label>背景樣式</label>
+                <div class="segmented-control" id="logoTextStyleControl">
+                  <button type="button" class="segmented-control__btn is-active" data-segment-value="box">方框</button>
+                  <button type="button" class="segmented-control__btn" data-segment-value="bar">長條</button>
+                  <button type="button" class="segmented-control__btn" data-segment-value="outline">字描邊</button>
+                  <button type="button" class="segmented-control__btn" data-segment-value="none">無</button>
+                </div>
               </div>
               <div class="field-group compact-group">
                 <label for="logoFontFamily">字形</label>

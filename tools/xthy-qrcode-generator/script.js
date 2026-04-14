@@ -36,34 +36,10 @@ const CODE_TYPES = {
   twqr: {
     label: '銀行轉帳 (TWQR)',
     fields: [
-      { key: 'payloadFormatIndicator', label: 'Payload Format Indicator', type: 'text', defaultValue: '01', required: true },
-      { key: 'pointOfInitiationMethod', label: 'Point of Initiation Method', type: 'select', options: [{ value: '11', label: '11 - 靜態' }, { value: '12', label: '12 - 動態' }], defaultValue: '11', required: true },
-      { key: 'merchantAccountGui', label: 'Merchant Account GUI', type: 'text', defaultValue: 'TWQR', required: true },
-      { key: 'merchantAccountInfo', label: 'Merchant Account Info / Bank Routing / Merchant ID', type: 'text', required: true, placeholder: '依收款方規格填入主識別內容' },
-      { key: 'merchantCategoryCode', label: 'Merchant Category Code', type: 'text', defaultValue: '0000', required: true },
-      { key: 'transactionCurrency', label: 'Transaction Currency', type: 'text', defaultValue: '901', required: true },
-      { key: 'transactionAmount', label: '交易金額', type: 'number', step: '0.01', placeholder: '可留空' },
-      { key: 'countryCode', label: 'Country Code', type: 'text', defaultValue: 'TW', required: true },
-      { key: 'merchantName', label: '收款人名稱', type: 'text', required: true },
-      { key: 'merchantCity', label: '城市', type: 'text', defaultValue: 'TAIPEI', required: true }
-    ],
-    advancedFields: [
-      { key: 'postalCode', label: 'Postal Code', type: 'text' },
-      { key: 'billNumber', label: 'Bill Number', type: 'text' },
-      { key: 'mobileNumber', label: 'Mobile Number', type: 'text' },
-      { key: 'storeLabel', label: 'Store Label', type: 'text' },
-      { key: 'loyaltyNumber', label: 'Loyalty Number', type: 'text' },
-      { key: 'referenceLabel', label: 'Reference Label', type: 'text' },
-      { key: 'customerLabel', label: 'Customer Label', type: 'text' },
-      { key: 'terminalLabel', label: 'Terminal Label', type: 'text' },
-      { key: 'purposeOfTransaction', label: 'Purpose of Transaction', type: 'text' },
-      { key: 'merchantInformationLanguageTemplate', label: 'Merchant Information Language Template', type: 'text', placeholder: '例如: ZH' },
-      { key: 'merchantAlternateName', label: 'Merchant Alternate Name', type: 'text' },
-      { key: 'merchantAlternateCity', label: 'Merchant Alternate City', type: 'text' },
-      { key: 'tipOrConvenienceIndicator', label: 'Tip / Convenience Indicator', type: 'select', options: [{ value: '', label: '不使用' }, { value: '01', label: '01 - Prompted to enter tip' }, { value: '02', label: '02 - Fixed convenience fee' }, { value: '03', label: '03 - Percentage convenience fee' }] },
-      { key: 'valueOfConvenienceFeeFixed', label: 'Fixed Convenience Fee', type: 'number', step: '0.01' },
-      { key: 'valueOfConvenienceFeePercentage', label: 'Convenience Fee Percentage', type: 'number', step: '0.01' },
-      { key: 'merchantChannel', label: 'Merchant Channel / 自訂附加欄位', type: 'text' }
+      { key: 'bankCode', label: '銀行代碼/代號', type: 'text', required: true, placeholder: '例如：812' },
+      { key: 'bankAccount', label: '銀行帳號', type: 'text', required: true, placeholder: '請輸入收款帳號' },
+      { key: 'amount', label: '轉帳金額', type: 'number', step: '0.01', placeholder: '可留空' },
+      { key: 'note', label: '留言備註', type: 'textarea', placeholder: '可留空' }
     ]
   }
 };
@@ -147,6 +123,7 @@ const elements = {
   errorCorrectionControl: document.querySelector('#errorCorrectionControl'),
   dotStyleControl: document.querySelector('#dotStyleControl'),
   logoModeControl: document.querySelector('#logoModeControl'),
+  logoTextStyleControl: document.querySelector('#logoTextStyleControl'),
   downloadFormatControl: document.querySelector('#downloadFormatControl'),
 };
 
@@ -222,7 +199,10 @@ function renderDynamicFields() {
   const advancedHtml = config.advancedFields?.length
     ? `<details class="scan-panel"><summary>TWQR 進階欄位</summary>${config.advancedFields.map(renderField).join('')}</details>`
     : '';
-  elements.dynamicFields.innerHTML = basicHtml + advancedHtml;
+  const twqrNotice = state.type === 'twqr'
+    ? `<p class="hint">注意：<br>這類型的QR碼，即TWQR（台灣共通QR碼支付標準），需搭配支付App及行動銀行App掃碼轉帳。</p>`
+    : '';
+  elements.dynamicFields.innerHTML = basicHtml + advancedHtml + twqrNotice;
 
   elements.dynamicFields.querySelectorAll('[data-field]').forEach((input) => {
     input.addEventListener('input', handleDynamicInput);
@@ -303,7 +283,7 @@ function bindStaticControls() {
     document.querySelector(selector).addEventListener('change', handleStaticInput);
   });
 
-  ['#logoText', '#logoTextColor', '#logoTextBgColor', '#logoTextStyle', '#logoFontFamily', '#logoImageBorderColor'].forEach((selector) => {
+  ['#logoText', '#logoTextColor', '#logoTextBgColor', '#logoFontFamily', '#logoImageBorderColor'].forEach((selector) => {
     document.querySelector(selector).addEventListener('input', handleStaticInput);
     document.querySelector(selector).addEventListener('change', handleStaticInput);
   });
@@ -331,6 +311,7 @@ function bindStaticControls() {
   if (elements.errorCorrectionControl) bindSegmentedValueControl(elements.errorCorrectionControl, 'qr', 'errorCorrection');
   if (elements.dotStyleControl) bindSegmentedValueControl(elements.dotStyleControl, 'qr', 'dotStyle');
   if (elements.logoModeControl) bindSegmentedValueControl(elements.logoModeControl, 'logo', 'mode', () => toggleLogoPanels());
+  if (elements.logoTextStyleControl) bindSegmentedValueControl(elements.logoTextStyleControl, 'logo', 'textStyle');
   if (elements.downloadFormatControl) bindSegmentedValueControl(elements.downloadFormatControl, 'export', 'format', null, { refresh: false });
 
   if (elements.previewBgMode) elements.previewBgMode.checked = state.preview.bgMode === 'dark';
@@ -426,57 +407,38 @@ function buildQrPayload() {
 
 function buildTwqrPayload(values) {
   const errors = [];
-  const requiredKeys = ['payloadFormatIndicator', 'pointOfInitiationMethod', 'merchantAccountGui', 'merchantAccountInfo', 'merchantCategoryCode', 'transactionCurrency', 'countryCode', 'merchantName', 'merchantCity'];
-  requiredKeys.forEach((key) => {
-    if (!(values[key] || '').toString().trim()) errors.push(`TWQR 缺少必要欄位：${key}`);
-  });
-  if (values.transactionCurrency && values.transactionCurrency !== '901') errors.push('台灣 TWD 幣別通常應為 901');
-  if (values.countryCode && String(values.countryCode).toUpperCase() !== 'TW') errors.push('TWQR Country Code 建議為 TW');
-  if (values.payloadFormatIndicator && values.payloadFormatIndicator !== '01') errors.push('Payload Format Indicator 通常為 01');
-  if (values.transactionAmount && Number(values.transactionAmount) < 0) errors.push('交易金額不可小於 0');
+  const bankCode = String(values.bankCode || '').trim();
+  const bankAccount = String(values.bankAccount || '').trim();
+  const amount = values.amount;
+  const note = String(values.note || '').trim();
 
-  const merchantAccountTemplate = [];
-  merchantAccountTemplate.push(tlv('00', values.merchantAccountGui || 'TWQR'));
-  merchantAccountTemplate.push(tlv('01', values.merchantAccountInfo || ''));
-  if (values.merchantChannel) merchantAccountTemplate.push(tlv('02', values.merchantChannel));
+  if (!bankCode) errors.push('請輸入銀行代碼/代號');
+  if (!bankAccount) errors.push('請輸入銀行帳號');
+  if (amount && Number(amount) < 0) errors.push('轉帳金額不可小於 0');
 
-  const additionalData = [];
-  if (values.billNumber) additionalData.push(tlv('01', values.billNumber));
-  if (values.mobileNumber) additionalData.push(tlv('02', values.mobileNumber));
-  if (values.storeLabel) additionalData.push(tlv('03', values.storeLabel));
-  if (values.loyaltyNumber) additionalData.push(tlv('04', values.loyaltyNumber));
-  if (values.referenceLabel) additionalData.push(tlv('05', values.referenceLabel));
-  if (values.customerLabel) additionalData.push(tlv('06', values.customerLabel));
-  if (values.terminalLabel) additionalData.push(tlv('07', values.terminalLabel));
-  if (values.purposeOfTransaction) additionalData.push(tlv('08', values.purposeOfTransaction));
-  if (values.additionalConsumerDataRequest) additionalData.push(tlv('09', values.additionalConsumerDataRequest));
-
-  const merchantLanguage = [];
-  if (values.merchantInformationLanguageTemplate) merchantLanguage.push(tlv('00', values.merchantInformationLanguageTemplate));
-  if (values.merchantAlternateName) merchantLanguage.push(tlv('01', values.merchantAlternateName));
-  if (values.merchantAlternateCity) merchantLanguage.push(tlv('02', values.merchantAlternateCity));
-
-  const records = [
-    tlv('00', values.payloadFormatIndicator || '01'),
-    tlv('01', values.pointOfInitiationMethod || '11'),
-    tlv('26', merchantAccountTemplate.join('')),
-    tlv('52', values.merchantCategoryCode || '0000'),
-    tlv('53', values.transactionCurrency || '901')
+  const merchantAccountTemplate = [
+    tlv('00', 'TWQR'),
+    tlv('01', `${bankCode}${bankAccount}`)
   ];
 
-  if (values.transactionAmount) records.push(tlv('54', formatAmount(values.transactionAmount)));
-  if (values.tipOrConvenienceIndicator) records.push(tlv('55', values.tipOrConvenienceIndicator));
-  if (values.valueOfConvenienceFeeFixed) records.push(tlv('56', formatAmount(values.valueOfConvenienceFeeFixed)));
-  if (values.valueOfConvenienceFeePercentage) records.push(tlv('57', formatAmount(values.valueOfConvenienceFeePercentage)));
+  const additionalData = [];
+  if (note) additionalData.push(tlv('05', note));
 
-  records.push(tlv('58', (values.countryCode || 'TW').toUpperCase()));
-  records.push(tlv('59', values.merchantName || ''));
-  records.push(tlv('60', values.merchantCity || ''));
-  if (values.postalCode) records.push(tlv('61', values.postalCode));
+  const records = [
+    tlv('00', '01'),
+    tlv('01', amount ? '12' : '11'),
+    tlv('26', merchantAccountTemplate.join('')),
+    tlv('52', '0000'),
+    tlv('53', '901')
+  ];
+
+  if (amount) records.push(tlv('54', formatAmount(amount)));
+  records.push(tlv('58', 'TW'));
+  records.push(tlv('59', `BANK ${bankCode}`.slice(0, 25)));
+  records.push(tlv('60', 'TAIPEI'));
   if (additionalData.length) records.push(tlv('62', additionalData.join('')));
-  if (merchantLanguage.length) records.push(tlv('64', merchantLanguage.join('')));
 
-  let payloadWithoutCrc = records.join('') + '6304';
+  const payloadWithoutCrc = records.join('') + '6304';
   const crc = crc16(payloadWithoutCrc);
   return { payload: payloadWithoutCrc + crc, errors };
 }
@@ -501,8 +463,8 @@ function refreshQr() {
   if (state.logo.mode !== 'none' && state.qr.errorCorrection === 'L') {
     riskMessages.push('有 LOGO 時不建議使用低容錯率 (L)。');
   }
-  if (state.type === 'twqr' && !state.values.transactionAmount) {
-    riskMessages.push('TWQR 若用於固定收款，建議填入交易金額。');
+  if (state.type === 'twqr' && !state.values.amount) {
+    riskMessages.push('TWQR 若要固定金額收款，建議填入轉帳金額。');
   }
   if (!state.export.fileName.trim()) {
     riskMessages.push('未設定檔案名稱');
@@ -585,7 +547,7 @@ function getSuggestedFileName() {
     case 'sms':
       return (state.values.number || '').trim() || 'qrcode';
     case 'twqr':
-      return (state.values.merchantName || '').trim() || 'qrcode';
+      return (`twqr-${(state.values.bankCode || '').trim()}`.replace(/-$/, '')) || 'qrcode';
     default:
       return 'qrcode';
   }
@@ -837,36 +799,14 @@ function parseTwqr(text) {
   const tlvs = parseTlvStream(text);
   const account = parseTlvStream(tlvs['26'] || '');
   const additional = parseTlvStream(tlvs['62'] || '');
-  const lang = parseTlvStream(tlvs['64'] || '');
+  const accountInfo = account['01'] || '';
   return {
     type: 'twqr',
     values: {
-      payloadFormatIndicator: tlvs['00'] || '01',
-      pointOfInitiationMethod: tlvs['01'] || '11',
-      merchantAccountGui: account['00'] || 'TWQR',
-      merchantAccountInfo: account['01'] || '',
-      merchantChannel: account['02'] || '',
-      merchantCategoryCode: tlvs['52'] || '0000',
-      transactionCurrency: tlvs['53'] || '901',
-      transactionAmount: tlvs['54'] || '',
-      tipOrConvenienceIndicator: tlvs['55'] || '',
-      valueOfConvenienceFeeFixed: tlvs['56'] || '',
-      valueOfConvenienceFeePercentage: tlvs['57'] || '',
-      countryCode: tlvs['58'] || 'TW',
-      merchantName: tlvs['59'] || '',
-      merchantCity: tlvs['60'] || '',
-      postalCode: tlvs['61'] || '',
-      billNumber: additional['01'] || '',
-      mobileNumber: additional['02'] || '',
-      storeLabel: additional['03'] || '',
-      loyaltyNumber: additional['04'] || '',
-      referenceLabel: additional['05'] || '',
-      customerLabel: additional['06'] || '',
-      terminalLabel: additional['07'] || '',
-      purposeOfTransaction: additional['08'] || '',
-      merchantInformationLanguageTemplate: lang['00'] || '',
-      merchantAlternateName: lang['01'] || '',
-      merchantAlternateCity: lang['02'] || ''
+      bankCode: accountInfo.slice(0, 3),
+      bankAccount: accountInfo.slice(3),
+      amount: tlvs['54'] || '',
+      note: additional['05'] || ''
     }
   };
 }
