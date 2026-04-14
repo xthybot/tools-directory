@@ -33,7 +33,7 @@
   },
   {
     "title": "Xthy QRCode 產生器",
-    "icon": "assets/icons/example-local.svg",
+    "icon": "assets/icons/qrcode-tool.svg",
     "description": "支援網址、Wi-Fi、文字、TWQR、電話、簡訊的 QRCode 產生、掃描與匯出。",
     "tags": [
       "QRCode",
