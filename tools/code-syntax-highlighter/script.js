@@ -23,7 +23,7 @@ const LANGUAGES = [
   { label: 'Python', value: 'python' },
   { label: 'Bash', value: 'bash' },
   { label: 'Shell', value: 'shell' },
-  { label: 'Command Line', value: 'shell' },
+  { label: 'Command Line', value: 'shellsession' },
   { label: 'Markdown', value: 'markdown' },
   { label: 'YAML', value: 'yaml' },
   { label: 'SQL', value: 'sql' },
@@ -92,6 +92,10 @@ const THEMES = [
 ];
 
 const SAMPLE_SNIPPETS = {
+  auto: `const prices = [120, 80, 199];
+const total = prices.reduce((sum, price) => sum + price, 0);
+console.log({ total });`,
+  plaintext: `This is plain text preview without syntax highlight.\nYou can paste logs, notes, or mixed snippets here.`,
   javascript: `function greet(name) {
   return \`Hello, ${name}!\`;
 }
@@ -101,10 +105,33 @@ console.log(greet(user));`,
   typescript: `type User = {
   id: number;
   name: string;
+  active: boolean;
 };
 
-const user: User = { id: 1, name: 'Xthy' };
+const user: User = { id: 1, name: 'Xthy', active: true };
 console.log(user.name);`,
+  xml: `<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello</title>
+  </head>
+  <body>
+    <h1>Hello World</h1>
+  </body>
+</html>`,
+  css: `.card {
+  border-radius: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, #4f7cff, #6d5efc);
+  color: white;
+}`,
+  json: `{
+  "name": "Xthy",
+  "role": "creator",
+  "active": true,
+  "tags": ["tools", "frontend"]
+}`,
   python: `def greet(name: str) -> str:
     return f"Hello, {name}!"
 
@@ -116,43 +143,86 @@ set -e
 for file in *.js; do
   echo "Processing $file"
 done`,
-  shell: `#!/bin/bash
-set -e
-
-for file in *.js; do
-  echo "Processing $file"
-done`,
-  sql: `SELECT id, name, created_at
-FROM users
-WHERE status = 'active'
-ORDER BY created_at DESC
-LIMIT 20;`,
-  xml: `<!doctype html>
-<html>
-  <body>
-    <h1>Hello World</h1>
-  </body>
-</html>`,
-  json: `{
-  "name": "Xthy",
-  "role": "creator",
-  "active": true
-}`,
-  yaml: `name: Xthy
-role: creator
-active: true`,
-  css: `.card {
-  border-radius: 16px;
-  padding: 20px;
-  background: linear-gradient(135deg, #4f7cff, #6d5efc);
-}`,
+  shell: `export APP_ENV=production
+pnpm install
+pnpm run build`,
+  shellsession: `$ git status --short
+ M tools/code-syntax-highlighter/script.js
+$ git add .
+$ git commit -m "feat: improve tool"`,
   markdown: `# Title
 
 - item 1
 - item 2
 
 \`inline code\``,
-  plaintext: `Plain text preview without syntax highlight.`
+  yaml: `name: Xthy
+role: creator
+active: true
+stack:
+  - frontend
+  - automation`,
+  sql: `SELECT id, name, created_at
+FROM users
+WHERE status = 'active'
+ORDER BY created_at DESC
+LIMIT 20;`,
+  java: `public class HelloWorld {
+  public static void main(String[] args) {
+    System.out.println("Hello, Xthy!");
+  }
+}`,
+  c: `#include <stdio.h>
+
+int main(void) {
+  printf("Hello, Xthy!\\n");
+  return 0;
+}`,
+  cpp: `#include <iostream>
+#include <vector>
+
+int main() {
+  std::vector<int> nums{1, 2, 3};
+  std::cout << nums.size() << std::endl;
+  return 0;
+}`,
+  csharp: `using System;
+
+class Program {
+  static void Main() {
+    Console.WriteLine("Hello, Xthy!");
+  }
+}`,
+  go: `package main
+
+import "fmt"
+
+func main() {
+  fmt.Println("Hello, Xthy!")
+}`,
+  rust: `fn main() {
+    let name = "Xthy";
+    println!("Hello, {}!", name);
+}`,
+  php: `<?php
+function greet(string $name): string {
+    return "Hello, {$name}!";
+}
+
+echo greet('Xthy');`,
+  ruby: `def greet(name)
+  "Hello, #{name}!"
+end
+
+puts greet('Xthy')`,
+  swift: `import Foundation
+
+let name = "Xthy"
+print("Hello, \(name)!")`,
+  kotlin: `fun main() {
+    val name = "Xthy"
+    println("Hello, $name!")
+}`
 };
 
 function setStatus(text) {
@@ -172,6 +242,13 @@ function applyThemeVisual(theme) {
   themeIndicator.textContent = `${theme.label} · ${theme.mode === 'dark' ? 'Dark' : 'Light'}`;
   document.body.classList.toggle('theme-dark', theme.mode === 'dark');
   document.documentElement.style.setProperty('--preview-bg', theme.previewBg);
+}
+
+function getHighlightLanguage(language) {
+  const aliasMap = {
+    shellsession: 'shell'
+  };
+  return aliasMap[language] || language;
 }
 
 function highlightCurrentCode() {
@@ -196,8 +273,9 @@ function highlightCurrentCode() {
       previewCode.innerHTML = result.value;
       setStatus(`已自動判斷語言：${result.language || 'plaintext'}`);
     } else {
-      result = hljs.highlight(raw, { language: selectedLanguage, ignoreIllegals: true });
-      previewCode.className = `hljs language-${selectedLanguage}`;
+      const highlightLanguage = getHighlightLanguage(selectedLanguage);
+      result = hljs.highlight(raw, { language: highlightLanguage, ignoreIllegals: true });
+      previewCode.className = `hljs language-${highlightLanguage}`;
       previewCode.innerHTML = result.value;
       const selectedLabel = LANGUAGES.find(item => item.value === selectedLanguage)?.label || selectedLanguage;
       setStatus(`已套用語言：${selectedLabel}`);
@@ -221,22 +299,40 @@ async function copyText(text, successMessage, failMessage = '複製失敗') {
 }
 
 function getSampleForLanguage(language) {
-  const aliasMap = {
-    c: 'plaintext',
-    cpp: 'plaintext',
-    csharp: 'plaintext',
-    go: 'plaintext',
-    rust: 'plaintext',
-    java: 'plaintext',
-    php: 'plaintext',
-    ruby: 'plaintext',
-    swift: 'plaintext',
-    kotlin: 'plaintext'
-  };
-
-  const resolved = aliasMap[language] || language;
-  if (SAMPLE_SNIPPETS[resolved]) return SAMPLE_SNIPPETS[resolved];
+  if (SAMPLE_SNIPPETS[language]) return SAMPLE_SNIPPETS[language];
   return SAMPLE_SNIPPETS.javascript;
+}
+
+function buildStyledHtmlSnippet() {
+  const codeClone = previewCode.cloneNode(true);
+  const allNodes = [codeClone, ...codeClone.querySelectorAll('*')];
+
+  allNodes.forEach(node => {
+    if (!(node instanceof HTMLElement)) return;
+    const computed = window.getComputedStyle(node);
+    node.style.color = computed.color;
+    node.style.backgroundColor = 'transparent';
+    node.style.fontWeight = computed.fontWeight;
+    node.style.fontStyle = computed.fontStyle;
+    node.style.textDecoration = computed.textDecoration;
+  });
+
+  const previewStyles = window.getComputedStyle(previewCode);
+  const wrapper = document.createElement('pre');
+  wrapper.style.margin = '0';
+  wrapper.style.padding = '22px';
+  wrapper.style.borderRadius = '16px';
+  wrapper.style.overflowX = 'auto';
+  wrapper.style.whiteSpace = 'pre';
+  wrapper.style.tabSize = '2';
+  wrapper.style.background = getComputedStyle(document.documentElement).getPropertyValue('--preview-bg').trim() || '#ffffff';
+  wrapper.style.color = previewStyles.color;
+  wrapper.style.fontFamily = previewStyles.fontFamily;
+  wrapper.style.fontSize = previewStyles.fontSize;
+  wrapper.style.lineHeight = previewStyles.lineHeight;
+  wrapper.appendChild(codeClone);
+
+  return wrapper.outerHTML;
 }
 
 function initialize() {
@@ -286,7 +382,7 @@ copyHtmlBtn.addEventListener('click', () => {
 });
 
 copyTextBtn.addEventListener('click', () => {
-  copyText(previewCode.textContent || '', '已複製純文字');
+  copyText(buildStyledHtmlSnippet(), '已複製帶樣式內容');
 });
 
 initialize();

@@ -209,12 +209,19 @@ textarea::placeholder { color: var(--placeholder); }
 }
 .preview-toolbar {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   gap: 12px;
   margin-bottom: 12px;
   color: var(--muted);
   font-size: 14px;
+}
+.preview-toolbar-left {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 .theme-indicator {
   border: 1px solid var(--line);
@@ -281,10 +288,17 @@ body.theme-dark .back:hover {
 
 @media (max-width: 640px) {
   body { padding: 16px; }
-  .topbar, .card-head, .preview-toolbar {
+  .topbar, .card-head {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+  }
+  .preview-toolbar,
+  .preview-toolbar-left {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
   }
   .hero, .editor-card, .preview-card { padding: 20px; }
   .control-grid { grid-template-columns: 1fr; }
