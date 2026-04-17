@@ -11,6 +11,8 @@
   --surface-soft: #f6f8fc;
   --placeholder: #8191a6;
   --preview-bg: #ffffff;
+  --code-font-size: 14px;
+  --code-line-height: 24px;
 }
 
 * { box-sizing: border-box; }
@@ -210,9 +212,9 @@ select {
   min-height: 720px;
   padding: 22px;
   font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
-  font-size: 14px;
+  font-size: var(--code-font-size);
   font-weight: 400;
-  line-height: 1.7;
+  line-height: var(--code-line-height);
   letter-spacing: 0;
   tab-size: 2;
   white-space: pre;
@@ -228,6 +230,10 @@ select {
 .highlight-layer,
 .highlight-layer * {
   font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace !important;
+  font-size: var(--code-font-size) !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  line-height: var(--code-line-height) !important;
   letter-spacing: 0 !important;
   font-variant-ligatures: none !important;
   font-feature-settings: "liga" 0 !important;
@@ -245,6 +251,7 @@ select {
   border: 0;
   background: transparent;
   color: transparent;
+  -webkit-text-fill-color: transparent;
   caret-color: var(--text);
   overflow: auto;
 }
