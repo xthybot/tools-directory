@@ -1,8 +1,8 @@
 const THEME_STYLESHEET = document.getElementById('hljs-theme');
 const languageSelect = document.getElementById('languageSelect');
 const themeSelect = document.getElementById('themeSelect');
-const codeInput = document.getElementById('codeInput');
-const previewCode = document.getElementById('previewCode');
+const editor = document.getElementById('editor');
+const editorHost = document.getElementById('editorHost');
 const sampleBtn = document.getElementById('sampleBtn');
 const clearBtn = document.getElementById('clearBtn');
 const copyRawBtn = document.getElementById('copyRawBtn');
@@ -11,7 +11,12 @@ const copyTextBtn = document.getElementById('copyTextBtn');
 const statusText = document.getElementById('statusText');
 const metaText = document.getElementById('metaText');
 const themeIndicator = document.getElementById('themeIndicator');
-const editorStack = document.getElementById('editorStack');
+
+const PLACEHOLDER = `把你的程式碼貼在這裡，例如：
+#!/bin/bash
+for file in *.js; do
+  echo "Processing $file"
+done`;
 
 const LANGUAGES = [
   { label: 'Auto Detect', value: 'auto' },
@@ -41,55 +46,13 @@ const LANGUAGES = [
 ];
 
 const THEMES = [
-  {
-    label: 'GitHub Light',
-    value: 'github',
-    href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css',
-    mode: 'light',
-    previewBg: '#ffffff'
-  },
-  {
-    label: 'GitHub Dark',
-    value: 'github-dark',
-    href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css',
-    mode: 'dark',
-    previewBg: '#0d1117'
-  },
-  {
-    label: 'Atom One Light',
-    value: 'atom-one-light',
-    href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-light.min.css',
-    mode: 'light',
-    previewBg: '#fafafa'
-  },
-  {
-    label: 'Atom One Dark',
-    value: 'atom-one-dark',
-    href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css',
-    mode: 'dark',
-    previewBg: '#282c34'
-  },
-  {
-    label: 'StackOverflow Light',
-    value: 'stackoverflow-light',
-    href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/stackoverflow-light.min.css',
-    mode: 'light',
-    previewBg: '#ffffff'
-  },
-  {
-    label: 'StackOverflow Dark',
-    value: 'stackoverflow-dark',
-    href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/stackoverflow-dark.min.css',
-    mode: 'dark',
-    previewBg: '#1c1b1b'
-  },
-  {
-    label: 'Nord',
-    value: 'nord',
-    href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/nord.min.css',
-    mode: 'dark',
-    previewBg: '#2e3440'
-  }
+  { label: 'GitHub Light', value: 'github', href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css', mode: 'light', previewBg: '#ffffff' },
+  { label: 'GitHub Dark', value: 'github-dark', href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css', mode: 'dark', previewBg: '#0d1117' },
+  { label: 'Atom One Light', value: 'atom-one-light', href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-light.min.css', mode: 'light', previewBg: '#fafafa' },
+  { label: 'Atom One Dark', value: 'atom-one-dark', href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css', mode: 'dark', previewBg: '#282c34' },
+  { label: 'StackOverflow Light', value: 'stackoverflow-light', href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/stackoverflow-light.min.css', mode: 'light', previewBg: '#ffffff' },
+  { label: 'StackOverflow Dark', value: 'stackoverflow-dark', href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/stackoverflow-dark.min.css', mode: 'dark', previewBg: '#1c1b1b' },
+  { label: 'Nord', value: 'nord', href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/nord.min.css', mode: 'dark', previewBg: '#2e3440' }
 ];
 
 const SAMPLE_SNIPPETS = {
@@ -202,8 +165,8 @@ func main() {
   fmt.Println("Hello, Xthy!")
 }`,
   rust: `fn main() {
-    let name = "Xthy";
-    println!("Hello, {}!", name);
+  let name = "Xthy";
+  println!("Hello, {}!", name);
 }`,
   php: `<?php
 function greet(string $name): string {
@@ -226,17 +189,11 @@ print("Hello, \(name)!")`,
 }`
 };
 
-function setStatus(text) {
-  statusText.textContent = text;
-}
-
-function populateSelect(select, list) {
-  select.innerHTML = list.map(item => `<option value="${item.value}">${item.label}</option>`).join('');
-}
-
-function getSelectedTheme() {
-  return THEMES.find(theme => theme.value === themeSelect.value) || THEMES[0];
-}
+function setStatus(text) { statusText.textContent = text; }
+function populateSelect(select, list) { select.innerHTML = list.map(item => `<option value="${item.value}">${item.label}</option>`).join(''); }
+function getSelectedTheme() { return THEMES.find(theme => theme.value === themeSelect.value) || THEMES[0]; }
+function getEditorText() { return editor.textContent || ''; }
+function escapeHtml(text) { return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
 function applyThemeVisual(theme) {
   THEME_STYLESHEET.href = theme.href;
@@ -246,57 +203,84 @@ function applyThemeVisual(theme) {
 }
 
 function getHighlightLanguage(language) {
-  const aliasMap = {
-    shellsession: 'shell'
-  };
+  const aliasMap = { shellsession: 'shell' };
   return aliasMap[language] || language;
 }
 
-function syncScroll() {
-  const highlightLayer = previewCode.parentElement;
-  if (!highlightLayer) return;
-  highlightLayer.scrollTop = codeInput.scrollTop;
-  highlightLayer.scrollLeft = codeInput.scrollLeft;
+function getCaretOffset(root) {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return 0;
+  const range = sel.getRangeAt(0);
+  const preRange = range.cloneRange();
+  preRange.selectNodeContents(root);
+  preRange.setEnd(range.endContainer, range.endOffset);
+  return preRange.toString().length;
 }
 
-function highlightCurrentCode() {
-  const raw = codeInput.value;
-  const selectedLanguage = languageSelect.value;
+function setCaretOffset(root, offset) {
+  const selection = window.getSelection();
+  if (!selection) return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+  let currentOffset = 0;
+  let node;
+  while ((node = walker.nextNode())) {
+    const nextOffset = currentOffset + node.nodeValue.length;
+    if (offset <= nextOffset) {
+      const range = document.createRange();
+      range.setStart(node, Math.max(0, offset - currentOffset));
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      return;
+    }
+    currentOffset = nextOffset;
+  }
+  const range = document.createRange();
+  range.selectNodeContents(root);
+  range.collapse(false);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
 
+function renderEditor({ preserveCaret = true } = {}) {
+  const raw = getEditorText();
+  const selectedLanguage = languageSelect.value;
+  const caret = preserveCaret ? getCaretOffset(editor) : 0;
   metaText.textContent = `${raw.length} 字元`;
 
   if (!raw.trim()) {
-    previewCode.textContent = codeInput.placeholder || '把程式碼貼上來後，這裡會立即顯示上色結果。';
-    previewCode.className = 'language-plaintext';
+    editor.className = 'editor-surface hljs language-plaintext';
+    editor.innerHTML = '';
+    editor.dataset.placeholder = PLACEHOLDER;
     setStatus('等待輸入');
-    syncScroll();
     return;
   }
 
+  delete editor.dataset.placeholder;
+
   try {
     let result;
-
     if (selectedLanguage === 'auto') {
       result = hljs.highlightAuto(raw);
-      previewCode.className = `hljs language-${result.language || 'plaintext'}`;
-      previewCode.innerHTML = result.value;
+      editor.className = `editor-surface hljs language-${result.language || 'plaintext'}`;
+      editor.innerHTML = result.value;
       setStatus(`已自動判斷語言：${result.language || 'plaintext'}`);
     } else {
       const highlightLanguage = getHighlightLanguage(selectedLanguage);
       result = hljs.highlight(raw, { language: highlightLanguage, ignoreIllegals: true });
-      previewCode.className = `hljs language-${highlightLanguage}`;
-      previewCode.innerHTML = result.value;
+      editor.className = `editor-surface hljs language-${highlightLanguage}`;
+      editor.innerHTML = result.value;
       const selectedLabel = LANGUAGES.find(item => item.value === selectedLanguage)?.label || selectedLanguage;
       setStatus(`已套用語言：${selectedLabel}`);
     }
   } catch (error) {
-    previewCode.textContent = raw;
-    previewCode.className = 'hljs language-plaintext';
+    editor.className = 'editor-surface hljs language-plaintext';
+    editor.innerHTML = escapeHtml(raw);
     setStatus('語法高亮失敗，已退回純文字');
     console.error(error);
   }
 
-  syncScroll();
+  if (preserveCaret) setCaretOffset(editor, caret);
 }
 
 async function copyText(text, successMessage, failMessage = '複製失敗') {
@@ -327,26 +311,22 @@ async function copyRichHtml(html, plainText, successMessage, failMessage = '複�
   }
 }
 
-function getSampleForLanguage(language) {
-  if (SAMPLE_SNIPPETS[language]) return SAMPLE_SNIPPETS[language];
-  return SAMPLE_SNIPPETS.javascript;
-}
+function getSampleForLanguage(language) { return SAMPLE_SNIPPETS[language] || SAMPLE_SNIPPETS.javascript; }
 
 function buildStyledHtmlSnippet() {
-  const codeClone = previewCode.cloneNode(true);
-  const allNodes = [codeClone, ...codeClone.querySelectorAll('*')];
-
+  const clone = editor.cloneNode(true);
+  const allNodes = [clone, ...clone.querySelectorAll('*')];
   allNodes.forEach(node => {
     if (!(node instanceof HTMLElement)) return;
     const computed = window.getComputedStyle(node);
     node.style.color = computed.color;
     node.style.backgroundColor = 'transparent';
-    node.style.fontWeight = computed.fontWeight;
-    node.style.fontStyle = computed.fontStyle;
+    node.style.fontWeight = '400';
+    node.style.fontStyle = 'normal';
     node.style.textDecoration = computed.textDecoration;
   });
 
-  const previewStyles = window.getComputedStyle(previewCode);
+  const styles = window.getComputedStyle(editor);
   const wrapper = document.createElement('pre');
   wrapper.style.margin = '0';
   wrapper.style.padding = '22px';
@@ -355,69 +335,49 @@ function buildStyledHtmlSnippet() {
   wrapper.style.whiteSpace = 'pre';
   wrapper.style.tabSize = '2';
   wrapper.style.background = getComputedStyle(document.documentElement).getPropertyValue('--preview-bg').trim() || '#ffffff';
-  wrapper.style.minHeight = '100%';
-  wrapper.style.color = previewStyles.color;
-  wrapper.style.fontFamily = previewStyles.fontFamily;
-  wrapper.style.fontSize = previewStyles.fontSize;
-  wrapper.style.lineHeight = previewStyles.lineHeight;
-  wrapper.appendChild(codeClone);
-
-  return {
-    html: wrapper.outerHTML,
-    text: previewCode.textContent || ''
-  };
+  wrapper.style.color = styles.color;
+  wrapper.style.fontFamily = styles.fontFamily;
+  wrapper.style.fontSize = styles.fontSize;
+  wrapper.style.lineHeight = styles.lineHeight;
+  wrapper.appendChild(clone);
+  return { html: wrapper.outerHTML, text: getEditorText() };
 }
 
 function initialize() {
   populateSelect(languageSelect, LANGUAGES);
   populateSelect(themeSelect, THEMES);
-
   languageSelect.value = 'javascript';
   themeSelect.value = 'github';
-  codeInput.value = SAMPLE_SNIPPETS.javascript;
-
+  editor.textContent = SAMPLE_SNIPPETS.javascript;
   applyThemeVisual(getSelectedTheme());
-  highlightCurrentCode();
-  syncScroll();
+  renderEditor({ preserveCaret: false });
 }
 
-languageSelect.addEventListener('change', () => {
-  highlightCurrentCode();
+editor.addEventListener('input', () => renderEditor());
+editor.addEventListener('paste', event => {
+  event.preventDefault();
+  const text = event.clipboardData?.getData('text/plain') || '';
+  document.execCommand('insertText', false, text);
 });
-
-themeSelect.addEventListener('change', () => {
-  applyThemeVisual(getSelectedTheme());
-  highlightCurrentCode();
-});
-
-codeInput.addEventListener('input', () => {
-  highlightCurrentCode();
-});
-
-codeInput.addEventListener('scroll', syncScroll);
-editorStack.addEventListener('click', () => codeInput.focus());
+languageSelect.addEventListener('change', () => renderEditor());
+themeSelect.addEventListener('change', () => { applyThemeVisual(getSelectedTheme()); renderEditor(); });
 
 sampleBtn.addEventListener('click', () => {
   const selectedLanguage = languageSelect.value === 'auto' ? 'javascript' : languageSelect.value;
-  codeInput.value = getSampleForLanguage(selectedLanguage);
-  highlightCurrentCode();
+  editor.textContent = getSampleForLanguage(selectedLanguage);
+  renderEditor({ preserveCaret: false });
+  setCaretOffset(editor, getEditorText().length);
+  editor.focus();
   setStatus('已載入範例');
 });
-
 clearBtn.addEventListener('click', () => {
-  codeInput.value = '';
-  highlightCurrentCode();
+  editor.textContent = '';
+  renderEditor({ preserveCaret: false });
+  editor.focus();
   setStatus('已清空內容');
 });
-
-copyRawBtn.addEventListener('click', () => {
-  copyText(codeInput.value, '已複製原始碼');
-});
-
-copyHtmlBtn.addEventListener('click', () => {
-  copyText(previewCode.outerHTML, '已複製上色後 HTML');
-});
-
+copyRawBtn.addEventListener('click', () => copyText(getEditorText(), '已複製原始碼'));
+copyHtmlBtn.addEventListener('click', () => copyText(editor.outerHTML, '已複製上色後 HTML'));
 copyTextBtn.addEventListener('click', () => {
   const snippet = buildStyledHtmlSnippet();
   copyRichHtml(snippet.html, snippet.text, '已複製帶樣式內容');
