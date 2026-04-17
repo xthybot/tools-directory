@@ -298,6 +298,24 @@ async function copyText(text, successMessage, failMessage = '複製失敗') {
   }
 }
 
+async function copyRichHtml(html, plainText, successMessage, failMessage = '複製失敗') {
+  try {
+    if (navigator.clipboard && window.ClipboardItem) {
+      const item = new ClipboardItem({
+        'text/html': new Blob([html], { type: 'text/html' }),
+        'text/plain': new Blob([plainText], { type: 'text/plain' })
+      });
+      await navigator.clipboard.write([item]);
+    } else {
+      await navigator.clipboard.writeText(plainText);
+    }
+    setStatus(successMessage);
+  } catch (error) {
+    console.error(error);
+    setStatus(failMessage);
+  }
+}
+
 function getSampleForLanguage(language) {
   if (SAMPLE_SNIPPETS[language]) return SAMPLE_SNIPPETS[language];
   return SAMPLE_SNIPPETS.javascript;
@@ -332,7 +350,10 @@ function buildStyledHtmlSnippet() {
   wrapper.style.lineHeight = previewStyles.lineHeight;
   wrapper.appendChild(codeClone);
 
-  return wrapper.outerHTML;
+  return {
+    html: wrapper.outerHTML,
+    text: previewCode.textContent || ''
+  };
 }
 
 function initialize() {
@@ -382,7 +403,8 @@ copyHtmlBtn.addEventListener('click', () => {
 });
 
 copyTextBtn.addEventListener('click', () => {
-  copyText(buildStyledHtmlSnippet(), '已複製帶樣式內容');
+  const snippet = buildStyledHtmlSnippet();
+  copyRichHtml(snippet.html, snippet.text, '已複製帶樣式內容');
 });
 
 initialize();
