@@ -385,7 +385,20 @@ async function copyRichHtml(html, plainText, successMessage, failMessage = '複�
   }
 }
 
-function getSampleForLanguage(language) { return SAMPLE_SNIPPETS[language] || SAMPLE_SNIPPETS.javascript; }
+function normalizeIndentation(text, indentSize = Number(indentSizeSelect?.value || 2)) {
+  const lines = text.split('\n');
+  return lines.map(line => {
+    const leadingSpaces = (line.match(/^ +/) || [''])[0].length;
+    if (!leadingSpaces) return line;
+    const indentLevel = Math.floor(leadingSpaces / 2);
+    return `${' '.repeat(indentLevel * indentSize)}${line.slice(leadingSpaces)}`;
+  }).join('\n');
+}
+
+function getSampleForLanguage(language) {
+  const sample = SAMPLE_SNIPPETS[language] || SAMPLE_SNIPPETS.javascript;
+  return normalizeIndentation(sample);
+}
 
 function buildStyledHtmlSnippet() {
   const clone = editor.cloneNode(true);
@@ -470,7 +483,7 @@ sampleBtn.addEventListener('click', () => {
   renderEditor({ preserveCaret: false });
   setCaretOffset(editor, getEditorText().length);
   editor.focus();
-  setStatus('已載入範例');
+  setStatus(`已載入範例（${indentSizeSelect.value} 空格縮排）`);
 });
 clearBtn.addEventListener('click', () => {
   editor.textContent = '';
