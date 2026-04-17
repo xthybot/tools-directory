@@ -211,15 +211,26 @@ select {
   padding: 22px;
   font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
   font-size: 14px;
+  font-weight: 400;
   line-height: 1.7;
+  letter-spacing: 0;
   tab-size: 2;
   white-space: pre;
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0;
 }
 .highlight-layer {
   position: relative;
   z-index: 1;
   pointer-events: none;
   background: transparent !important;
+}
+.highlight-layer,
+.highlight-layer * {
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace !important;
+  letter-spacing: 0 !important;
+  font-variant-ligatures: none !important;
+  font-feature-settings: "liga" 0 !important;
 }
 .highlight-layer code {
   display: block;
