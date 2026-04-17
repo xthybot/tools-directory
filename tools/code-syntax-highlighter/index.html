@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>程式碼上色工具</title>
+  <meta name="description" content="支援多語言、Bash / Command Line、5 種以上主題的線上程式碼上色工具。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css" id="hljs-theme" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+
+  <main class="shell">
+    <header class="topbar">
+      <a class="back" href="/">← 回首頁</a>
+      <span class="badge">CODE HIGHLIGHTER</span>
+    </header>
+
+    <section class="hero panel">
+      <p class="eyebrow">XTHY WORK TOOL</p>
+      <h1>程式碼上色工具</h1>
+      <p class="subtitle">貼上程式碼，選語言、換主題，立即得到可讀性更高的語法高亮結果。支援 JavaScript、Python、HTML、CSS、JSON、SQL、Bash、Command Line 等主流語言。</p>
+      <div class="chips">
+        <span>多語言</span>
+        <span>Light / Dark 主題</span>
+        <span>Bash / CLI</span>
+        <span>即時預覽</span>
+        <span>複製輸出</span>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <section class="panel editor-card">
+        <div class="card-head">
+          <h2>原始程式碼</h2>
+          <div class="head-actions">
+            <button class="mini-btn" id="sampleBtn" type="button">載入範例</button>
+            <button class="mini-btn" id="clearBtn" type="button">清空</button>
+            <button class="mini-btn" id="copyRawBtn" type="button">複製原始碼</button>
+          </div>
+        </div>
+
+        <div class="control-grid">
+          <label>
+            語言
+            <select id="languageSelect"></select>
+          </label>
+          <label>
+            主題
+            <select id="themeSelect"></select>
+          </label>
+        </div>
+
+        <textarea id="codeInput" spellcheck="false" placeholder="把你的程式碼貼在這裡，例如：
+#!/bin/bash
+for file in *.js; do
+  echo \"Processing $file\"
+done"></textarea>
+
+        <div class="status-row">
+          <span id="statusText">等待輸入</span>
+          <span id="metaText">0 字元</span>
+        </div>
+      </section>
+
+      <section class="panel preview-card">
+        <div class="card-head">
+          <h2>上色預覽</h2>
+          <div class="head-actions">
+            <button class="mini-btn" id="copyHtmlBtn" type="button">複製 HTML</button>
+            <button class="mini-btn" id="copyTextBtn" type="button">複製純文字</button>
+          </div>
+        </div>
+
+        <div class="preview-toolbar">
+          <span class="preview-label">目前預覽</span>
+          <span class="theme-indicator" id="themeIndicator">GitHub Light</span>
+        </div>
+
+        <div class="preview-shell" id="previewShell">
+          <pre><code id="previewCode" class="language-plaintext"></code></pre>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/shell.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/typescript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/go.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/rust.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/cpp.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/csharp.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/php.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/ruby.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/swift.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/kotlin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/sql.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/yaml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/markdown.min.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>

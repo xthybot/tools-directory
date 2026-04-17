@@ -39,5 +39,15 @@
       "QRCode"
     ],
     "link": "tools/xthy-qrcode-generator/"
+  },
+  {
+    "title": "程式碼上色工具",
+    "icon": "assets/icons/code-syntax-highlighter.svg",
+    "description": "支援多語言、Bash / Command Line 與多主題切換的線上程式碼高亮工具。",
+    "tags": [
+      "開發",
+      "程式碼"
+    ],
+    "link": "tools/code-syntax-highlighter/"
   }
 ]
