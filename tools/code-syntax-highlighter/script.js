@@ -223,7 +223,10 @@ function setCaretOffset(root, offset) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
   let currentOffset = 0;
   let node;
+  let lastTextNode = null;
+
   while ((node = walker.nextNode())) {
+    lastTextNode = node;
     const nextOffset = currentOffset + node.nodeValue.length;
     if (offset <= nextOffset) {
       const range = document.createRange();
@@ -236,22 +239,20 @@ function setCaretOffset(root, offset) {
     currentOffset = nextOffset;
   }
 
-  if (!root.firstChild) {
-    root.textContent = '';
-    const textNode = root.firstChild;
-    if (textNode) {
-      const range = document.createRange();
-      range.setStart(textNode, 0);
-      range.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(range);
-      return;
-    }
+  if (lastTextNode) {
+    const range = document.createRange();
+    range.setStart(lastTextNode, lastTextNode.nodeValue.length);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    return;
   }
 
+  const trailingNode = document.createTextNode('');
+  root.appendChild(trailingNode);
   const range = document.createRange();
-  range.selectNodeContents(root);
-  range.collapse(false);
+  range.setStart(trailingNode, 0);
+  range.collapse(true);
   selection.removeAllRanges();
   selection.addRange(range);
 }
@@ -285,6 +286,7 @@ function renderEditor({ preserveCaret = true } = {}) {
   const raw = getEditorText();
   const selectedLanguage = languageSelect.value;
   const caret = preserveCaret ? getCaretOffset(editor) : 0;
+  const endsWithNewline = raw.endsWith('\n');
   metaText.textContent = `${raw.length} 字元`;
 
   if (!raw.trim()) {
@@ -317,6 +319,10 @@ function renderEditor({ preserveCaret = true } = {}) {
     editor.innerHTML = escapeHtml(raw);
     setStatus('語法高亮失敗，已退回純文字');
     console.error(error);
+  }
+
+  if (endsWithNewline) {
+    editor.appendChild(document.createTextNode('\n'));
   }
 
   if (preserveCaret) setCaretOffset(editor, caret);
