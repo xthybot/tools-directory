@@ -9,7 +9,6 @@
   --shadow: 0 20px 60px rgba(36, 52, 76, 0.18);
   --surface: #ffffff;
   --surface-soft: #f6f8fc;
-  --surface-softer: #f8faff;
   --placeholder: #8191a6;
   --preview-bg: #ffffff;
 }
@@ -125,28 +124,33 @@ h1 {
   color: var(--muted);
   background: rgba(255,255,255,0.45);
 }
-.workspace {
-  display: grid;
-  grid-template-columns: minmax(320px, 520px) 1fr;
-  gap: 18px;
-}
-.editor-card, .preview-card {
+.editor-panel {
   padding: 24px;
 }
 .card-head {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   margin-bottom: 14px;
 }
 .card-head h2 {
-  margin: 0;
+  margin: 0 0 10px;
+}
+.preview-toolbar-left {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 14px;
 }
 .head-actions {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  justify-content: flex-end;
 }
 .mini-btn, .back {
   transition: transform .2s ease, border-color .2s ease, background-color .2s ease;
@@ -185,44 +189,6 @@ select {
   min-height: 44px;
   padding: 10px 12px;
 }
-textarea {
-  width: 100%;
-  min-height: 640px;
-  resize: vertical;
-  border-radius: 20px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--text);
-  padding: 18px;
-  line-height: 1.7;
-  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
-  font-size: 14px;
-}
-textarea::placeholder { color: var(--placeholder); }
-.status-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 12px;
-  color: var(--muted);
-  font-size: 14px;
-}
-.preview-toolbar {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-  color: var(--muted);
-  font-size: 14px;
-}
-.preview-toolbar-left {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  flex-wrap: wrap;
-}
 .theme-indicator {
   border: 0;
   padding: 0;
@@ -230,26 +196,63 @@ textarea::placeholder { color: var(--placeholder); }
   background: transparent;
   color: var(--text);
 }
-.preview-shell {
-  min-height: 640px;
+.editor-stack {
+  position: relative;
+  min-height: 720px;
   border-radius: 20px;
   border: 1px solid var(--line);
   background: var(--preview-bg);
   overflow: auto;
 }
-.preview-shell pre {
+.highlight-layer,
+#codeInput {
   margin: 0;
-  min-height: 100%;
-  background: transparent !important;
-}
-.preview-shell code {
-  display: block;
-  min-height: 640px;
+  min-height: 720px;
   padding: 22px;
   font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
   font-size: 14px;
   line-height: 1.7;
   tab-size: 2;
+  white-space: pre;
+}
+.highlight-layer {
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+  background: transparent !important;
+}
+.highlight-layer code {
+  display: block;
+  min-height: 676px;
+}
+#codeInput {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  resize: none;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--text);
+  overflow: auto;
+}
+#codeInput::selection {
+  background: rgba(79, 124, 255, 0.28);
+}
+#codeInput:focus {
+  outline: none;
+}
+#codeInput::placeholder {
+  color: var(--placeholder);
+}
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 14px;
 }
 
 body.theme-dark {
@@ -263,7 +266,6 @@ body.theme-dark {
   --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
   --surface: rgba(4, 10, 20, 0.72);
   --surface-soft: rgba(255,255,255,0.03);
-  --surface-softer: rgba(255,255,255,0.02);
   --placeholder: #7890b1;
 }
 
@@ -281,25 +283,26 @@ body.theme-dark .back:hover {
 }
 
 @media (max-width: 1040px) {
-  .workspace { grid-template-columns: 1fr; }
-  textarea, .preview-shell, .preview-shell code { min-height: 420px; }
+  .editor-stack,
+  .highlight-layer,
+  #codeInput {
+    min-height: 520px;
+  }
+  .highlight-layer code {
+    min-height: 476px;
+  }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 720px) {
   body { padding: 16px; }
-  .topbar, .card-head {
+  .topbar,
+  .card-head {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
-  .preview-toolbar,
-  .preview-toolbar-left {
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 8px;
-  }
-  .hero, .editor-card, .preview-card { padding: 20px; }
+  .hero,
+  .editor-panel { padding: 20px; }
   .control-grid { grid-template-columns: 1fr; }
-  .head-actions { width: 100%; }
+  .head-actions { width: 100%; justify-content: flex-start; }
 }

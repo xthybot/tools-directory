@@ -26,70 +26,58 @@
     <section class="hero panel">
       <p class="eyebrow">XTHY WORK TOOL</p>
       <h1>程式碼上色工具</h1>
-      <p class="subtitle">貼上程式碼，選語言、換主題，立即得到可讀性更高的語法高亮結果。支援 JavaScript、Python、HTML、CSS、JSON、SQL、Bash、Command Line 等主流語言。</p>
+      <p class="subtitle">直接在有上色的編輯區內修改程式碼。支援多語言、主題切換、Bash / Command Line，以及複製輸出。</p>
       <div class="chips">
+        <span>單欄編輯</span>
         <span>多語言</span>
         <span>Light / Dark 主題</span>
         <span>Bash / CLI</span>
-        <span>即時預覽</span>
         <span>複製輸出</span>
       </div>
     </section>
 
-    <section class="workspace">
-      <section class="panel editor-card">
-        <div class="card-head">
-          <h2>原始程式碼</h2>
-          <div class="head-actions">
-            <button class="mini-btn" id="sampleBtn" type="button">載入範例</button>
-            <button class="mini-btn" id="clearBtn" type="button">清空</button>
-            <button class="mini-btn" id="copyRawBtn" type="button">複製原始碼</button>
+    <section class="panel editor-panel">
+      <div class="card-head main-head">
+        <div>
+          <h2>程式碼編輯器</h2>
+          <div class="preview-toolbar-left">
+            <span class="preview-label">目前主題</span>
+            <span class="theme-indicator" id="themeIndicator">GitHub Light</span>
           </div>
         </div>
-
-        <div class="control-grid">
-          <label>
-            語言
-            <select id="languageSelect"></select>
-          </label>
-          <label>
-            主題
-            <select id="themeSelect"></select>
-          </label>
+        <div class="head-actions">
+          <button class="mini-btn" id="sampleBtn" type="button">載入範例</button>
+          <button class="mini-btn" id="clearBtn" type="button">清空</button>
+          <button class="mini-btn" id="copyRawBtn" type="button">複製原始碼</button>
+          <button class="mini-btn" id="copyHtmlBtn" type="button">複製 HTML</button>
+          <button class="mini-btn" id="copyTextBtn" type="button">複製帶樣式</button>
         </div>
+      </div>
 
-        <textarea id="codeInput" spellcheck="false" placeholder="把你的程式碼貼在這裡，例如：
+      <div class="control-grid">
+        <label>
+          語言
+          <select id="languageSelect"></select>
+        </label>
+        <label>
+          主題
+          <select id="themeSelect"></select>
+        </label>
+      </div>
+
+      <div class="editor-stack" id="editorStack">
+        <pre class="highlight-layer" aria-hidden="true"><code id="previewCode" class="language-plaintext"></code></pre>
+        <textarea id="codeInput" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="把你的程式碼貼在這裡，例如：
 #!/bin/bash
 for file in *.js; do
   echo \"Processing $file\"
 done"></textarea>
+      </div>
 
-        <div class="status-row">
-          <span id="statusText">等待輸入</span>
-          <span id="metaText">0 字元</span>
-        </div>
-      </section>
-
-      <section class="panel preview-card">
-        <div class="card-head">
-          <h2>上色預覽</h2>
-          <div class="head-actions">
-            <button class="mini-btn" id="copyHtmlBtn" type="button">複製 HTML</button>
-            <button class="mini-btn" id="copyTextBtn" type="button">複製帶樣式</button>
-          </div>
-        </div>
-
-        <div class="preview-toolbar">
-          <div class="preview-toolbar-left">
-            <span class="preview-label">目前預覽</span>
-            <span class="theme-indicator" id="themeIndicator">GitHub Light</span>
-          </div>
-        </div>
-
-        <div class="preview-shell" id="previewShell">
-          <pre><code id="previewCode" class="language-plaintext"></code></pre>
-        </div>
-      </section>
+      <div class="status-row">
+        <span id="statusText">等待輸入</span>
+        <span id="metaText">0 字元</span>
+      </div>
     </section>
   </main>
 

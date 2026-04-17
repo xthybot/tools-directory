@@ -11,6 +11,7 @@ const copyTextBtn = document.getElementById('copyTextBtn');
 const statusText = document.getElementById('statusText');
 const metaText = document.getElementById('metaText');
 const themeIndicator = document.getElementById('themeIndicator');
+const editorStack = document.getElementById('editorStack');
 
 const LANGUAGES = [
   { label: 'Auto Detect', value: 'auto' },
@@ -251,6 +252,13 @@ function getHighlightLanguage(language) {
   return aliasMap[language] || language;
 }
 
+function syncScroll() {
+  const highlightLayer = previewCode.parentElement;
+  if (!highlightLayer) return;
+  highlightLayer.scrollTop = codeInput.scrollTop;
+  highlightLayer.scrollLeft = codeInput.scrollLeft;
+}
+
 function highlightCurrentCode() {
   const raw = codeInput.value;
   const selectedLanguage = languageSelect.value;
@@ -258,9 +266,10 @@ function highlightCurrentCode() {
   metaText.textContent = `${raw.length} 字元`;
 
   if (!raw.trim()) {
-    previewCode.textContent = '把程式碼貼上來後，這裡會立即顯示上色結果。';
+    previewCode.textContent = codeInput.placeholder || '把程式碼貼上來後，這裡會立即顯示上色結果。';
     previewCode.className = 'language-plaintext';
     setStatus('等待輸入');
+    syncScroll();
     return;
   }
 
@@ -286,6 +295,8 @@ function highlightCurrentCode() {
     setStatus('語法高亮失敗，已退回純文字');
     console.error(error);
   }
+
+  syncScroll();
 }
 
 async function copyText(text, successMessage, failMessage = '複製失敗') {
@@ -344,6 +355,7 @@ function buildStyledHtmlSnippet() {
   wrapper.style.whiteSpace = 'pre';
   wrapper.style.tabSize = '2';
   wrapper.style.background = getComputedStyle(document.documentElement).getPropertyValue('--preview-bg').trim() || '#ffffff';
+  wrapper.style.minHeight = '100%';
   wrapper.style.color = previewStyles.color;
   wrapper.style.fontFamily = previewStyles.fontFamily;
   wrapper.style.fontSize = previewStyles.fontSize;
@@ -366,6 +378,7 @@ function initialize() {
 
   applyThemeVisual(getSelectedTheme());
   highlightCurrentCode();
+  syncScroll();
 }
 
 languageSelect.addEventListener('change', () => {
@@ -380,6 +393,9 @@ themeSelect.addEventListener('change', () => {
 codeInput.addEventListener('input', () => {
   highlightCurrentCode();
 });
+
+codeInput.addEventListener('scroll', syncScroll);
+editorStack.addEventListener('click', () => codeInput.focus());
 
 sampleBtn.addEventListener('click', () => {
   const selectedLanguage = languageSelect.value === 'auto' ? 'javascript' : languageSelect.value;
