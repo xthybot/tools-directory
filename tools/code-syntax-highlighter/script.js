@@ -235,11 +235,46 @@ function setCaretOffset(root, offset) {
     }
     currentOffset = nextOffset;
   }
+
+  if (!root.firstChild) {
+    root.textContent = '';
+    const textNode = root.firstChild;
+    if (textNode) {
+      const range = document.createRange();
+      range.setStart(textNode, 0);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      return;
+    }
+  }
+
   const range = document.createRange();
   range.selectNodeContents(root);
   range.collapse(false);
   selection.removeAllRanges();
   selection.addRange(range);
+}
+
+function insertTextAtCaret(text, { moveCaret = true } = {}) {
+  const current = getEditorText();
+  const start = getCaretOffset(editor);
+  const end = start;
+  const next = current.slice(0, start) + text + current.slice(end);
+  editor.textContent = next;
+  renderEditor({ preserveCaret: false });
+  if (moveCaret) setCaretOffset(editor, start + text.length);
+}
+
+function getLineIndentBeforeCaret(text, caret) {
+  const beforeCaret = text.slice(0, caret);
+  const lineStart = beforeCaret.lastIndexOf('\n') + 1;
+  const currentLine = beforeCaret.slice(lineStart);
+  const indentMatch = currentLine.match(/^\s*/);
+  const baseIndent = indentMatch ? indentMatch[0] : '';
+  const trimmed = currentLine.trimEnd();
+  const shouldIncrease = /[\{\[\(\:]$/.test(trimmed) || /\b(do|then|else|elif|case)\s*$/.test(trimmed);
+  return baseIndent + (shouldIncrease ? '  ' : '');
 }
 
 function renderEditor({ preserveCaret = true } = {}) {
@@ -354,10 +389,25 @@ function initialize() {
 }
 
 editor.addEventListener('input', () => renderEditor());
+editor.addEventListener('keydown', event => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    const text = getEditorText();
+    const caret = getCaretOffset(editor);
+    const indent = getLineIndentBeforeCaret(text, caret);
+    insertTextAtCaret(`\n${indent}`);
+    return;
+  }
+
+  if (event.key === 'Tab') {
+    event.preventDefault();
+    insertTextAtCaret('  ');
+  }
+});
 editor.addEventListener('paste', event => {
   event.preventDefault();
   const text = event.clipboardData?.getData('text/plain') || '';
-  document.execCommand('insertText', false, text);
+  insertTextAtCaret(text);
 });
 languageSelect.addEventListener('change', () => renderEditor());
 themeSelect.addEventListener('change', () => { applyThemeVisual(getSelectedTheme()); renderEditor(); });
