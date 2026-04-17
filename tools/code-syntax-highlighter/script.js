@@ -1,6 +1,7 @@
 const THEME_STYLESHEET = document.getElementById('hljs-theme');
 const languageSelect = document.getElementById('languageSelect');
 const themeSelect = document.getElementById('themeSelect');
+const indentSizeSelect = document.getElementById('indentSizeSelect');
 const editor = document.getElementById('editor');
 const editorHost = document.getElementById('editorHost');
 const sampleBtn = document.getElementById('sampleBtn');
@@ -194,6 +195,7 @@ function populateSelect(select, list) { select.innerHTML = list.map(item => `<op
 function getSelectedTheme() { return THEMES.find(theme => theme.value === themeSelect.value) || THEMES[0]; }
 function getEditorText() { return editor.textContent || ''; }
 function escapeHtml(text) { return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function getIndentUnit() { return ' '.repeat(Number(indentSizeSelect?.value || 2)); }
 
 function applyThemeVisual(theme) {
   THEME_STYLESHEET.href = theme.href;
@@ -279,7 +281,34 @@ function getLineIndentBeforeCaret(text, caret) {
   const baseIndent = indentMatch ? indentMatch[0] : '';
   const trimmed = currentLine.trimEnd();
   const shouldIncrease = /[\{\[\(\:]$/.test(trimmed) || /\b(do|then|else|elif|case)\s*$/.test(trimmed);
-  return baseIndent + (shouldIncrease ? '  ' : '');
+  return baseIndent + (shouldIncrease ? getIndentUnit() : '');
+}
+
+function outdentCurrentLine() {
+  const text = getEditorText();
+  const caret = getCaretOffset(editor);
+  const lineStart = text.lastIndexOf('\n', Math.max(0, caret - 1)) + 1;
+  const rest = text.slice(lineStart);
+  const line = rest.split('\n')[0];
+  const indentUnit = getIndentUnit();
+
+  let removeCount = 0;
+  if (line.startsWith(indentUnit)) {
+    removeCount = indentUnit.length;
+  } else {
+    const leadingSpaces = (line.match(/^ +/) || [''])[0].length;
+    removeCount = Math.min(leadingSpaces, indentUnit.length);
+  }
+
+  if (!removeCount) return;
+
+  const next = text.slice(0, lineStart) + text.slice(lineStart + removeCount);
+  editor.textContent = next;
+  renderEditor({ preserveCaret: false });
+  requestAnimationFrame(() => {
+    editor.focus();
+    setCaretOffset(editor, Math.max(lineStart, caret - removeCount));
+  });
 }
 
 function renderEditor({ preserveCaret = true } = {}) {
@@ -391,6 +420,7 @@ function buildStyledHtmlSnippet() {
 function initialize() {
   populateSelect(languageSelect, LANGUAGES);
   populateSelect(themeSelect, THEMES);
+  indentSizeSelect.value = '2';
   languageSelect.value = 'javascript';
   themeSelect.value = 'github';
   editor.textContent = SAMPLE_SNIPPETS.javascript;
@@ -415,7 +445,11 @@ editor.addEventListener('keydown', event => {
   if (event.key === 'Tab') {
     event.preventDefault();
     event.stopPropagation();
-    insertTextAtCaret('  ');
+    if (event.shiftKey) {
+      outdentCurrentLine();
+    } else {
+      insertTextAtCaret(getIndentUnit());
+    }
   }
 });
 editor.addEventListener('paste', event => {
@@ -425,6 +459,10 @@ editor.addEventListener('paste', event => {
 });
 languageSelect.addEventListener('change', () => renderEditor());
 themeSelect.addEventListener('change', () => { applyThemeVisual(getSelectedTheme()); renderEditor(); });
+indentSizeSelect.addEventListener('change', () => {
+  editor.focus();
+  setStatus(`縮排改為 ${indentSizeSelect.value} 個空格`);
+});
 
 sampleBtn.addEventListener('click', () => {
   const selectedLanguage = languageSelect.value === 'auto' ? 'javascript' : languageSelect.value;

@@ -111,6 +111,7 @@ h1 { margin: 14px 0 16px; font-size: clamp(36px, 7vw, 68px); line-height: 1; }
   background: rgba(255,255,255,0.82);
 }
 .control-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+.control-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .control-grid label { display: grid; gap: 8px; font-size: 14px; color: var(--muted); }
 select {
   width: 100%;
@@ -182,6 +183,6 @@ body.theme-dark .back:hover { background: rgba(255,255,255,0.06); border-color: 
   body { padding: 16px; }
   .topbar, .card-head { flex-direction: column; align-items: flex-start; gap: 12px; }
   .hero, .editor-panel { padding: 20px; }
-  .control-grid { grid-template-columns: 1fr; }
+  .control-grid, .control-grid-3 { grid-template-columns: 1fr; }
   .head-actions { width: 100%; justify-content: flex-start; }
 }
