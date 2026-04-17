@@ -259,11 +259,15 @@ function setCaretOffset(root, offset) {
 function insertTextAtCaret(text, { moveCaret = true } = {}) {
   const current = getEditorText();
   const start = getCaretOffset(editor);
-  const end = start;
-  const next = current.slice(0, start) + text + current.slice(end);
+  const next = current.slice(0, start) + text + current.slice(start);
   editor.textContent = next;
   renderEditor({ preserveCaret: false });
-  if (moveCaret) setCaretOffset(editor, start + text.length);
+  if (moveCaret) {
+    requestAnimationFrame(() => {
+      editor.focus();
+      setCaretOffset(editor, start + text.length);
+    });
+  }
 }
 
 function getLineIndentBeforeCaret(text, caret) {
@@ -390,8 +394,11 @@ function initialize() {
 
 editor.addEventListener('input', () => renderEditor());
 editor.addEventListener('keydown', event => {
+  if (event.isComposing) return;
+
   if (event.key === 'Enter') {
     event.preventDefault();
+    event.stopPropagation();
     const text = getEditorText();
     const caret = getCaretOffset(editor);
     const indent = getLineIndentBeforeCaret(text, caret);
@@ -401,6 +408,7 @@ editor.addEventListener('keydown', event => {
 
   if (event.key === 'Tab') {
     event.preventDefault();
+    event.stopPropagation();
     insertTextAtCaret('  ');
   }
 });
