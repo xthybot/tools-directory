@@ -109,7 +109,8 @@ function bindEvents() {
 
   dom.ratioPreset.addEventListener('change', () => {
     if (dom.ratioPreset.value) {
-      dom.ratioValue.value = dom.ratioPreset.value;
+      const parsed = parseRatio(dom.ratioPreset.value);
+      dom.ratioValue.value = parsed ? formatRatioDisplay(parsed.width, parsed.height) : dom.ratioPreset.value;
     }
     recalculate();
   });
@@ -211,7 +212,12 @@ function applyPreset(preset) {
   state.outputUnits.physicalWidth = preset.physical?.width?.unit ?? dom.inputPhysicalWidthUnit.value;
   state.outputUnits.physicalHeight = preset.physical?.height?.unit ?? dom.inputPhysicalHeightUnit.value;
   state.outputUnits.resolution = preset.resolution?.unit ?? dom.resolutionUnit.value;
-  dom.ratioValue.value = preset.ratio ?? '';
+  if (preset.ratio) {
+    const parsedRatio = parseRatio(preset.ratio);
+    dom.ratioValue.value = parsedRatio ? formatRatioDisplay(parsedRatio.width, parsedRatio.height) : preset.ratio;
+  } else {
+    dom.ratioValue.value = '';
+  }
   dom.ratioPreset.value = [...dom.ratioPreset.options].some((option) => option.value === preset.ratio) ? preset.ratio : '';
   recalculate();
 }
@@ -268,7 +274,7 @@ function copyResultToInput() {
   if (result.pixel.height.value != null) dom.inputPixelHeight.value = formatNumber(result.pixel.height.value, 0);
   if (result.resolution.value != null) dom.resolutionValue.value = formatNumber(result.resolution.value, 4);
   if (outputPrefs.resolution) dom.resolutionUnit.value = outputPrefs.resolution;
-  if (result.ratio.display) dom.ratioValue.value = result.ratio.raw || result.ratio.display;
+  if (result.ratio.display) dom.ratioValue.value = result.ratio.display;
   if ([...dom.ratioPreset.options].some((option) => option.value === (result.ratio.raw || result.ratio.display))) {
     dom.ratioPreset.value = result.ratio.raw || result.ratio.display;
   }

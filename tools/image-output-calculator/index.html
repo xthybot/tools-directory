@@ -44,21 +44,20 @@
       <section class="panel side-card">
         <div class="section-head">
           <div>
-            <h2>左側：目前已知條件</h2>
-            <p>可只填實體尺寸、只填像素尺寸，或混合填寫；系統會自行判斷。</p>
+            <h2>目前已知條件</h2>
+            <p>將已知的參數直接填寫；系統會自行判斷。</p>
           </div>
           <span class="status-pill input-pill">輸入區</span>
         </div>
 
         <div class="group">
-          <h3>預設尺寸輸入欄位</h3>
+          <h3>預設尺寸輸入</h3>
           <div class="dimension-grid">
             <div class="field-inline horizontal-field">
               <label for="inputPhysicalWidth">實體寬</label>
               <input id="inputPhysicalWidth" type="number" inputmode="decimal" min="0" step="any" placeholder="例如 210" />
             </div>
-            <div class="field-inline unit-field horizontal-field">
-              <label for="inputPhysicalWidthUnit">單位</label>
+            <div class="field-inline unit-field horizontal-field no-label-field compact-unit-field">
               <select id="inputPhysicalWidthUnit">
                 <option value="mm">mm</option>
                 <option value="cm">cm</option>
@@ -69,8 +68,7 @@
               <label for="inputPhysicalHeight">實體高</label>
               <input id="inputPhysicalHeight" type="number" inputmode="decimal" min="0" step="any" placeholder="例如 297" />
             </div>
-            <div class="field-inline unit-field horizontal-field">
-              <label for="inputPhysicalHeightUnit">單位</label>
+            <div class="field-inline unit-field horizontal-field no-label-field compact-unit-field">
               <select id="inputPhysicalHeightUnit">
                 <option value="mm">mm</option>
                 <option value="cm">cm</option>
@@ -81,8 +79,8 @@
         </div>
 
         <div class="group">
-          <h3>像素尺寸輸入欄位</h3>
-          <div class="pixel-grid">
+          <h3>像素尺寸輸入</h3>
+          <div class="pixel-grid pixel-grid-single">
             <div class="field-inline horizontal-field">
               <label for="inputPixelWidth">像素寬</label>
               <input id="inputPixelWidth" type="number" inputmode="decimal" min="0" step="any" placeholder="例如 2480" />
@@ -95,9 +93,9 @@
         </div>
 
         <div class="group">
-          <h3>解析度輸入欄位</h3>
-          <div class="resolution-row">
-            <div class="field-inline grow horizontal-field">
+          <h3>解析度輸入</h3>
+          <div class="resolution-row resolution-row-compact">
+            <div class="field-inline grow horizontal-field resolution-value-field">
               <label for="resolutionValue">解析度數值</label>
               <input id="resolutionValue" type="number" inputmode="decimal" min="0" step="any" placeholder="例如 300" />
             </div>
@@ -142,8 +140,8 @@
       <section class="panel side-card output-card">
         <div class="section-head">
           <div>
-            <h2>右側：自動補完結果</h2>
-            <p>已填值會同步顯示；左側空白但可推算的欄位會自動補出。</p>
+            <h2>計算結果</h2>
+            <p>若顯示空白代表無法計算。</p>
           </div>
           <div class="status-legend">
             <span class="legend-item"><i class="dot dot-input"></i>使用者輸入</span>
@@ -152,7 +150,7 @@
         </div>
 
         <div class="group">
-          <h3>預設尺寸輸出欄位</h3>
+          <h3>預設尺寸輸出</h3>
           <div class="result-grid">
             <div class="result-field horizontal-output-field">
               <span class="result-label">實體寬</span>
@@ -182,7 +180,7 @@
         </div>
 
         <div class="group">
-          <h3>像素尺寸輸出欄位</h3>
+          <h3>像素尺寸輸出</h3>
           <div class="pixel-result-grid">
             <div class="result-field horizontal-output-field">
               <span class="result-label">像素寬</span>
@@ -196,7 +194,7 @@
         </div>
 
         <div class="group">
-          <h3>解析度輸出欄位</h3>
+          <h3>解析度輸出</h3>
           <div class="result-grid single-row">
             <div class="result-field horizontal-output-field">
               <span class="result-label">解析度數值</span>
