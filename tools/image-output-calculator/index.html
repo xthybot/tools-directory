@@ -20,12 +20,6 @@
       <p class="eyebrow">影像輸出換算</p>
       <h1>影像輸出計算機</h1>
       <p class="subtitle">直接輸入目前已知條件，右側會同步顯示已知值，並自動補出可推算的實體尺寸、像素尺寸、解析度與長寬比。</p>
-      <div class="hero-chips">
-        <span>實體尺寸</span>
-        <span>像素尺寸</span>
-        <span>DPI / PPI</span>
-        <span>長寬比</span>
-      </div>
     </section>
 
     <section class="toolbar panel">
@@ -95,12 +89,11 @@
         <div class="group">
           <h3>解析度輸入</h3>
           <div class="resolution-row resolution-row-compact">
-            <div class="field-inline grow horizontal-field resolution-value-field">
+            <div class="field-inline horizontal-field resolution-value-field">
               <label for="resolutionValue">解析度數值</label>
               <input id="resolutionValue" type="number" inputmode="decimal" min="0" step="any" placeholder="例如 300" />
             </div>
-            <div class="field-inline unit-field fixed-small horizontal-field">
-              <label for="resolutionUnit">單位</label>
+            <div class="field-inline unit-field fixed-small horizontal-field no-label-field compact-unit-field">
               <select id="resolutionUnit">
                 <option value="DPI">DPI</option>
                 <option value="PPI">PPI</option>
@@ -127,8 +120,7 @@
               <select id="ratioPreset">
                 <option value="">選擇常用比例</option>
                 <option value="16:9">16:9</option>
-                <option value="1:1.41421356237">A 系列（1:√2）</option>
-                <option value="1:1.41421356237">B 系列（1:√2）</option>
+                <option value="1:1.41421356237">A / B 系列（1:√2）</option>
               </select>
             </div>
           </div>

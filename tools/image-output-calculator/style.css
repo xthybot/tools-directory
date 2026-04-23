@@ -70,8 +70,6 @@ code {
 h1 { margin: 12px 0 14px; font-size: clamp(32px, 5vw, 58px); line-height: 1; }
 h2, h3 { margin-top: 0; }
 .subtitle, .section-head p, .group-hint, .toolbar-hint { color: var(--muted); line-height: 1.7; }
-.hero-chips { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
-.hero-chips span { border: 1px solid var(--line); border-radius: 999px; padding: 10px 14px; color: var(--muted); }
 .toolbar {
   margin-bottom: 18px;
   display: grid;
@@ -131,6 +129,7 @@ h2, h3 { margin-top: 0; }
 .resolution-row-compact {
   gap: 8px;
   justify-content: flex-start;
+  align-items: center;
 }
 .grow { flex: 1; }
 .horizontal-field,
@@ -141,6 +140,7 @@ h2, h3 { margin-top: 0; }
   align-items: center;
 }
 .resolution-value-field {
+  flex: 0 0 auto;
   grid-template-columns: 88px 120px;
 }
 .horizontal-field label,
