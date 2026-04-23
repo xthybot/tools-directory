@@ -124,19 +124,28 @@ h2, h3 { margin-top: 0; }
 .unit-field.fixed-large { width: 220px; }
 .resolution-row, .ratio-grid { display: flex; gap: 12px; align-items: end; }
 .grow { flex: 1; }
-.horizontal-field {
+.horizontal-field,
+.horizontal-output-field {
   display: grid;
   grid-template-columns: 88px minmax(0, 1fr);
   gap: 10px;
   align-items: center;
 }
-.horizontal-field label {
+.horizontal-field label,
+.horizontal-output-field .result-label {
   margin: 0;
   text-align: left;
 }
 .horizontal-field input,
-.horizontal-field select {
+.horizontal-field select,
+.horizontal-output-field .result-box {
   min-width: 0;
+}
+.unit-output-field {
+  grid-template-columns: 44px minmax(0, 1fr);
+}
+.ratio-output-field {
+  grid-template-columns: 44px minmax(0, 1fr);
 }
 input[type="text"], input[type="number"], select {
   width: 100%;
@@ -199,7 +208,7 @@ input::placeholder { color: rgba(150, 169, 199, 0.66); }
   .single-line-toolbar,
   .section-head, .resolution-row, .ratio-grid { flex-direction: column; align-items: stretch; display: flex; }
   .dimension-grid, .result-grid, .pixel-grid, .pixel-result-grid, .result-grid.single-row { grid-template-columns: 1fr; }
-  .horizontal-field { grid-template-columns: 1fr; }
+  .horizontal-field, .horizontal-output-field, .unit-output-field, .ratio-output-field { grid-template-columns: 1fr; }
   .unit-field.fixed-medium, .unit-field.fixed-large { width: auto; }
   .toolbar-actions, .output-actions { width: 100%; }
   .toolbar-actions .btn, .output-actions .btn { width: 100%; }
