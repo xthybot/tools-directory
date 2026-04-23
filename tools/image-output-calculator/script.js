@@ -97,19 +97,7 @@ function bindEvents() {
     dom.inputPhysicalHeight,
     dom.inputPixelWidth,
     dom.inputPixelHeight,
-    dom.resolutionValue
-  ].forEach((element) => {
-    element.addEventListener('input', () => {
-      normalizeZeroLikeInput(element);
-      recalculate();
-    });
-    element.addEventListener('change', () => {
-      normalizeZeroLikeInput(element);
-      recalculate();
-    });
-  });
-
-  [
+    dom.resolutionValue,
     dom.inputPhysicalWidthUnit,
     dom.inputPhysicalHeightUnit,
     dom.resolutionUnit,
@@ -627,16 +615,6 @@ function hasAnyInput(input) {
     input.resolution.source,
     input.ratio.source
   ].some(Boolean);
-}
-
-function normalizeZeroLikeInput(element) {
-  if (!element) return;
-  const raw = String(element.value ?? '').trim();
-  if (!raw) return;
-  const number = Number(raw);
-  if (Number.isFinite(number) && number === 0) {
-    element.value = '';
-  }
 }
 
 function parsePositiveNumber(value) {

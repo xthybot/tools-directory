@@ -94,11 +94,13 @@
               <input id="resolutionValue" type="number" inputmode="decimal" min="0" step="any" placeholder="例如 300" />
             </div>
             <div class="resolution-inline-controls">
-              <div class="field-inline unit-field fixed-small horizontal-field no-label-field compact-unit-field">
-                <select id="resolutionUnit">
-                  <option value="DPI">DPI</option>
-                  <option value="PPI">PPI</option>
-                </select>
+              <div class="select-wrap compact-select-wrap">
+                <div class="field-inline unit-field fixed-small horizontal-field no-label-field compact-unit-field">
+                  <select id="resolutionUnit">
+                    <option value="DPI">DPI</option>
+                    <option value="PPI">PPI</option>
+                  </select>
+                </div>
               </div>
               <div class="quick-actions resolution-shortcuts-inline" id="resolutionShortcuts">
                 <button type="button" data-resolution="72">72</button>
@@ -152,22 +154,26 @@
               <div class="result-box" id="outputPhysicalWidth"></div>
             </div>
             <div class="result-field horizontal-output-field unit-output-field no-output-unit-label">
-              <select class="result-select" id="outputPhysicalWidthUnit">
-                <option value="mm">mm</option>
-                <option value="cm">cm</option>
-                <option value="inch">inch</option>
-              </select>
+              <div class="select-wrap result-select-wrap">
+                <select class="result-select" id="outputPhysicalWidthUnit">
+                  <option value="mm">mm</option>
+                  <option value="cm">cm</option>
+                  <option value="inch">inch</option>
+                </select>
+              </div>
             </div>
             <div class="result-field horizontal-output-field">
               <span class="result-label">實體高</span>
               <div class="result-box" id="outputPhysicalHeight"></div>
             </div>
             <div class="result-field horizontal-output-field unit-output-field no-output-unit-label">
-              <select class="result-select" id="outputPhysicalHeightUnit">
-                <option value="mm">mm</option>
-                <option value="cm">cm</option>
-                <option value="inch">inch</option>
-              </select>
+              <div class="select-wrap result-select-wrap">
+                <select class="result-select" id="outputPhysicalHeightUnit">
+                  <option value="mm">mm</option>
+                  <option value="cm">cm</option>
+                  <option value="inch">inch</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
@@ -194,10 +200,12 @@
               <div class="result-box" id="outputResolutionValue"></div>
             </div>
             <div class="result-field horizontal-output-field unit-output-field no-output-unit-label">
-              <select class="result-select" id="outputResolutionUnit">
-                <option value="DPI">DPI</option>
-                <option value="PPI">PPI</option>
-              </select>
+              <div class="select-wrap result-select-wrap">
+                <select class="result-select" id="outputResolutionUnit">
+                  <option value="DPI">DPI</option>
+                  <option value="PPI">PPI</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>

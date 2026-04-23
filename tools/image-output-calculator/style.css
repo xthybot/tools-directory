@@ -127,10 +127,11 @@ h2, h3 { margin-top: 0; }
 }
 .resolution-row, .ratio-grid { display: flex; gap: 12px; align-items: end; }
 .resolution-row-compact {
-  gap: 8px;
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 8px 12px;
+  align-items: end;
   justify-content: flex-start;
-  align-items: center;
-  flex-wrap: nowrap;
 }
 .resolution-inline-controls {
   display: flex;
@@ -198,14 +199,33 @@ select {
   -moz-appearance: none;
   cursor: pointer;
   padding-right: 42px;
-  background-color: rgba(4, 10, 20, 0.72);
-  background-image: linear-gradient(45deg, transparent 50%, #ebf3ff 50%), linear-gradient(135deg, #ebf3ff 50%, transparent 50%);
-  background-position: calc(100% - 18px) calc(50% - 2px), calc(100% - 12px) calc(50% - 2px);
-  background-size: 6px 6px, 6px 6px;
-  background-repeat: no-repeat;
+  background-image: none;
 }
 select::-ms-expand {
   display: none;
+}
+.select-wrap {
+  position: relative;
+  width: 100%;
+}
+.select-wrap::after {
+  content: '';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #ebf3ff;
+  border-bottom: 2px solid #ebf3ff;
+  transform: translateY(-65%) rotate(45deg);
+  pointer-events: none;
+  opacity: 0.95;
+}
+.result-select-wrap {
+  min-width: 0;
+}
+.compact-select-wrap {
+  width: 100%;
 }
 .result-select {
   background-color: rgba(4, 10, 20, 0.72);
@@ -276,11 +296,11 @@ input::placeholder { color: rgba(150, 169, 199, 0.66); }
   body { padding: 16px; }
   .hero, .toolbar, .side-card { padding: 20px; }
   .single-line-toolbar,
-  .section-head, .resolution-row, .ratio-grid, .resolution-inline-controls { flex-direction: column; align-items: stretch; display: flex; }
+  .section-head, .ratio-grid, .resolution-inline-controls { flex-direction: column; align-items: stretch; display: flex; }
+  .resolution-row-compact { grid-template-columns: 1fr; }
   .dimension-grid, .result-grid, .pixel-grid, .pixel-result-grid, .result-grid.single-row { grid-template-columns: 1fr; }
   .horizontal-field, .horizontal-output-field, .unit-output-field, .ratio-output-field, .resolution-value-field, .no-output-unit-label { grid-template-columns: 1fr; }
   .unit-field.fixed-medium, .unit-field.fixed-large, .compact-unit-field, .unit-field.fixed-small { width: auto; }
-  .resolution-row-compact, .resolution-inline-controls { flex-wrap: wrap; }
   .resolution-shortcuts-inline { margin-top: 12px; flex-wrap: wrap; white-space: normal; }
   .toolbar-actions, .output-actions { width: 100%; }
   .toolbar-actions .btn, .output-actions .btn { width: 100%; }
