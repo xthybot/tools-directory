@@ -625,7 +625,11 @@ function parsePositiveNumber(value) {
 }
 
 function hasValue(value) {
-  return String(value ?? '').trim() !== '';
+  const raw = String(value ?? '').trim();
+  if (raw === '') return false;
+  const number = Number(raw);
+  if (Number.isFinite(number) && number === 0) return false;
+  return true;
 }
 
 function ratioMatches(a, b) {
