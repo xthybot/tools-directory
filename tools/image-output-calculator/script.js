@@ -346,9 +346,18 @@ function calculateOutput(input) {
       source: input.ratio.source
     },
     meta: {
-      steps: []
+      steps: [],
+      errors: []
     }
   };
+
+  result.meta.errors = validateConsistency(result);
+  if (result.meta.errors.length) {
+    if (result.ratio.parsed) {
+      result.ratio.display = formatRatioDisplay(result.ratio.parsed.width, result.ratio.parsed.height);
+    }
+    return result;
+  }
 
   hydrateRatio(result);
   applyRatioCompletion(result);
@@ -382,6 +391,34 @@ function deriveRatioFromPair(widthField, heightField) {
   if (widthField.value == null || heightField.value == null || !widthField.unit || !heightField.unit) return null;
   if (widthField.unit !== heightField.unit) return null;
   return { width: widthField.value, height: heightField.value };
+}
+
+function validateConsistency(result) {
+  const errors = [];
+  const physicalRatio = deriveRatioFromPair(result.physical.width, result.physical.height);
+  const pixelRatio = deriveRatioFromPair(result.pixel.width, result.pixel.height);
+  const manualRatio = result.ratio.parsed;
+
+  if (manualRatio && physicalRatio && !ratioMatches(manualRatio, physicalRatio)) {
+    errors.push('長寬比與實體尺寸不符。');
+  }
+
+  if (manualRatio && pixelRatio && !ratioMatches(manualRatio, pixelRatio)) {
+    errors.push('長寬比與像素尺寸不符。');
+  }
+
+  if (physicalRatio && pixelRatio && !ratioMatches(physicalRatio, pixelRatio)) {
+    errors.push('像素尺寸與實體尺寸的長寬比不符。');
+  }
+
+  if (result.resolution.value != null) {
+    const inferredResolution = deriveResolution(result);
+    if (inferredResolution != null && !nearlyEqual(inferredResolution, result.resolution.value, 0.01)) {
+      errors.push('解析度與像素尺寸 / 實體尺寸不符。');
+    }
+  }
+
+  return errors;
 }
 
 function applyRatioCompletion(result) {
@@ -503,7 +540,16 @@ function renderOutput(result) {
 }
 
 function renderSummaries(input, result) {
+  const uniqueErrors = [...new Set(result.meta.errors || [])];
   const uniqueSteps = [...new Set(result.meta.steps)];
+
+  dom.logicSummary.classList.toggle('is-error', uniqueErrors.length > 0);
+
+  if (uniqueErrors.length) {
+    dom.logicSummary.textContent = uniqueErrors.join('\n');
+    return;
+  }
+
   if (!uniqueSteps.length) {
     if (!hasAnyInput(input)) {
       dom.logicSummary.textContent = '等待輸入條件。';
@@ -561,6 +607,16 @@ function parsePositiveNumber(value) {
 
 function hasValue(value) {
   return String(value ?? '').trim() !== '';
+}
+
+function ratioMatches(a, b) {
+  return nearlyEqual(a.width / a.height, b.width / b.height, 0.01);
+}
+
+function nearlyEqual(a, b, tolerance = 0.01) {
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return false;
+  const baseline = Math.max(1, Math.abs(a), Math.abs(b));
+  return Math.abs(a - b) / baseline <= tolerance;
 }
 
 function parseRatio(rawValue) {

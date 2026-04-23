@@ -115,6 +115,9 @@ h2, h3 { margin-top: 0; }
 .pixel-grid-single {
   grid-template-columns: 1fr;
 }
+.pixel-result-grid-single {
+  grid-template-columns: 1fr;
+}
 .result-grid.single-row { grid-template-columns: minmax(0, 1fr) 126px; }
 .result-grid.single-full { grid-template-columns: 1fr; }
 .full-span { grid-column: 1 / -1; }
@@ -125,6 +128,10 @@ h2, h3 { margin-top: 0; }
   width: 96px;
 }
 .resolution-row, .ratio-grid { display: flex; gap: 12px; align-items: end; }
+.resolution-row-compact {
+  gap: 8px;
+  justify-content: flex-start;
+}
 .grow { flex: 1; }
 .horizontal-field,
 .horizontal-output-field {
@@ -134,7 +141,7 @@ h2, h3 { margin-top: 0; }
   align-items: center;
 }
 .resolution-value-field {
-  grid-template-columns: 88px 140px;
+  grid-template-columns: 88px 120px;
 }
 .horizontal-field label,
 .horizontal-output-field .result-label {
@@ -215,6 +222,11 @@ input::placeholder { color: rgba(150, 169, 199, 0.66); }
 .info-box.secondary { border-color: rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: var(--muted); }
 #logicSummary {
   white-space: pre-line;
+}
+#logicSummary.is-error {
+  border-color: rgba(255, 139, 167, 0.45);
+  background: rgba(255, 139, 167, 0.12);
+  color: #ffd7e1;
 }
 .output-actions {
   margin-top: 18px;
