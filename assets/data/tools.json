@@ -1,5 +1,15 @@
 [
   {
+    "title": "影像輸出計算機",
+    "icon": "assets/icons/image-output-calculator.svg",
+    "description": "自動補完實體尺寸、像素尺寸、解析度與長寬比的影像輸出換算工具。",
+    "tags": [
+      "圖片",
+      "列印"
+    ],
+    "link": "tools/image-output-calculator/"
+  },
+  {
     "title": "A4 合併列印工具",
     "icon": "assets/icons/a4-merge-print-tool.svg",
     "description": "把多張圖片整理成適合 A4 列印的版面，方便預覽與輸出。",

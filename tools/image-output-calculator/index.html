@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>影像輸出計算機</title>
+  <meta name="description" content="自動補完影像輸出的實體尺寸、像素尺寸、解析度與長寬比。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+
+  <main class="shell">
+    <header class="topbar">
+      <span class="badge">IMAGE OUTPUT CALCULATOR</span>
+    </header>
+
+    <section class="hero panel">
+      <p class="eyebrow">影像輸出換算</p>
+      <h1>影像輸出計算機</h1>
+      <p class="subtitle">直接輸入目前已知條件，右側會同步顯示已知值，並自動補出可推算的實體尺寸、像素尺寸、解析度與長寬比。</p>
+      <div class="hero-chips">
+        <span>實體尺寸</span>
+        <span>像素尺寸</span>
+        <span>DPI / PPI</span>
+        <span>長寬比</span>
+      </div>
+    </section>
+
+    <section class="toolbar panel">
+      <div class="toolbar-group preset-group">
+        <label for="presetSearch">預設資料快速帶入</label>
+        <input id="presetSearch" list="presetOptions" type="text" placeholder="搜尋 A4、照片 4x6、A3..." autocomplete="off" />
+        <datalist id="presetOptions"></datalist>
+        <div class="toolbar-hint" id="presetHint">可輸入名稱搜尋，選定後會回填左側欄位。</div>
+      </div>
+      <div class="toolbar-actions">
+        <button class="btn" id="swapBtn" type="button">交換寬高</button>
+        <button class="btn" id="copyResultBtn" type="button">複製右側結果到左側</button>
+        <button class="btn danger" id="resetBtn" type="button">清空 / 重設</button>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <section class="panel side-card">
+        <div class="section-head">
+          <div>
+            <h2>左側：目前已知條件</h2>
+            <p>可只填實體尺寸、只填像素尺寸，或混合填寫；系統會自行判斷。</p>
+          </div>
+          <span class="status-pill input-pill">輸入區</span>
+        </div>
+
+        <div class="group">
+          <h3>預設尺寸輸入欄位</h3>
+          <div class="dimension-grid">
+            <div class="field-inline">
+              <label for="inputPhysicalWidth">實體寬</label>
+              <input id="inputPhysicalWidth" type="number" inputmode="decimal" min="0" step="any" placeholder="例如 210" />
+            </div>
+            <div class="field-inline unit-field">
+              <label for="inputPhysicalWidthUnit">單位</label>
+              <select id="inputPhysicalWidthUnit">
+                <option value="mm">mm</option>
+                <option value="cm">cm</option>
+                <option value="inch">inch</option>
+              </select>
+            </div>
+            <div class="field-inline">
+              <label for="inputPhysicalHeight">實體高</label>
+              <input id="inputPhysicalHeight" type="number" inputmode="decimal" min="0" step="any" placeholder="例如 297" />
+            </div>
+            <div class="field-inline unit-field">
+              <label for="inputPhysicalHeightUnit">單位</label>
+              <select id="inputPhysicalHeightUnit">
+                <option value="mm">mm</option>
+                <option value="cm">cm</option>
+                <option value="inch">inch</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <h3>像素尺寸輸入欄位</h3>
+          <div class="pixel-grid">
+            <div class="field-inline">
+              <label for="inputPixelWidth">像素寬</label>
+              <input id="inputPixelWidth" type="number" inputmode="decimal" min="0" step="any" placeholder="例如 2480" />
+            </div>
+            <div class="field-inline">
+              <label for="inputPixelHeight">像素高</label>
+              <input id="inputPixelHeight" type="number" inputmode="decimal" min="0" step="any" placeholder="例如 3508" />
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <h3>解析度輸入欄位</h3>
+          <div class="resolution-row">
+            <div class="field-inline grow">
+              <label for="resolutionValue">解析度數值</label>
+              <input id="resolutionValue" type="number" inputmode="decimal" min="0" step="any" placeholder="例如 300" />
+            </div>
+            <div class="field-inline unit-field fixed-medium">
+              <label for="resolutionUnit">單位</label>
+              <select id="resolutionUnit">
+                <option value="DPI">DPI</option>
+                <option value="PPI">PPI</option>
+              </select>
+            </div>
+          </div>
+          <div class="quick-actions" id="resolutionShortcuts">
+            <button type="button" data-resolution="72">72</button>
+            <button type="button" data-resolution="96">96</button>
+            <button type="button" data-resolution="150">150</button>
+            <button type="button" data-resolution="300">300</button>
+            <button type="button" data-resolution="600">600</button>
+          </div>
+        </div>
+
+        <div class="group">
+          <h3>長寬比輸入</h3>
+          <div class="ratio-grid">
+            <div class="field-inline grow">
+              <label for="ratioValue">比例</label>
+              <input id="ratioValue" type="text" placeholder="例如 16:9、1:1、1:1.4142" />
+            </div>
+            <div class="field-inline unit-field fixed-large">
+              <label for="ratioPreset">快速選擇</label>
+              <select id="ratioPreset">
+                <option value="">選擇常用比例</option>
+                <option value="16:9">16:9</option>
+                <option value="1:1.41421356237">A 系列（1:√2）</option>
+              </select>
+            </div>
+          </div>
+          <p class="group-hint">若只知道一邊尺寸，且比例明確，就可自動補另一邊。</p>
+        </div>
+
+        <div class="info-box" id="logicSummary">等待輸入條件。</div>
+      </section>
+
+      <section class="panel side-card output-card">
+        <div class="section-head">
+          <div>
+            <h2>右側：自動補完結果</h2>
+            <p>已填值會同步顯示；左側空白但可推算的欄位會自動補出。</p>
+          </div>
+          <div class="status-legend">
+            <span class="legend-item"><i class="dot dot-input"></i>使用者輸入</span>
+            <span class="legend-item"><i class="dot dot-computed"></i>系統補完</span>
+          </div>
+        </div>
+
+        <div class="group">
+          <h3>預設尺寸輸出欄位</h3>
+          <div class="result-grid">
+            <div class="result-field">
+              <span class="result-label">實體寬</span>
+              <div class="result-box" id="outputPhysicalWidth"></div>
+            </div>
+            <div class="result-field">
+              <span class="result-label">單位</span>
+              <div class="result-box" id="outputPhysicalWidthUnit"></div>
+            </div>
+            <div class="result-field">
+              <span class="result-label">實體高</span>
+              <div class="result-box" id="outputPhysicalHeight"></div>
+            </div>
+            <div class="result-field">
+              <span class="result-label">單位</span>
+              <div class="result-box" id="outputPhysicalHeightUnit"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <h3>像素尺寸輸出欄位</h3>
+          <div class="pixel-result-grid">
+            <div class="result-field">
+              <span class="result-label">像素寬</span>
+              <div class="result-box" id="outputPixelWidth"></div>
+            </div>
+            <div class="result-field">
+              <span class="result-label">像素高</span>
+              <div class="result-box" id="outputPixelHeight"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <h3>解析度輸出欄位</h3>
+          <div class="result-grid single-row">
+            <div class="result-field">
+              <span class="result-label">解析度數值</span>
+              <div class="result-box" id="outputResolutionValue"></div>
+            </div>
+            <div class="result-field">
+              <span class="result-label">單位</span>
+              <div class="result-box" id="outputResolutionUnit"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <h3>長寬比輸出</h3>
+          <div class="result-grid single-full">
+            <div class="result-field full-span">
+              <span class="result-label">比例</span>
+              <div class="result-box" id="outputRatioValue"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-box secondary" id="resultSummary">條件不足時，對應欄位會保持空白。</div>
+      </section>
+    </section>
+  </main>
+
+  <script src="./script.js"></script>
+</body>
+</html>
