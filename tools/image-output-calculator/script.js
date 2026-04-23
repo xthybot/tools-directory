@@ -519,7 +519,11 @@ function completePhysicalFromPixels(result, resolution) {
 }
 
 function renderOutput(result) {
-  const hideAllOutput = (result.meta.errors || []).includes('像素尺寸與實體尺寸的長寬比不符。');
+  const blockingErrors = [
+    '像素尺寸與實體尺寸的長寬比不符。',
+    '解析度與像素尺寸 / 實體尺寸不符。'
+  ];
+  const hideAllOutput = (result.meta.errors || []).some((error) => blockingErrors.includes(error));
   const outputPrefs = getOutputUnitPrefs(result);
   const displayPhysicalWidth = convertPhysicalField(result.physical.width, outputPrefs.physicalWidth);
   const displayPhysicalHeight = convertPhysicalField(result.physical.height, outputPrefs.physicalHeight);

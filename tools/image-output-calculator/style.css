@@ -187,6 +187,13 @@ input[type="text"], input[type="number"], select {
 }
 .result-select {
   appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 38px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.25 4.5 6 8.25 9.75 4.5' fill='none' stroke='%23ebf3ff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 12px 12px;
 }
 input::placeholder { color: rgba(150, 169, 199, 0.66); }
 .quick-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
