@@ -16,10 +16,6 @@
   <div class="orb orb-b"></div>
 
   <main class="shell">
-    <header class="topbar">
-      <span class="badge">IMAGE OUTPUT CALCULATOR</span>
-    </header>
-
     <section class="hero panel">
       <p class="eyebrow">影像輸出換算</p>
       <h1>影像輸出計算機</h1>
@@ -33,7 +29,7 @@
     </section>
 
     <section class="toolbar panel">
-      <div class="toolbar-group preset-group">
+      <div class="toolbar-group preset-group single-line-toolbar">
         <label for="presetSearch">預設資料快速帶入</label>
         <input id="presetSearch" list="presetOptions" type="text" placeholder="搜尋 A4、照片 4x6、A3..." autocomplete="off" />
         <datalist id="presetOptions"></datalist>
@@ -41,7 +37,6 @@
       </div>
       <div class="toolbar-actions">
         <button class="btn" id="swapBtn" type="button">交換寬高</button>
-        <button class="btn" id="copyResultBtn" type="button">複製右側結果到左側</button>
         <button class="btn danger" id="resetBtn" type="button">清空 / 重設</button>
       </div>
     </section>
@@ -59,11 +54,11 @@
         <div class="group">
           <h3>預設尺寸輸入欄位</h3>
           <div class="dimension-grid">
-            <div class="field-inline">
+            <div class="field-inline horizontal-field">
               <label for="inputPhysicalWidth">實體寬</label>
               <input id="inputPhysicalWidth" type="number" inputmode="decimal" min="0" step="any" placeholder="例如 210" />
             </div>
-            <div class="field-inline unit-field">
+            <div class="field-inline unit-field horizontal-field">
               <label for="inputPhysicalWidthUnit">單位</label>
               <select id="inputPhysicalWidthUnit">
                 <option value="mm">mm</option>
@@ -71,11 +66,11 @@
                 <option value="inch">inch</option>
               </select>
             </div>
-            <div class="field-inline">
+            <div class="field-inline horizontal-field">
               <label for="inputPhysicalHeight">實體高</label>
               <input id="inputPhysicalHeight" type="number" inputmode="decimal" min="0" step="any" placeholder="例如 297" />
             </div>
-            <div class="field-inline unit-field">
+            <div class="field-inline unit-field horizontal-field">
               <label for="inputPhysicalHeightUnit">單位</label>
               <select id="inputPhysicalHeightUnit">
                 <option value="mm">mm</option>
@@ -89,11 +84,11 @@
         <div class="group">
           <h3>像素尺寸輸入欄位</h3>
           <div class="pixel-grid">
-            <div class="field-inline">
+            <div class="field-inline horizontal-field">
               <label for="inputPixelWidth">像素寬</label>
               <input id="inputPixelWidth" type="number" inputmode="decimal" min="0" step="any" placeholder="例如 2480" />
             </div>
-            <div class="field-inline">
+            <div class="field-inline horizontal-field">
               <label for="inputPixelHeight">像素高</label>
               <input id="inputPixelHeight" type="number" inputmode="decimal" min="0" step="any" placeholder="例如 3508" />
             </div>
@@ -103,11 +98,11 @@
         <div class="group">
           <h3>解析度輸入欄位</h3>
           <div class="resolution-row">
-            <div class="field-inline grow">
+            <div class="field-inline grow horizontal-field">
               <label for="resolutionValue">解析度數值</label>
               <input id="resolutionValue" type="number" inputmode="decimal" min="0" step="any" placeholder="例如 300" />
             </div>
-            <div class="field-inline unit-field fixed-medium">
+            <div class="field-inline unit-field fixed-medium horizontal-field">
               <label for="resolutionUnit">單位</label>
               <select id="resolutionUnit">
                 <option value="DPI">DPI</option>
@@ -127,11 +122,11 @@
         <div class="group">
           <h3>長寬比輸入</h3>
           <div class="ratio-grid">
-            <div class="field-inline grow">
+            <div class="field-inline grow horizontal-field">
               <label for="ratioValue">比例</label>
               <input id="ratioValue" type="text" placeholder="例如 16:9、1:1、1:1.4142" />
             </div>
-            <div class="field-inline unit-field fixed-large">
+            <div class="field-inline unit-field fixed-large horizontal-field">
               <label for="ratioPreset">快速選擇</label>
               <select id="ratioPreset">
                 <option value="">選擇常用比例</option>
@@ -219,6 +214,9 @@
         </div>
 
         <div class="info-box secondary" id="resultSummary">條件不足時，對應欄位會保持空白。</div>
+        <div class="output-actions">
+          <button class="btn" id="copyResultBtn" type="button">複製右側結果到左側</button>
+        </div>
       </section>
     </section>
   </main>

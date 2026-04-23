@@ -51,7 +51,6 @@ code {
 .orb-a { width: 280px; height: 280px; top: 8%; left: 8%; background: rgba(115,224,255,0.16); }
 .orb-b { width: 340px; height: 340px; right: 4%; top: 20%; background: rgba(124,140,255,0.18); }
 .shell { position: relative; z-index: 1; max-width: 1320px; margin: 0 auto; }
-.topbar { display: flex; justify-content: flex-start; margin-bottom: 20px; }
 .badge, .status-pill, .legend-item {
   border: 1px solid var(--line);
   background: rgba(255,255,255,0.03);
@@ -78,11 +77,25 @@ h2, h3 { margin-top: 0; }
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) auto;
   gap: 18px;
-  align-items: end;
+  align-items: center;
+}
+.single-line-toolbar {
+  display: grid;
+  grid-template-columns: 156px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
 }
 .toolbar-group label,
 .field-inline label,
 .result-label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 14px; }
+.single-line-toolbar > label,
+.single-line-toolbar .toolbar-hint {
+  margin: 0;
+}
+.single-line-toolbar .toolbar-hint {
+  font-size: 13px;
+  white-space: nowrap;
+}
 .toolbar-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
 .workspace { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .section-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 18px; }
@@ -111,6 +124,20 @@ h2, h3 { margin-top: 0; }
 .unit-field.fixed-large { width: 220px; }
 .resolution-row, .ratio-grid { display: flex; gap: 12px; align-items: end; }
 .grow { flex: 1; }
+.horizontal-field {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+.horizontal-field label {
+  margin: 0;
+  text-align: left;
+}
+.horizontal-field input,
+.horizontal-field select {
+  min-width: 0;
+}
 input[type="text"], input[type="number"], select {
   width: 100%;
   border-radius: 16px;
@@ -145,8 +172,8 @@ input::placeholder { color: rgba(150, 169, 199, 0.66); }
   color: var(--muted);
 }
 .result-box.has-value { color: var(--text); }
-.result-box.from-input { border-color: rgba(130, 243, 195, 0.34); box-shadow: inset 0 0 0 1px rgba(130, 243, 195, 0.1); }
-.result-box.from-computed { border-color: rgba(255, 209, 102, 0.34); box-shadow: inset 0 0 0 1px rgba(255, 209, 102, 0.1); }
+.result-box.from-input { border-width: 2px; border-color: rgba(130, 243, 195, 0.75); box-shadow: inset 0 0 0 1px rgba(130, 243, 195, 0.12); }
+.result-box.from-computed { border-width: 2px; border-color: rgba(255, 209, 102, 0.78); box-shadow: inset 0 0 0 1px rgba(255, 209, 102, 0.12); }
 .info-box {
   margin-top: 24px;
   border: 1px solid rgba(115,224,255,0.2);
@@ -157,6 +184,11 @@ input::placeholder { color: rgba(150, 169, 199, 0.66); }
   line-height: 1.75;
 }
 .info-box.secondary { border-color: rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: var(--muted); }
+.output-actions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+}
 @media (max-width: 980px) {
   .toolbar, .workspace { grid-template-columns: 1fr; }
   .toolbar-actions { justify-content: flex-start; }
@@ -164,9 +196,12 @@ input::placeholder { color: rgba(150, 169, 199, 0.66); }
 @media (max-width: 720px) {
   body { padding: 16px; }
   .hero, .toolbar, .side-card { padding: 20px; }
-  .section-head, .resolution-row, .ratio-grid { flex-direction: column; align-items: stretch; }
+  .single-line-toolbar,
+  .section-head, .resolution-row, .ratio-grid { flex-direction: column; align-items: stretch; display: flex; }
   .dimension-grid, .result-grid, .pixel-grid, .pixel-result-grid, .result-grid.single-row { grid-template-columns: 1fr; }
+  .horizontal-field { grid-template-columns: 1fr; }
   .unit-field.fixed-medium, .unit-field.fixed-large { width: auto; }
-  .toolbar-actions { width: 100%; }
-  .toolbar-actions .btn { width: 100%; }
+  .toolbar-actions, .output-actions { width: 100%; }
+  .toolbar-actions .btn, .output-actions .btn { width: 100%; }
+  .single-line-toolbar .toolbar-hint { white-space: normal; }
 }
