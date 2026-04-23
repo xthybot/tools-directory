@@ -6,8 +6,8 @@
   --line: rgba(146, 164, 191, 0.16);
   --accent: #73e0ff;
   --accent-2: #7c8cff;
-  --input-tag: #82f3c3;
-  --computed-tag: #ffd166;
+  --input-tag: #ffd166;
+  --computed-tag: #82f3c3;
   --danger: #ff8ba7;
   --shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
 }
@@ -126,6 +126,9 @@ h2, h3 { margin-top: 0; }
   width: 84px;
 }
 .resolution-row, .ratio-grid { display: flex; gap: 12px; align-items: end; }
+.ratio-grid-two-inputs {
+  align-items: stretch;
+}
 .resolution-row-compact {
   display: grid;
   grid-template-columns: auto auto;
@@ -183,6 +186,28 @@ h2, h3 { margin-top: 0; }
 }
 .ratio-output-field {
   grid-template-columns: 44px minmax(0, 1fr);
+}
+.ratio-pair-field {
+  grid-template-columns: 88px minmax(0, 1fr);
+}
+.ratio-pair-inputs,
+.ratio-pair-output {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+.ratio-pair-output .result-box {
+  width: 100%;
+}
+.ratio-output-pair-field {
+  grid-template-columns: 44px minmax(0, 1fr);
+}
+.ratio-separator {
+  color: var(--muted);
+  font-weight: 700;
+  text-align: center;
 }
 input[type="text"], input[type="number"], select {
   width: 100%;
@@ -299,7 +324,7 @@ input::placeholder { color: rgba(150, 169, 199, 0.66); }
   .section-head, .ratio-grid, .resolution-inline-controls { flex-direction: column; align-items: stretch; display: flex; }
   .resolution-row-compact { grid-template-columns: 1fr; }
   .dimension-grid, .result-grid, .pixel-grid, .pixel-result-grid, .result-grid.single-row { grid-template-columns: 1fr; }
-  .horizontal-field, .horizontal-output-field, .unit-output-field, .ratio-output-field, .resolution-value-field, .no-output-unit-label { grid-template-columns: 1fr; }
+  .horizontal-field, .horizontal-output-field, .unit-output-field, .ratio-output-field, .resolution-value-field, .no-output-unit-label, .ratio-pair-field, .ratio-output-pair-field { grid-template-columns: 1fr; }
   .unit-field.fixed-medium, .unit-field.fixed-large, .compact-unit-field, .unit-field.fixed-small { width: auto; }
   .resolution-shortcuts-inline { margin-top: 12px; flex-wrap: wrap; white-space: normal; }
   .toolbar-actions, .output-actions { width: 100%; }

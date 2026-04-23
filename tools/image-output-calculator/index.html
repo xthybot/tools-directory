@@ -115,10 +115,14 @@
 
         <div class="group">
           <h3>長寬比輸入</h3>
-          <div class="ratio-grid">
-            <div class="field-inline grow horizontal-field">
-              <label for="ratioValue">比例</label>
-              <input id="ratioValue" type="text" placeholder="例如 16:9、1:1、1:1.4142" />
+          <div class="ratio-grid ratio-grid-two-inputs">
+            <div class="field-inline horizontal-field ratio-pair-field">
+              <label for="ratioWidthValue">比例</label>
+              <div class="ratio-pair-inputs">
+                <input id="ratioWidthValue" type="number" inputmode="decimal" min="0" step="any" placeholder="寬" />
+                <span class="ratio-separator">:</span>
+                <input id="ratioHeightValue" type="number" inputmode="decimal" min="0" step="any" placeholder="高" />
+              </div>
             </div>
             <div class="field-inline unit-field fixed-large horizontal-field no-label-field">
               <select id="ratioPreset">
@@ -213,9 +217,13 @@
         <div class="group">
           <h3>長寬比輸出</h3>
           <div class="result-grid single-full">
-            <div class="result-field full-span horizontal-output-field ratio-output-field">
+            <div class="result-field full-span horizontal-output-field ratio-output-field ratio-output-pair-field">
               <span class="result-label">比例</span>
-              <div class="result-box" id="outputRatioValue"></div>
+              <div class="ratio-pair-output">
+                <div class="result-box" id="outputRatioWidth"></div>
+                <span class="ratio-separator">:</span>
+                <div class="result-box" id="outputRatioHeight"></div>
+              </div>
             </div>
           </div>
         </div>

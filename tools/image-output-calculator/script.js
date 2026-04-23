@@ -71,7 +71,8 @@ function bindDom() {
   dom.inputPixelHeight = document.getElementById('inputPixelHeight');
   dom.resolutionValue = document.getElementById('resolutionValue');
   dom.resolutionUnit = document.getElementById('resolutionUnit');
-  dom.ratioValue = document.getElementById('ratioValue');
+  dom.ratioWidthValue = document.getElementById('ratioWidthValue');
+  dom.ratioHeightValue = document.getElementById('ratioHeightValue');
   dom.ratioPreset = document.getElementById('ratioPreset');
 
   dom.outputPhysicalWidth = document.getElementById('outputPhysicalWidth');
@@ -82,7 +83,8 @@ function bindDom() {
   dom.outputPixelHeight = document.getElementById('outputPixelHeight');
   dom.outputResolutionValue = document.getElementById('outputResolutionValue');
   dom.outputResolutionUnit = document.getElementById('outputResolutionUnit');
-  dom.outputRatioValue = document.getElementById('outputRatioValue');
+  dom.outputRatioWidth = document.getElementById('outputRatioWidth');
+  dom.outputRatioHeight = document.getElementById('outputRatioHeight');
 
   dom.logicSummary = document.getElementById('logicSummary');
   dom.swapBtn = document.getElementById('swapBtn');
@@ -101,7 +103,8 @@ function bindEvents() {
     dom.inputPhysicalWidthUnit,
     dom.inputPhysicalHeightUnit,
     dom.resolutionUnit,
-    dom.ratioValue
+    dom.ratioWidthValue,
+    dom.ratioHeightValue
   ].forEach((element) => {
     element.addEventListener('input', recalculate);
     element.addEventListener('change', recalculate);
@@ -110,7 +113,10 @@ function bindEvents() {
   dom.ratioPreset.addEventListener('change', () => {
     if (dom.ratioPreset.value) {
       const parsed = parseRatio(dom.ratioPreset.value);
-      dom.ratioValue.value = parsed ? formatRatioDisplay(parsed.width, parsed.height) : dom.ratioPreset.value;
+      if (parsed) {
+        dom.ratioWidthValue.value = formatNumber(parsed.width, 4);
+        dom.ratioHeightValue.value = formatNumber(parsed.height, 4);
+      }
     }
     recalculate();
   });
@@ -214,9 +220,11 @@ function applyPreset(preset) {
   state.outputUnits.resolution = preset.resolution?.unit ?? dom.resolutionUnit.value;
   if (preset.ratio) {
     const parsedRatio = parseRatio(preset.ratio);
-    dom.ratioValue.value = parsedRatio ? formatRatioDisplay(parsedRatio.width, parsedRatio.height) : preset.ratio;
+    dom.ratioWidthValue.value = parsedRatio ? formatNumber(parsedRatio.width, 4) : '';
+    dom.ratioHeightValue.value = parsedRatio ? formatNumber(parsedRatio.height, 4) : '';
   } else {
-    dom.ratioValue.value = '';
+    dom.ratioWidthValue.value = '';
+    dom.ratioHeightValue.value = '';
   }
   dom.ratioPreset.value = [...dom.ratioPreset.options].some((option) => option.value === preset.ratio) ? preset.ratio : '';
   recalculate();
@@ -235,7 +243,8 @@ function resetAll() {
   state.outputUnits.physicalWidth = null;
   state.outputUnits.physicalHeight = null;
   state.outputUnits.resolution = null;
-  dom.ratioValue.value = '';
+  dom.ratioWidthValue.value = '';
+  dom.ratioHeightValue.value = '';
   dom.ratioPreset.value = '';
   recalculate();
 }
@@ -274,7 +283,10 @@ function copyResultToInput() {
   if (result.pixel.height.value != null) dom.inputPixelHeight.value = formatNumber(result.pixel.height.value, 0);
   if (result.resolution.value != null) dom.resolutionValue.value = formatNumber(result.resolution.value, 4);
   if (outputPrefs.resolution) dom.resolutionUnit.value = outputPrefs.resolution;
-  if (result.ratio.display) dom.ratioValue.value = result.ratio.display;
+  if (result.ratio.parsed) {
+    dom.ratioWidthValue.value = formatNumber(result.ratio.parsed.width, 4);
+    dom.ratioHeightValue.value = formatNumber(result.ratio.parsed.height, 4);
+  }
   if ([...dom.ratioPreset.options].some((option) => option.value === (result.ratio.raw || result.ratio.display))) {
     dom.ratioPreset.value = result.ratio.raw || result.ratio.display;
   }
@@ -314,9 +326,9 @@ function getInputState() {
       source: hasValue(dom.resolutionValue.value) ? 'input' : null
     },
     ratio: {
-      raw: String(dom.ratioValue.value || '').trim(),
-      parsed: parseRatio(dom.ratioValue.value),
-      source: hasValue(dom.ratioValue.value) ? 'input' : null
+      raw: buildRatioRaw(dom.ratioWidthValue.value, dom.ratioHeightValue.value),
+      parsed: parseRatioParts(dom.ratioWidthValue.value, dom.ratioHeightValue.value),
+      source: hasValue(dom.ratioWidthValue.value) && hasValue(dom.ratioHeightValue.value) ? 'input' : null
     }
   };
 }
@@ -538,7 +550,8 @@ function renderOutput(result) {
     setResultBox(dom.outputPixelWidth, null, null, 0);
     setResultBox(dom.outputPixelHeight, null, null, 0);
     setResultBox(dom.outputResolutionValue, null, null, 4);
-    setResultBox(dom.outputRatioValue, '', null, null, true);
+    setResultBox(dom.outputRatioWidth, null, null, 4);
+    setResultBox(dom.outputRatioHeight, null, null, 4);
     return;
   }
 
@@ -551,7 +564,8 @@ function renderOutput(result) {
   setResultBox(dom.outputPixelWidth, result.pixel.width.value, result.pixel.width.source, 0);
   setResultBox(dom.outputPixelHeight, result.pixel.height.value, result.pixel.height.source, 0);
   setResultBox(dom.outputResolutionValue, result.resolution.value, result.resolution.source, 4);
-  setResultBox(dom.outputRatioValue, result.ratio.display, result.ratio.source, null, true);
+  setResultBox(dom.outputRatioWidth, result.ratio.parsed?.width, result.ratio.source, 4);
+  setResultBox(dom.outputRatioHeight, result.ratio.parsed?.height, result.ratio.source, 4);
 }
 
 function renderSummaries(input, result) {
@@ -646,11 +660,20 @@ function parseRatio(rawValue) {
   const parts = normalized.split(':');
   if (parts.length !== 2) return null;
 
-  const width = Number(parts[0]);
-  const height = Number(parts[1]);
-  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return null;
+  return parseRatioParts(parts[0], parts[1]);
+}
 
+function parseRatioParts(widthValue, heightValue) {
+  const width = Number(String(widthValue || '').trim().replace(/√2/g, String(Math.SQRT2)));
+  const height = Number(String(heightValue || '').trim().replace(/√2/g, String(Math.SQRT2)));
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return null;
   return { width, height };
+}
+
+function buildRatioRaw(widthValue, heightValue) {
+  const parsed = parseRatioParts(widthValue, heightValue);
+  if (!parsed) return '';
+  return `${trimTrailingZeros(parsed.width)}:${trimTrailingZeros(parsed.height)}`;
 }
 
 function toInches(value, unit) {
