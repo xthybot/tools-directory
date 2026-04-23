@@ -119,17 +119,18 @@ h2, h3 { margin-top: 0; }
 .result-grid.single-row { grid-template-columns: minmax(0, 1fr) 126px; }
 .result-grid.single-full { grid-template-columns: 1fr; }
 .full-span { grid-column: 1 / -1; }
-.unit-field.fixed-small { width: 110px; }
+.unit-field.fixed-small { width: 96px; }
 .unit-field.fixed-medium { width: 132px; }
 .unit-field.fixed-large { width: 220px; }
 .compact-unit-field {
-  width: 96px;
+  width: 84px;
 }
 .resolution-row, .ratio-grid { display: flex; gap: 12px; align-items: end; }
 .resolution-row-compact {
   gap: 8px;
   justify-content: flex-start;
   align-items: center;
+  flex-wrap: wrap;
 }
 .grow { flex: 1; }
 .horizontal-field,
@@ -166,6 +167,12 @@ h2, h3 { margin-top: 0; }
 .unit-output-field {
   grid-template-columns: 44px minmax(0, 1fr);
 }
+.no-output-unit-label {
+  grid-template-columns: 1fr;
+}
+.no-output-unit-label .result-label {
+  display: none;
+}
 .ratio-output-field {
   grid-template-columns: 44px minmax(0, 1fr);
 }
@@ -183,6 +190,10 @@ input[type="text"], input[type="number"], select {
 }
 input::placeholder { color: rgba(150, 169, 199, 0.66); }
 .quick-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.resolution-shortcuts-inline {
+  margin-top: 0;
+  align-items: center;
+}
 .quick-actions button, .btn {
   border: 1px solid var(--line);
   background: rgba(255,255,255,0.03);
@@ -243,8 +254,9 @@ input::placeholder { color: rgba(150, 169, 199, 0.66); }
   .single-line-toolbar,
   .section-head, .resolution-row, .ratio-grid { flex-direction: column; align-items: stretch; display: flex; }
   .dimension-grid, .result-grid, .pixel-grid, .pixel-result-grid, .result-grid.single-row { grid-template-columns: 1fr; }
-  .horizontal-field, .horizontal-output-field, .unit-output-field, .ratio-output-field, .resolution-value-field { grid-template-columns: 1fr; }
-  .unit-field.fixed-medium, .unit-field.fixed-large, .compact-unit-field { width: auto; }
+  .horizontal-field, .horizontal-output-field, .unit-output-field, .ratio-output-field, .resolution-value-field, .no-output-unit-label { grid-template-columns: 1fr; }
+  .unit-field.fixed-medium, .unit-field.fixed-large, .compact-unit-field, .unit-field.fixed-small { width: auto; }
+  .resolution-shortcuts-inline { margin-top: 12px; }
   .toolbar-actions, .output-actions { width: 100%; }
   .toolbar-actions .btn, .output-actions .btn { width: 100%; }
 }
