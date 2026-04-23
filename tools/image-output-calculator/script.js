@@ -520,6 +520,7 @@ function completePhysicalFromPixels(result, resolution) {
 
 function renderOutput(result) {
   const blockingErrors = [
+    '長寬比與實體尺寸不符。',
     '像素尺寸與實體尺寸的長寬比不符。',
     '解析度與像素尺寸 / 實體尺寸不符。'
   ];
