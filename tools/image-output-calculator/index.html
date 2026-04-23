@@ -33,7 +33,6 @@
         <label for="presetSearch">預設資料快速帶入</label>
         <input id="presetSearch" list="presetOptions" type="text" placeholder="搜尋 A4、照片 4x6、A3..." autocomplete="off" />
         <datalist id="presetOptions"></datalist>
-        <div class="toolbar-hint" id="presetHint">可輸入名稱搜尋，選定後會回填左側欄位。</div>
       </div>
       <div class="toolbar-actions">
         <button class="btn" id="swapBtn" type="button">交換寬高</button>
@@ -102,7 +101,7 @@
               <label for="resolutionValue">解析度數值</label>
               <input id="resolutionValue" type="number" inputmode="decimal" min="0" step="any" placeholder="例如 300" />
             </div>
-            <div class="field-inline unit-field fixed-medium horizontal-field">
+            <div class="field-inline unit-field fixed-small horizontal-field">
               <label for="resolutionUnit">單位</label>
               <select id="resolutionUnit">
                 <option value="DPI">DPI</option>
@@ -126,8 +125,7 @@
               <label for="ratioValue">比例</label>
               <input id="ratioValue" type="text" placeholder="例如 16:9、1:1、1:1.4142" />
             </div>
-            <div class="field-inline unit-field fixed-large horizontal-field">
-              <label for="ratioPreset">快速選擇</label>
+            <div class="field-inline unit-field fixed-large horizontal-field no-label-field">
               <select id="ratioPreset">
                 <option value="">選擇常用比例</option>
                 <option value="16:9">16:9</option>
@@ -162,7 +160,11 @@
             </div>
             <div class="result-field horizontal-output-field unit-output-field">
               <span class="result-label">單位</span>
-              <div class="result-box" id="outputPhysicalWidthUnit"></div>
+              <select class="result-select" id="outputPhysicalWidthUnit">
+                <option value="mm">mm</option>
+                <option value="cm">cm</option>
+                <option value="inch">inch</option>
+              </select>
             </div>
             <div class="result-field horizontal-output-field">
               <span class="result-label">實體高</span>
@@ -170,7 +172,11 @@
             </div>
             <div class="result-field horizontal-output-field unit-output-field">
               <span class="result-label">單位</span>
-              <div class="result-box" id="outputPhysicalHeightUnit"></div>
+              <select class="result-select" id="outputPhysicalHeightUnit">
+                <option value="mm">mm</option>
+                <option value="cm">cm</option>
+                <option value="inch">inch</option>
+              </select>
             </div>
           </div>
         </div>
@@ -198,7 +204,10 @@
             </div>
             <div class="result-field horizontal-output-field unit-output-field">
               <span class="result-label">單位</span>
-              <div class="result-box" id="outputResolutionUnit"></div>
+              <select class="result-select" id="outputResolutionUnit">
+                <option value="DPI">DPI</option>
+                <option value="PPI">PPI</option>
+              </select>
             </div>
           </div>
         </div>
@@ -213,7 +222,6 @@
           </div>
         </div>
 
-        <div class="info-box secondary" id="resultSummary">條件不足時，對應欄位會保持空白。</div>
         <div class="output-actions">
           <button class="btn" id="copyResultBtn" type="button">複製右側結果到左側</button>
         </div>

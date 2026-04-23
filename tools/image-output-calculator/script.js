@@ -43,7 +43,12 @@ const FALLBACK_PRESETS = [
 
 const state = {
   presets: [],
-  lastPresetSource: 'fallback'
+  lastPresetSource: 'fallback',
+  outputUnits: {
+    physicalWidth: null,
+    physicalHeight: null,
+    resolution: null
+  }
 };
 
 const dom = {};
@@ -57,7 +62,6 @@ function init() {
 function bindDom() {
   dom.presetSearch = document.getElementById('presetSearch');
   dom.presetOptions = document.getElementById('presetOptions');
-  dom.presetHint = document.getElementById('presetHint');
 
   dom.inputPhysicalWidth = document.getElementById('inputPhysicalWidth');
   dom.inputPhysicalWidthUnit = document.getElementById('inputPhysicalWidthUnit');
@@ -81,7 +85,6 @@ function bindDom() {
   dom.outputRatioValue = document.getElementById('outputRatioValue');
 
   dom.logicSummary = document.getElementById('logicSummary');
-  dom.resultSummary = document.getElementById('resultSummary');
   dom.swapBtn = document.getElementById('swapBtn');
   dom.copyResultBtn = document.getElementById('copyResultBtn');
   dom.resetBtn = document.getElementById('resetBtn');
@@ -124,6 +127,20 @@ function bindEvents() {
   dom.swapBtn.addEventListener('click', swapDimensions);
   dom.copyResultBtn.addEventListener('click', copyResultToInput);
   dom.resetBtn.addEventListener('click', resetAll);
+
+  dom.outputPhysicalWidthUnit.addEventListener('change', () => {
+    state.outputUnits.physicalWidth = dom.outputPhysicalWidthUnit.value;
+    recalculate();
+  });
+  dom.outputPhysicalHeightUnit.addEventListener('change', () => {
+    state.outputUnits.physicalHeight = dom.outputPhysicalHeightUnit.value;
+    recalculate();
+  });
+  dom.outputResolutionUnit.addEventListener('change', () => {
+    state.outputUnits.resolution = dom.outputResolutionUnit.value;
+    dom.resolutionUnit.value = dom.outputResolutionUnit.value;
+    recalculate();
+  });
 }
 
 async function loadPresets() {
@@ -139,9 +156,6 @@ async function loadPresets() {
   }
 
   renderPresetOptions();
-  dom.presetHint.textContent = state.lastPresetSource === 'json'
-    ? '已載入 presets.json，選定後會回填左側欄位。'
-    : '目前使用內建預設備援資料；若經由伺服器開啟，會優先讀取 presets.json。';
 }
 
 function normalizePresets(data) {
@@ -194,6 +208,9 @@ function applyPreset(preset) {
   dom.inputPixelHeight.value = preset.pixel?.height?.value ?? '';
   dom.resolutionValue.value = preset.resolution?.value ?? '';
   dom.resolutionUnit.value = preset.resolution?.unit ?? 'DPI';
+  state.outputUnits.physicalWidth = preset.physical?.width?.unit ?? dom.inputPhysicalWidthUnit.value;
+  state.outputUnits.physicalHeight = preset.physical?.height?.unit ?? dom.inputPhysicalHeightUnit.value;
+  state.outputUnits.resolution = preset.resolution?.unit ?? dom.resolutionUnit.value;
   dom.ratioValue.value = preset.ratio ?? '';
   dom.ratioPreset.value = [...dom.ratioPreset.options].some((option) => option.value === preset.ratio) ? preset.ratio : '';
   recalculate();
@@ -209,6 +226,9 @@ function resetAll() {
   dom.inputPixelHeight.value = '';
   dom.resolutionValue.value = '';
   dom.resolutionUnit.value = 'DPI';
+  state.outputUnits.physicalWidth = null;
+  state.outputUnits.physicalHeight = null;
+  state.outputUnits.resolution = null;
   dom.ratioValue.value = '';
   dom.ratioPreset.value = '';
   recalculate();
@@ -236,14 +256,18 @@ function swapSelectValues(a, b) {
 function copyResultToInput() {
   const result = calculateOutput(getInputState());
 
-  if (result.physical.width.value != null) dom.inputPhysicalWidth.value = formatNumber(result.physical.width.value, 4);
-  if (result.physical.width.unit) dom.inputPhysicalWidthUnit.value = result.physical.width.unit;
-  if (result.physical.height.value != null) dom.inputPhysicalHeight.value = formatNumber(result.physical.height.value, 4);
-  if (result.physical.height.unit) dom.inputPhysicalHeightUnit.value = result.physical.height.unit;
+  const outputPrefs = getOutputUnitPrefs(result);
+  const widthForInput = convertPhysicalField(result.physical.width, outputPrefs.physicalWidth);
+  const heightForInput = convertPhysicalField(result.physical.height, outputPrefs.physicalHeight);
+
+  if (widthForInput.value != null) dom.inputPhysicalWidth.value = formatNumber(widthForInput.value, 4);
+  if (widthForInput.unit) dom.inputPhysicalWidthUnit.value = widthForInput.unit;
+  if (heightForInput.value != null) dom.inputPhysicalHeight.value = formatNumber(heightForInput.value, 4);
+  if (heightForInput.unit) dom.inputPhysicalHeightUnit.value = heightForInput.unit;
   if (result.pixel.width.value != null) dom.inputPixelWidth.value = formatNumber(result.pixel.width.value, 0);
   if (result.pixel.height.value != null) dom.inputPixelHeight.value = formatNumber(result.pixel.height.value, 0);
   if (result.resolution.value != null) dom.resolutionValue.value = formatNumber(result.resolution.value, 4);
-  if (result.resolution.unit) dom.resolutionUnit.value = result.resolution.unit;
+  if (outputPrefs.resolution) dom.resolutionUnit.value = outputPrefs.resolution;
   if (result.ratio.display) dom.ratioValue.value = result.ratio.raw || result.ratio.display;
   if ([...dom.ratioPreset.options].some((option) => option.value === (result.ratio.raw || result.ratio.display))) {
     dom.ratioPreset.value = result.ratio.raw || result.ratio.display;
@@ -452,14 +476,23 @@ function completePhysicalFromPixels(result, resolution) {
 }
 
 function renderOutput(result) {
-  setResultBox(dom.outputPhysicalWidth, result.physical.width.value, result.physical.width.source, 4);
-  setResultBox(dom.outputPhysicalWidthUnit, result.physical.width.unit, result.physical.width.source, null, true);
-  setResultBox(dom.outputPhysicalHeight, result.physical.height.value, result.physical.height.source, 4);
-  setResultBox(dom.outputPhysicalHeightUnit, result.physical.height.unit, result.physical.height.source, null, true);
+  const outputPrefs = getOutputUnitPrefs(result);
+  const displayPhysicalWidth = convertPhysicalField(result.physical.width, outputPrefs.physicalWidth);
+  const displayPhysicalHeight = convertPhysicalField(result.physical.height, outputPrefs.physicalHeight);
+
+  dom.outputPhysicalWidthUnit.value = outputPrefs.physicalWidth;
+  dom.outputPhysicalHeightUnit.value = outputPrefs.physicalHeight;
+  dom.outputResolutionUnit.value = outputPrefs.resolution;
+
+  syncResultSelectState(dom.outputPhysicalWidthUnit, result.physical.width.source, Boolean(displayPhysicalWidth.unit));
+  syncResultSelectState(dom.outputPhysicalHeightUnit, result.physical.height.source, Boolean(displayPhysicalHeight.unit));
+  syncResultSelectState(dom.outputResolutionUnit, result.resolution.source, Boolean(outputPrefs.resolution));
+
+  setResultBox(dom.outputPhysicalWidth, displayPhysicalWidth.value, result.physical.width.source, 4);
+  setResultBox(dom.outputPhysicalHeight, displayPhysicalHeight.value, result.physical.height.source, 4);
   setResultBox(dom.outputPixelWidth, result.pixel.width.value, result.pixel.width.source, 0);
   setResultBox(dom.outputPixelHeight, result.pixel.height.value, result.pixel.height.source, 0);
   setResultBox(dom.outputResolutionValue, result.resolution.value, result.resolution.source, 4);
-  setResultBox(dom.outputResolutionUnit, result.resolution.unit, result.resolution.source, null, true);
   setResultBox(dom.outputRatioValue, result.ratio.display, result.ratio.source, null, true);
 }
 
@@ -472,26 +505,8 @@ function renderSummaries(input, result) {
       dom.logicSummary.textContent = '目前資料仍不足，無法安全補算更多欄位。';
     }
   } else {
-    dom.logicSummary.textContent = uniqueSteps.join(' ');
+    dom.logicSummary.textContent = uniqueSteps.join('\n');
   }
-
-  const summaries = [];
-  if (result.physical.width.value != null || result.physical.height.value != null) {
-    summaries.push(`實體尺寸 ${formatPair(result.physical.width, result.physical.height)}`);
-  }
-  if (result.pixel.width.value != null || result.pixel.height.value != null) {
-    summaries.push(`像素尺寸 ${formatPair(result.pixel.width, result.pixel.height, 'px')}`);
-  }
-  if (result.resolution.value != null) {
-    summaries.push(`解析度 ${formatNumber(result.resolution.value, 4)} ${result.resolution.unit}`);
-  }
-  if (result.ratio.display) {
-    summaries.push(`比例 ${result.ratio.display}`);
-  }
-
-  dom.resultSummary.textContent = summaries.length
-    ? `目前可確認結果：${summaries.join('、')}`
-    : '條件不足時，對應欄位會保持空白。';
 }
 
 function formatPair(widthField, heightField, fallbackUnit = '') {
@@ -505,6 +520,14 @@ function formatPair(widthField, heightField, fallbackUnit = '') {
 function setResultBox(element, value, source, decimals = null, rawText = false) {
   const hasContent = value !== null && value !== undefined && String(value).trim() !== '';
   element.textContent = hasContent ? (rawText ? String(value) : formatNumber(value, decimals)) : '';
+  element.classList.remove('has-value', 'from-input', 'from-computed');
+  if (!hasContent) return;
+  element.classList.add('has-value');
+  if (source === 'input') element.classList.add('from-input');
+  if (source === 'computed') element.classList.add('from-computed');
+}
+
+function syncResultSelectState(element, source, hasContent) {
   element.classList.remove('has-value', 'from-input', 'from-computed');
   if (!hasContent) return;
   element.classList.add('has-value');
@@ -589,14 +612,37 @@ function simplifyRatioDisplay(width, height) {
     { label: '5:4', value: 5 / 4 },
     { label: '16:9', value: 16 / 9 },
     { label: '2:3', value: 2 / 3 },
-    { label: '1:1.4142', value: 1 / Math.SQRT2 }
+    { label: '1:√2', value: 1 / Math.SQRT2 },
+    { label: '√2:1', value: Math.SQRT2 }
   ];
   const matched = commonRatios.find((item) => Math.abs(item.value - ratio) < 0.01);
   return matched ? matched.label : formatRatioDisplay(width, height);
 }
 
 function formatRatioDisplay(width, height) {
-  return `${trimTrailingZeros(width)}:${trimTrailingZeros(height)}`;
+  return `${formatRatioPart(width)}:${formatRatioPart(height)}`;
+}
+
+function formatRatioPart(value) {
+  if (Math.abs(value - Math.SQRT2) < 0.01) return '√2';
+  return trimTrailingZeros(value);
+}
+
+function getOutputUnitPrefs(result) {
+  return {
+    physicalWidth: state.outputUnits.physicalWidth || result.physical.width.unit || dom.inputPhysicalWidthUnit.value || 'mm',
+    physicalHeight: state.outputUnits.physicalHeight || result.physical.height.unit || dom.inputPhysicalHeightUnit.value || 'mm',
+    resolution: state.outputUnits.resolution || result.resolution.unit || dom.resolutionUnit.value || 'DPI'
+  };
+}
+
+function convertPhysicalField(field, targetUnit) {
+  if (field.value == null) return { value: null, unit: targetUnit || field.unit || 'mm' };
+  const inches = toInches(field.value, field.unit || 'mm');
+  return {
+    value: fromInches(inches, targetUnit || field.unit || 'mm'),
+    unit: targetUnit || field.unit || 'mm'
+  };
 }
 
 document.addEventListener('DOMContentLoaded', init);
