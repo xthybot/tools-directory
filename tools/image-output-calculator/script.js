@@ -519,6 +519,7 @@ function completePhysicalFromPixels(result, resolution) {
 }
 
 function renderOutput(result) {
+  const hideAllOutput = (result.meta.errors || []).includes('像素尺寸與實體尺寸的長寬比不符。');
   const outputPrefs = getOutputUnitPrefs(result);
   const displayPhysicalWidth = convertPhysicalField(result.physical.width, outputPrefs.physicalWidth);
   const displayPhysicalHeight = convertPhysicalField(result.physical.height, outputPrefs.physicalHeight);
@@ -526,6 +527,20 @@ function renderOutput(result) {
   dom.outputPhysicalWidthUnit.value = outputPrefs.physicalWidth;
   dom.outputPhysicalHeightUnit.value = outputPrefs.physicalHeight;
   dom.outputResolutionUnit.value = outputPrefs.resolution;
+
+  if (hideAllOutput) {
+    syncResultSelectState(dom.outputPhysicalWidthUnit, null, false);
+    syncResultSelectState(dom.outputPhysicalHeightUnit, null, false);
+    syncResultSelectState(dom.outputResolutionUnit, null, false);
+
+    setResultBox(dom.outputPhysicalWidth, null, null, 4);
+    setResultBox(dom.outputPhysicalHeight, null, null, 4);
+    setResultBox(dom.outputPixelWidth, null, null, 0);
+    setResultBox(dom.outputPixelHeight, null, null, 0);
+    setResultBox(dom.outputResolutionValue, null, null, 4);
+    setResultBox(dom.outputRatioValue, '', null, null, true);
+    return;
+  }
 
   syncResultSelectState(dom.outputPhysicalWidthUnit, result.physical.width.source, Boolean(displayPhysicalWidth.unit));
   syncResultSelectState(dom.outputPhysicalHeightUnit, result.physical.height.source, Boolean(displayPhysicalHeight.unit));
