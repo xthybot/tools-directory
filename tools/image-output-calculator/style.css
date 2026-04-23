@@ -130,12 +130,14 @@ h2, h3 { margin-top: 0; }
   gap: 8px;
   justify-content: flex-start;
   align-items: center;
+  flex-wrap: nowrap;
 }
 .resolution-inline-controls {
   display: flex;
   align-items: center;
   gap: 8px;
   flex: 0 0 auto;
+  flex-wrap: nowrap;
 }
 .grow { flex: 1; }
 .horizontal-field,
@@ -190,20 +192,23 @@ input[type="text"], input[type="number"], select {
   padding: 12px 14px;
   min-height: 48px;
 }
-.result-select {
+select {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
   cursor: pointer;
-  padding-right: 38px;
+  padding-right: 42px;
   background-color: rgba(4, 10, 20, 0.72);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3 5.25 7 9.25 11 5.25' fill='none' stroke='%23ebf3ff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: linear-gradient(45deg, transparent 50%, #ebf3ff 50%), linear-gradient(135deg, #ebf3ff 50%, transparent 50%);
+  background-position: calc(100% - 18px) calc(50% - 2px), calc(100% - 12px) calc(50% - 2px);
+  background-size: 6px 6px, 6px 6px;
   background-repeat: no-repeat;
-  background-position: calc(100% - 12px) center;
-  background-size: 14px 14px;
 }
-.result-select::-ms-expand {
+select::-ms-expand {
   display: none;
+}
+.result-select {
+  background-color: rgba(4, 10, 20, 0.72);
 }
 input::placeholder { color: rgba(150, 169, 199, 0.66); }
 .quick-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
@@ -275,6 +280,7 @@ input::placeholder { color: rgba(150, 169, 199, 0.66); }
   .dimension-grid, .result-grid, .pixel-grid, .pixel-result-grid, .result-grid.single-row { grid-template-columns: 1fr; }
   .horizontal-field, .horizontal-output-field, .unit-output-field, .ratio-output-field, .resolution-value-field, .no-output-unit-label { grid-template-columns: 1fr; }
   .unit-field.fixed-medium, .unit-field.fixed-large, .compact-unit-field, .unit-field.fixed-small { width: auto; }
+  .resolution-row-compact, .resolution-inline-controls { flex-wrap: wrap; }
   .resolution-shortcuts-inline { margin-top: 12px; flex-wrap: wrap; white-space: normal; }
   .toolbar-actions, .output-actions { width: 100%; }
   .toolbar-actions .btn, .output-actions .btn { width: 100%; }
