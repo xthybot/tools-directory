@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown Slides</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <div>
+        <h1>Markdown Slides</h1>
+        <p>Paste Markdown, split slides with <code>---</code>, preview, play, and export PDF.</p>
+      </div>
+      <div class="header-actions">
+        <button id="playBtn" class="primary">Play</button>
+        <button id="exportBtn">Export PDF</button>
+      </div>
+    </header>
+
+    <section class="workspace">
+      <section class="editor-panel">
+        <div class="toolbar" aria-label="Markdown quick styles">
+          <button data-style="h1">#</button>
+          <button data-style="h2">##</button>
+          <button data-style="h3">###</button>
+          <button data-style="ul">-</button>
+          <button data-style="ol1">1.</button>
+          <button data-style="ol2">a.</button>
+          <button data-style="ol3">i.</button>
+          <button data-style="table">Table</button>
+        </div>
+
+        <div class="editor-tabs">
+          <button id="sourceTab" class="active">Source</button>
+          <button id="previewTab">Preview</button>
+        </div>
+
+        <textarea id="markdownInput" spellcheck="false"></textarea>
+        <div id="markdownPreview" class="markdown-preview hidden"></div>
+      </section>
+
+      <section class="slides-panel">
+        <div class="panel-title">
+          <h2>Slide Preview</h2>
+          <span id="slideCount">0 slides</span>
+        </div>
+        <div id="slidesContainer" class="slides-container"></div>
+      </section>
+    </section>
+  </main>
+
+  <section id="presentation" class="presentation hidden" aria-hidden="true">
+    <button id="closePresentation" class="close-btn">×</button>
+    <button id="prevSlide" class="nav-btn prev">‹</button>
+    <div id="presentationSlide" class="presentation-slide"></div>
+    <button id="nextSlide" class="nav-btn next">›</button>
+    <div id="presentationCounter" class="presentation-counter"></div>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
