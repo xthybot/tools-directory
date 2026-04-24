@@ -308,6 +308,7 @@ input::placeholder { color: rgba(150, 169, 199, 0.66); }
   background: rgba(255, 139, 167, 0.12);
   color: #ffd7e1;
 }
+.ratio-actions,
 .output-actions {
   margin-top: 18px;
   display: flex;
@@ -327,6 +328,6 @@ input::placeholder { color: rgba(150, 169, 199, 0.66); }
   .horizontal-field, .horizontal-output-field, .unit-output-field, .ratio-output-field, .resolution-value-field, .no-output-unit-label, .ratio-pair-field, .ratio-output-pair-field { grid-template-columns: 1fr; }
   .unit-field.fixed-medium, .unit-field.fixed-large, .compact-unit-field, .unit-field.fixed-small { width: auto; }
   .resolution-shortcuts-inline { margin-top: 12px; flex-wrap: wrap; white-space: normal; }
-  .toolbar-actions, .output-actions { width: 100%; }
-  .toolbar-actions .btn, .output-actions .btn { width: 100%; }
+  .toolbar-actions, .ratio-actions, .output-actions { width: 100%; }
+  .toolbar-actions .btn, .ratio-actions .btn, .output-actions .btn { width: 100%; }
 }

@@ -74,6 +74,7 @@ function bindDom() {
   dom.ratioWidthValue = document.getElementById('ratioWidthValue');
   dom.ratioHeightValue = document.getElementById('ratioHeightValue');
   dom.ratioPreset = document.getElementById('ratioPreset');
+  dom.swapRatioBtn = document.getElementById('swapRatioBtn');
 
   dom.outputPhysicalWidth = document.getElementById('outputPhysicalWidth');
   dom.outputPhysicalWidthUnit = document.getElementById('outputPhysicalWidthUnit');
@@ -132,6 +133,7 @@ function bindEvents() {
   });
 
   dom.swapBtn.addEventListener('click', swapDimensions);
+  dom.swapRatioBtn.addEventListener('click', swapRatioOnly);
   dom.copyResultBtn.addEventListener('click', copyResultToInput);
   dom.resetBtn.addEventListener('click', resetAll);
 
@@ -256,6 +258,15 @@ function swapDimensions() {
   recalculate();
 }
 
+function swapRatioOnly() {
+  swapFieldValues(dom.ratioWidthValue, dom.ratioHeightValue);
+
+  const swappedPreset = swapRatioPresetValue(dom.ratioPreset.value);
+  dom.ratioPreset.value = swappedPreset;
+
+  recalculate();
+}
+
 function swapFieldValues(a, b) {
   const temp = a.value;
   a.value = b.value;
@@ -284,8 +295,9 @@ function copyResultToInput() {
   if (result.resolution.value != null) dom.resolutionValue.value = formatNumber(result.resolution.value, 4);
   if (outputPrefs.resolution) dom.resolutionUnit.value = outputPrefs.resolution;
   if (result.ratio.parsed) {
-    dom.ratioWidthValue.value = formatNumber(result.ratio.parsed.width, 4);
-    dom.ratioHeightValue.value = formatNumber(result.ratio.parsed.height, 4);
+    const scaledRatio = scaleRatioDisplay(result.ratio.parsed, result.ratio.inputWidth, result.ratio.inputHeight);
+    dom.ratioWidthValue.value = formatNumber(scaledRatio.width, 4);
+    dom.ratioHeightValue.value = formatNumber(scaledRatio.height, 4);
   }
   if ([...dom.ratioPreset.options].some((option) => option.value === (result.ratio.raw || result.ratio.display))) {
     dom.ratioPreset.value = result.ratio.raw || result.ratio.display;
@@ -295,6 +307,10 @@ function copyResultToInput() {
 }
 
 function getInputState() {
+  const ratioWidthInput = parsePositiveNumberAllowZeroBlank(dom.ratioWidthValue.value);
+  const ratioHeightInput = parsePositiveNumberAllowZeroBlank(dom.ratioHeightValue.value);
+  const ratioParsed = parseRatioParts(dom.ratioWidthValue.value, dom.ratioHeightValue.value);
+
   return {
     physical: {
       width: {
@@ -327,8 +343,11 @@ function getInputState() {
     },
     ratio: {
       raw: buildRatioRaw(dom.ratioWidthValue.value, dom.ratioHeightValue.value),
-      parsed: parseRatioParts(dom.ratioWidthValue.value, dom.ratioHeightValue.value),
-      source: hasValue(dom.ratioWidthValue.value) && hasValue(dom.ratioHeightValue.value) ? 'input' : null
+      parsed: ratioParsed,
+      source: ratioParsed ? 'input' : null,
+      inputWidth: ratioWidthInput,
+      inputHeight: ratioHeightInput,
+      hasPartialInput: ratioWidthInput != null || ratioHeightInput != null
     }
   };
 }
@@ -355,7 +374,11 @@ function calculateOutput(input) {
       raw: input.ratio.raw,
       display: input.ratio.raw || '',
       parsed: input.ratio.parsed,
-      source: input.ratio.source
+      source: input.ratio.source,
+      inputWidth: input.ratio.inputWidth,
+      inputHeight: input.ratio.inputHeight,
+      displayWidth: null,
+      displayHeight: null
     },
     meta: {
       steps: [],
@@ -375,6 +398,7 @@ function calculateOutput(input) {
   applyRatioCompletion(result);
   applyResolutionBackfill(result);
   hydrateRatio(result);
+  hydrateRatioDisplayPair(result);
 
   return result;
 }
@@ -564,8 +588,8 @@ function renderOutput(result) {
   setResultBox(dom.outputPixelWidth, result.pixel.width.value, result.pixel.width.source, 0);
   setResultBox(dom.outputPixelHeight, result.pixel.height.value, result.pixel.height.source, 0);
   setResultBox(dom.outputResolutionValue, result.resolution.value, result.resolution.source, 4);
-  setResultBox(dom.outputRatioWidth, result.ratio.parsed?.width, result.ratio.source, 4);
-  setResultBox(dom.outputRatioHeight, result.ratio.parsed?.height, result.ratio.source, 4);
+  setResultBox(dom.outputRatioWidth, result.ratio.displayWidth, result.ratio.source, 4, true);
+  setResultBox(dom.outputRatioHeight, result.ratio.displayHeight, result.ratio.source, 4, true);
 }
 
 function renderSummaries(input, result) {
@@ -634,6 +658,14 @@ function parsePositiveNumber(value) {
   return number;
 }
 
+function parsePositiveNumberAllowZeroBlank(value) {
+  const raw = String(value ?? '').trim();
+  if (!raw) return null;
+  const number = Number(raw);
+  if (!Number.isFinite(number) || number <= 0) return null;
+  return number;
+}
+
 function hasValue(value) {
   const raw = String(value ?? '').trim();
   if (raw === '') return false;
@@ -671,9 +703,13 @@ function parseRatioParts(widthValue, heightValue) {
 }
 
 function buildRatioRaw(widthValue, heightValue) {
-  const parsed = parseRatioParts(widthValue, heightValue);
-  if (!parsed) return '';
-  return `${trimTrailingZeros(parsed.width)}:${trimTrailingZeros(parsed.height)}`;
+  const hasWidth = parsePositiveNumberAllowZeroBlank(widthValue) != null;
+  const hasHeight = parsePositiveNumberAllowZeroBlank(heightValue) != null;
+  if (!hasWidth && !hasHeight) return '';
+
+  const widthText = hasWidth ? formatRatioPart(parsePositiveNumberAllowZeroBlank(widthValue)) : '';
+  const heightText = hasHeight ? formatRatioPart(parsePositiveNumberAllowZeroBlank(heightValue)) : '';
+  return `${widthText}:${heightText}`;
 }
 
 function toInches(value, unit) {
@@ -729,6 +765,7 @@ function formatRatioDisplay(width, height) {
 
 function formatRatioPart(value) {
   if (Math.abs(value - Math.SQRT2) < 0.01) return '√2';
+  if (Math.abs(value - 1 / Math.SQRT2) < 0.01) return `1/√2`;
   return trimTrailingZeros(value);
 }
 
@@ -747,6 +784,46 @@ function convertPhysicalField(field, targetUnit) {
     value: fromInches(inches, targetUnit || field.unit || 'mm'),
     unit: targetUnit || field.unit || 'mm'
   };
+}
+
+function hydrateRatioDisplayPair(result) {
+  if (!result.ratio.parsed) {
+    result.ratio.displayWidth = '';
+    result.ratio.displayHeight = '';
+    return;
+  }
+
+  const scaled = scaleRatioDisplay(result.ratio.parsed, result.ratio.inputWidth, result.ratio.inputHeight);
+  result.ratio.displayWidth = formatRatioPart(scaled.width);
+  result.ratio.displayHeight = formatRatioPart(scaled.height);
+}
+
+function scaleRatioDisplay(baseRatio, inputWidth, inputHeight) {
+  if (inputWidth != null && inputHeight == null) {
+    return {
+      width: inputWidth,
+      height: inputWidth * (baseRatio.height / baseRatio.width)
+    };
+  }
+
+  if (inputHeight != null && inputWidth == null) {
+    return {
+      width: inputHeight * (baseRatio.width / baseRatio.height),
+      height: inputHeight
+    };
+  }
+
+  return {
+    width: baseRatio.width,
+    height: baseRatio.height
+  };
+}
+
+function swapRatioPresetValue(value) {
+  const parsed = parseRatio(value);
+  if (!parsed) return value;
+  const swapped = `${formatRatioPart(parsed.height)}:${formatRatioPart(parsed.width)}`;
+  return [...dom.ratioPreset.options].some((option) => option.value === swapped) ? swapped : '';
 }
 
 document.addEventListener('DOMContentLoaded', init);
