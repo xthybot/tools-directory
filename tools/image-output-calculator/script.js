@@ -378,7 +378,9 @@ function calculateOutput(input) {
       inputWidth: input.ratio.inputWidth,
       inputHeight: input.ratio.inputHeight,
       displayWidth: null,
-      displayHeight: null
+      displayHeight: null,
+      displayWidthSource: null,
+      displayHeightSource: null
     },
     meta: {
       steps: [],
@@ -588,8 +590,8 @@ function renderOutput(result) {
   setResultBox(dom.outputPixelWidth, result.pixel.width.value, result.pixel.width.source, 0);
   setResultBox(dom.outputPixelHeight, result.pixel.height.value, result.pixel.height.source, 0);
   setResultBox(dom.outputResolutionValue, result.resolution.value, result.resolution.source, 4);
-  setResultBox(dom.outputRatioWidth, result.ratio.displayWidth, result.ratio.source, 4, true);
-  setResultBox(dom.outputRatioHeight, result.ratio.displayHeight, result.ratio.source, 4, true);
+  setResultBox(dom.outputRatioWidth, result.ratio.displayWidth, result.ratio.displayWidthSource, 2, true);
+  setResultBox(dom.outputRatioHeight, result.ratio.displayHeight, result.ratio.displayHeightSource, 2, true);
 }
 
 function renderSummaries(input, result) {
@@ -763,10 +765,10 @@ function formatRatioDisplay(width, height) {
   return `${formatRatioPart(width)}:${formatRatioPart(height)}`;
 }
 
-function formatRatioPart(value) {
+function formatRatioPart(value, decimals = 2) {
   if (Math.abs(value - Math.SQRT2) < 0.01) return '√2';
   if (Math.abs(value - 1 / Math.SQRT2) < 0.01) return `1/√2`;
-  return trimTrailingZeros(value);
+  return trimTrailingZeros(Number(value).toFixed(decimals));
 }
 
 function getOutputUnitPrefs(result) {
@@ -790,12 +792,35 @@ function hydrateRatioDisplayPair(result) {
   if (!result.ratio.parsed) {
     result.ratio.displayWidth = '';
     result.ratio.displayHeight = '';
+    result.ratio.displayWidthSource = null;
+    result.ratio.displayHeightSource = null;
     return;
   }
 
   const scaled = scaleRatioDisplay(result.ratio.parsed, result.ratio.inputWidth, result.ratio.inputHeight);
-  result.ratio.displayWidth = formatRatioPart(scaled.width);
-  result.ratio.displayHeight = formatRatioPart(scaled.height);
+  result.ratio.displayWidth = formatRatioPart(scaled.width, 2);
+  result.ratio.displayHeight = formatRatioPart(scaled.height, 2);
+
+  if (result.ratio.inputWidth != null && result.ratio.inputHeight != null) {
+    result.ratio.displayWidthSource = 'input';
+    result.ratio.displayHeightSource = 'input';
+    return;
+  }
+
+  if (result.ratio.inputWidth != null) {
+    result.ratio.displayWidthSource = 'input';
+    result.ratio.displayHeightSource = 'computed';
+    return;
+  }
+
+  if (result.ratio.inputHeight != null) {
+    result.ratio.displayWidthSource = 'computed';
+    result.ratio.displayHeightSource = 'input';
+    return;
+  }
+
+  result.ratio.displayWidthSource = result.ratio.source;
+  result.ratio.displayHeightSource = result.ratio.source;
 }
 
 function scaleRatioDisplay(baseRatio, inputWidth, inputHeight) {
