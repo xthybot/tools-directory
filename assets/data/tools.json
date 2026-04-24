@@ -59,5 +59,16 @@
       "程式碼"
     ],
     "link": "tools/code-syntax-highlighter/"
+  },
+  {
+    "title": "Markdown 簡報",
+    "icon": "assets/icons/markdown-slides.svg",
+    "description": "用 Markdown 快速製作簡報，支援可編輯預覽、播放模式與 PDF 匯出。",
+    "tags": [
+      "簡報",
+      "Markdown",
+      "開發"
+    ],
+    "link": "tools/markdown-slides/"
   }
 ]
