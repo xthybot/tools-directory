@@ -122,7 +122,8 @@ button.primary {
 }
 
 .slide-page,
-.presentation-slide {
+.presentation-slide,
+.print-slide {
   background: #fff;
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -238,37 +239,53 @@ button.primary {
   border-radius: 0;
   box-shadow: none;
   padding: 4vw 5vw;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .presentation-slide .markdown-body {
   min-height: calc(100vh - 8vw);
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  align-items: stretch;
+  justify-content: flex-start;
+  --content-scale: 1;
 }
 
-.presentation-slide .markdown-body h1 {
+.presentation-slide .markdown-body > h1 {
+  flex: 0 0 auto;
   font-size: clamp(36px, 5vw, 72px);
-  margin-bottom: 2.6vh;
+  margin: 0 0 2.6vh 0;
 }
 
-.presentation-slide .markdown-body h2 {
-  font-size: clamp(26px, 3.2vw, 42px);
+.presentation-content {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transform: scale(var(--content-scale));
+  transform-origin: center center;
+}
+
+.presentation-slide .presentation-content h2 {
+  font-size: calc(42px * var(--content-scale));
   margin: 1.8vh 0 1vh 0;
 }
 
-.presentation-slide .markdown-body h3 {
-  font-size: clamp(22px, 2.4vw, 32px);
+.presentation-slide .presentation-content h3 {
+  font-size: calc(32px * var(--content-scale));
   margin: 1.4vh 0 0.8vh 0;
 }
 
-.presentation-slide .markdown-body p,
-.presentation-slide .markdown-body li,
-.presentation-slide .markdown-body td,
-.presentation-slide .markdown-body th {
-  font-size: clamp(20px, 2vw, 30px);
+.presentation-slide .presentation-content p,
+.presentation-slide .presentation-content li,
+.presentation-slide .presentation-content td,
+.presentation-slide .presentation-content th {
+  font-size: calc(26px * var(--content-scale));
   line-height: 1.5;
+}
+
+.presentation-slide .presentation-content table {
+  font-size: calc(20px * var(--content-scale));
 }
 
 .close-btn,
@@ -316,6 +333,21 @@ button.primary {
   padding: 10px 14px;
 }
 
+.print-slides {
+  display: none;
+}
+
+.print-slide {
+  width: 100vw;
+  height: 100vh;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  page-break-after: always;
+  overflow: hidden;
+}
+
 @media (max-width: 980px) {
   .header {
     flex-direction: column;
@@ -340,9 +372,16 @@ button.primary {
     background: #fff;
   }
 
-  .header,
-  .editor-panel,
-  .presentation {
+  body.print-ready .app,
+  body.print-ready .presentation {
     display: none !important;
+  }
+
+  body.print-ready .print-slides {
+    display: block !important;
+  }
+
+  .print-slide {
+    display: block;
   }
 }

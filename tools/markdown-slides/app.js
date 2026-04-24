@@ -9,12 +9,14 @@ const presentationCounter = document.getElementById('presentationCounter');
 const closePresentation = document.getElementById('closePresentation');
 const fullscreenBtn = document.getElementById('fullscreenBtn');
 const presentationControls = document.getElementById('presentationControls');
+const printSlides = document.getElementById('printSlides');
 
 let slides = [];
 let currentSlideIndex = 0;
 let previewMode = false;
 let suppressPreviewSync = false;
 let controlsTimer = null;
+let printCleanupPending = false;
 
 const sampleMarkdown = `# 專案總覽
 
@@ -67,6 +69,16 @@ function parseInline(text) {
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
     .replace(/`(.*?)`/g, '<code>$1</code>');
+}
+
+function stripInlineMarkdown(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/`(.*?)`/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/^\s*([-*+]\s+|\d+\.\s+)/gm, '')
+    .trim();
 }
 
 function splitSlides(markdown) {
@@ -333,6 +345,67 @@ function getSelectionBlockElement() {
   return null;
 }
 
+function savePreviewSelection() {
+  const selection = window.getSelection();
+  if (!selection || !selection.rangeCount || !markdownPreview.contains(selection.anchorNode)) return null;
+
+  const range = selection.getRangeAt(0).cloneRange();
+  const preSelectionRange = range.cloneRange();
+  preSelectionRange.selectNodeContents(markdownPreview);
+  preSelectionRange.setEnd(range.startContainer, range.startOffset);
+  const start = preSelectionRange.toString().length;
+
+  return {
+    start,
+    end: start + range.toString().length
+  };
+}
+
+function restorePreviewSelection(saved) {
+  if (!saved) return;
+
+  const selection = window.getSelection();
+  const range = document.createRange();
+  let charIndex = 0;
+  let startSet = false;
+  let endSet = false;
+
+  function walk(node) {
+    if (endSet) return;
+
+    if (node.nodeType === Node.TEXT_NODE) {
+      const nextCharIndex = charIndex + node.textContent.length;
+
+      if (!startSet && saved.start >= charIndex && saved.start <= nextCharIndex) {
+        range.setStart(node, saved.start - charIndex);
+        startSet = true;
+      }
+
+      if (!endSet && saved.end >= charIndex && saved.end <= nextCharIndex) {
+        range.setEnd(node, saved.end - charIndex);
+        endSet = true;
+      }
+
+      charIndex = nextCharIndex;
+      return;
+    }
+
+    node.childNodes.forEach(walk);
+  }
+
+  walk(markdownPreview);
+
+  if (!startSet) {
+    range.selectNodeContents(markdownPreview);
+    range.collapse(false);
+  } else if (!endSet) {
+    range.collapse(false);
+  }
+
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
 function placeCaretAtEnd(element) {
   const selection = window.getSelection();
   const range = document.createRange();
@@ -342,10 +415,11 @@ function placeCaretAtEnd(element) {
   selection.addRange(range);
 }
 
-function syncPreviewToMarkdown() {
+function syncPreviewToMarkdown({ rerenderPreview = false } = {}) {
+  const savedSelection = rerenderPreview ? savePreviewSelection() : null;
   const nextMarkdown = htmlToMarkdown(markdownPreview);
   input.value = nextMarkdown;
-  renderAll();
+  renderAll({ preservePreviewSelection: savedSelection, forcePreviewRender: rerenderPreview });
 }
 
 function indentListItem(item, outdent = false) {
@@ -410,7 +484,7 @@ function handlePreviewEnter(event) {
     return;
   }
 
-  if (block.tagName === 'P') {
+  if (block.tagName === 'P' || /^H[1-3]$/.test(block.tagName)) {
     event.preventDefault();
     const newParagraph = document.createElement('p');
     newParagraph.innerHTML = '<br>';
@@ -431,11 +505,84 @@ function handlePreviewTab(event) {
   }
 }
 
-function renderAll() {
+function groupPresentationContent() {
+  const body = presentationSlide.querySelector('.markdown-body');
+  if (!body) return;
+
+  body.style.removeProperty('--content-scale');
+  const children = Array.from(body.children);
+  const h1 = children[0]?.tagName === 'H1' ? children[0] : null;
+  const rest = children.filter(node => node !== h1);
+  const content = document.createElement('div');
+  content.className = 'presentation-content';
+
+  rest.forEach(node => content.appendChild(node));
+
+  if (h1) {
+    body.innerHTML = '';
+    body.appendChild(h1);
+    body.appendChild(content);
+  } else {
+    body.innerHTML = '';
+    body.appendChild(content);
+  }
+}
+
+function fitPresentationSlide() {
+  const body = presentationSlide.querySelector('.markdown-body');
+  const content = presentationSlide.querySelector('.presentation-content');
+  if (!body || !content) return;
+
+  let scale = 1;
+  body.style.setProperty('--content-scale', String(scale));
+
+  const h1 = body.querySelector(':scope > h1');
+  const h1Height = h1 ? h1.getBoundingClientRect().height + 20 : 0;
+  const availableHeight = Math.max(120, presentationSlide.clientHeight - h1Height - 24);
+  const contentHeight = content.scrollHeight;
+
+  if (contentHeight > availableHeight) {
+    scale = Math.max(0.58, availableHeight / contentHeight);
+    body.style.setProperty('--content-scale', scale.toFixed(3));
+  }
+}
+
+function renderPrintSlides() {
+  printSlides.innerHTML = slides
+    .map(slide => `<article class="print-slide">${renderMarkdown(slide)}</article>`)
+    .join('');
+}
+
+function cleanupPrintMode() {
+  if (!printCleanupPending) return;
+  document.body.classList.remove('print-ready');
+  printSlides.classList.add('hidden');
+  printSlides.setAttribute('aria-hidden', 'true');
+  printSlides.innerHTML = '';
+  printCleanupPending = false;
+}
+
+function exportToPdf() {
+  renderPrintSlides();
+  document.body.classList.add('print-ready');
+  printSlides.classList.remove('hidden');
+  printSlides.setAttribute('aria-hidden', 'false');
+  printCleanupPending = true;
+  window.print();
+}
+
+function renderAll({ preservePreviewSelection = null, forcePreviewRender = false } = {}) {
   slides = splitSlides(input.value);
-  suppressPreviewSync = true;
-  markdownPreview.innerHTML = renderMarkdown(input.value);
-  suppressPreviewSync = false;
+
+  const shouldRenderPreview = !previewMode || forcePreviewRender || markdownPreview.innerHTML === '';
+  if (shouldRenderPreview) {
+    suppressPreviewSync = true;
+    markdownPreview.innerHTML = renderMarkdown(input.value);
+    suppressPreviewSync = false;
+    if (preservePreviewSelection) {
+      restorePreviewSelection(preservePreviewSelection);
+    }
+  }
 
   if (!slides.length) {
     slides = [''];
@@ -457,13 +604,18 @@ function setEditorMode(enabled) {
   updateModeSwitch();
   input.classList.toggle('hidden', enabled);
   markdownPreview.classList.toggle('hidden', !enabled);
+  if (enabled) {
+    renderAll({ forcePreviewRender: true });
+  }
 }
 
 function wrapSelection(prefix, suffix = '') {
   const start = input.selectionStart;
   const end = input.selectionEnd;
   const selected = input.value.slice(start, end);
-  const next = selected ? `${prefix}${selected}${suffix}` : prefix;
+  const cleanSelected = stripInlineMarkdown(selected);
+  const content = cleanSelected || '';
+  const next = `${prefix}${content}${suffix}`;
   input.setRangeText(next, start, end, 'end');
   input.focus();
   renderAll();
@@ -471,22 +623,33 @@ function wrapSelection(prefix, suffix = '') {
 
 function applyStyle(style) {
   const templates = {
-    h1: { prefix: '# ', suffix: '' },
-    h2: { prefix: '## ', suffix: '' },
-    h3: { prefix: '### ', suffix: '' },
-    ul: { prefix: '- ', suffix: '' },
-    ol1: { prefix: '1. ', suffix: '' },
-    ol2: { prefix: '  1. ', suffix: '' },
-    ol3: { prefix: '    1. ', suffix: '' },
-    table: {
-      prefix: '\n| 欄位 1 | 欄位 2 | 欄位 3 |\n|---|---|---|\n| 內容 | 內容 | 內容 |\n',
-      suffix: ''
-    }
+    h1: '# ',
+    h2: '## ',
+    h3: '### ',
+    ul: '- ',
+    ol1: '1. ',
+    ol2: '  1. ',
+    ol3: '    1. ',
+    table: '| 欄位 1 | 欄位 2 | 欄位 3 |\n|---|---|---|\n| 內容 | 內容 | 內容 |'
   };
 
-  const item = templates[style];
-  if (!item) return;
-  wrapSelection(item.prefix, item.suffix);
+  const template = templates[style];
+  if (!template) return;
+
+  if (style === 'table') {
+    input.value = template;
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+    renderAll();
+    return;
+  }
+
+  const selected = input.value.slice(input.selectionStart, input.selectionEnd);
+  const cleanSelected = stripInlineMarkdown(selected);
+  input.value = `${template}${cleanSelected}`;
+  input.focus();
+  input.setSelectionRange(input.value.length, input.value.length);
+  renderAll();
 }
 
 function openPresentation() {
@@ -510,6 +673,8 @@ function closePresentationMode() {
 
 function updatePresentationSlide() {
   presentationSlide.innerHTML = renderMarkdown(slides[currentSlideIndex]);
+  groupPresentationContent();
+  fitPresentationSlide();
   presentationCounter.textContent = `${currentSlideIndex + 1} / ${slides.length}`;
 }
 
@@ -538,10 +703,10 @@ async function toggleFullscreen() {
   }
 }
 
-input.addEventListener('input', renderAll);
+input.addEventListener('input', () => renderAll({ forcePreviewRender: !previewMode }));
 modeSwitch.addEventListener('click', () => setEditorMode(!previewMode));
 playBtn.addEventListener('click', openPresentation);
-exportBtn.addEventListener('click', () => window.print());
+exportBtn.addEventListener('click', exportToPdf);
 closePresentation.addEventListener('click', closePresentationMode);
 fullscreenBtn.addEventListener('click', toggleFullscreen);
 
@@ -600,7 +765,17 @@ presentation.addEventListener('mousemove', event => {
 
 document.addEventListener('fullscreenchange', () => {
   fullscreenBtn.textContent = document.fullscreenElement ? '⤢' : '⛶';
+  if (!presentation.classList.contains('hidden')) {
+    updatePresentationSlide();
+  }
   revealControls();
+});
+
+window.addEventListener('afterprint', cleanupPrintMode);
+window.addEventListener('resize', () => {
+  if (!presentation.classList.contains('hidden')) {
+    fitPresentationSlide();
+  }
 });
 
 setEditorMode(false);
