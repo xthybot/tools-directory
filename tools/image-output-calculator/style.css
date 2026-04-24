@@ -303,6 +303,9 @@ input::placeholder { color: rgba(150, 169, 199, 0.66); }
 #logicSummary {
   white-space: pre-line;
 }
+#logicSummary.is-hidden {
+  display: none;
+}
 #logicSummary.is-error {
   border-color: rgba(255, 139, 167, 0.45);
   background: rgba(255, 139, 167, 0.12);

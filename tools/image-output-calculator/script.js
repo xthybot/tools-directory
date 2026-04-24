@@ -596,24 +596,17 @@ function renderOutput(result) {
 
 function renderSummaries(input, result) {
   const uniqueErrors = [...new Set(result.meta.errors || [])];
-  const uniqueSteps = [...new Set(result.meta.steps)];
+  const hasError = uniqueErrors.length > 0;
 
-  dom.logicSummary.classList.toggle('is-error', uniqueErrors.length > 0);
+  dom.logicSummary.classList.toggle('is-error', hasError);
+  dom.logicSummary.classList.toggle('is-hidden', !hasError);
 
-  if (uniqueErrors.length) {
+  if (hasError) {
     dom.logicSummary.textContent = uniqueErrors.join('\n');
     return;
   }
 
-  if (!uniqueSteps.length) {
-    if (!hasAnyInput(input)) {
-      dom.logicSummary.textContent = '等待輸入條件。';
-    } else {
-      dom.logicSummary.textContent = '目前資料仍不足，無法安全補算更多欄位。';
-    }
-  } else {
-    dom.logicSummary.textContent = uniqueSteps.join('\n');
-  }
+  dom.logicSummary.textContent = '';
 }
 
 function formatPair(widthField, heightField, fallbackUnit = '') {
