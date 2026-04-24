@@ -17,6 +17,9 @@ let previewMode = false;
 let suppressPreviewSync = false;
 let controlsTimer = null;
 let printCleanupPending = false;
+let historyStack = [];
+let historyIndex = -1;
+let isApplyingHistory = false;
 
 const sampleMarkdown = `# 專案總覽
 
@@ -77,7 +80,7 @@ function stripInlineMarkdown(text) {
     .replace(/\*(.*?)\*/g, '$1')
     .replace(/`(.*?)`/g, '$1')
     .replace(/^#{1,6}\s+/gm, '')
-    .replace(/^\s*([-*+]\s+|\d+\.\s+)/gm, '')
+    .replace(/^\s*([-*+]\s+|\d+\.\s+|[a-zA-Z]\.\s+|[ivxlcdmIVXLCDM]+\.\s+)/gm, '')
     .trim();
 }
 
@@ -571,6 +574,36 @@ function exportToPdf() {
   window.print();
 }
 
+function pushHistoryState(value) {
+  if (isApplyingHistory) return;
+  if (historyStack[historyIndex] === value) return;
+
+  historyStack = historyStack.slice(0, historyIndex + 1);
+  historyStack.push(value);
+  historyIndex = historyStack.length - 1;
+
+  if (historyStack.length > 200) {
+    historyStack.shift();
+    historyIndex = historyStack.length - 1;
+  }
+}
+
+function applyHistory(delta) {
+  const nextIndex = historyIndex + delta;
+  if (nextIndex < 0 || nextIndex >= historyStack.length) return;
+
+  historyIndex = nextIndex;
+  isApplyingHistory = true;
+  input.value = historyStack[historyIndex];
+  renderAll({ forcePreviewRender: true });
+  if (previewMode) {
+    markdownPreview.focus();
+  } else {
+    input.focus();
+  }
+  isApplyingHistory = false;
+}
+
 function renderAll({ preservePreviewSelection = null, forcePreviewRender = false } = {}) {
   slides = splitSlides(input.value);
 
@@ -592,6 +625,8 @@ function renderAll({ preservePreviewSelection = null, forcePreviewRender = false
     currentSlideIndex = Math.min(currentSlideIndex, slides.length - 1);
     updatePresentationSlide();
   }
+
+  pushHistoryState(input.value);
 }
 
 function updateModeSwitch() {
@@ -628,28 +663,23 @@ function applyStyle(style) {
     h3: '### ',
     ul: '- ',
     ol1: '1. ',
-    ol2: '  1. ',
-    ol3: '    1. ',
+    ol2: 'a. ',
+    ol3: 'i. ',
     table: '| 欄位 1 | 欄位 2 | 欄位 3 |\n|---|---|---|\n| 內容 | 內容 | 內容 |'
   };
 
   const template = templates[style];
   if (!template) return;
 
-  if (style === 'table') {
-    input.value = template;
-    input.focus();
-    input.setSelectionRange(input.value.length, input.value.length);
-    renderAll();
-    return;
-  }
-
-  const selected = input.value.slice(input.selectionStart, input.selectionEnd);
+  const start = input.selectionStart;
+  const end = input.selectionEnd;
+  const selected = input.value.slice(start, end);
   const cleanSelected = stripInlineMarkdown(selected);
-  input.value = `${template}${cleanSelected}`;
+  const insertText = `${template}${cleanSelected}`;
+
+  input.setRangeText(insertText, start, end, 'end');
   input.focus();
-  input.setSelectionRange(input.value.length, input.value.length);
-  renderAll();
+  renderAll({ forcePreviewRender: previewMode });
 }
 
 function openPresentation() {
@@ -704,6 +734,22 @@ async function toggleFullscreen() {
 }
 
 input.addEventListener('input', () => renderAll({ forcePreviewRender: !previewMode }));
+
+input.addEventListener('keydown', event => {
+  if (!(event.ctrlKey || event.metaKey)) return;
+  const key = event.key.toLowerCase();
+
+  if (key === 'z' && event.shiftKey) {
+    event.preventDefault();
+    applyHistory(1);
+    return;
+  }
+
+  if (key === 'z') {
+    event.preventDefault();
+    applyHistory(-1);
+  }
+});
 modeSwitch.addEventListener('click', () => setEditorMode(!previewMode));
 playBtn.addEventListener('click', openPresentation);
 exportBtn.addEventListener('click', exportToPdf);
@@ -716,6 +762,16 @@ markdownPreview.addEventListener('input', () => {
 });
 
 markdownPreview.addEventListener('keydown', event => {
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
+    event.preventDefault();
+    if (event.shiftKey) {
+      applyHistory(1);
+    } else {
+      applyHistory(-1);
+    }
+    return;
+  }
+
   if (!previewMode) return;
 
   if (event.key === 'Enter') {
@@ -779,4 +835,5 @@ window.addEventListener('resize', () => {
 });
 
 setEditorMode(false);
+pushHistoryState(input.value);
 renderAll();
