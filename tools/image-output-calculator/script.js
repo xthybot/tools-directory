@@ -589,7 +589,7 @@ function renderOutput(result) {
   setResultBox(dom.outputPhysicalHeight, displayPhysicalHeight.value, result.physical.height.source, 4);
   setResultBox(dom.outputPixelWidth, result.pixel.width.value, result.pixel.width.source, 0);
   setResultBox(dom.outputPixelHeight, result.pixel.height.value, result.pixel.height.source, 0);
-  setResultBox(dom.outputResolutionValue, result.resolution.value, result.resolution.source, 4);
+  setResultBox(dom.outputResolutionValue, result.resolution.value, result.resolution.source, 0);
   setResultBox(dom.outputRatioWidth, result.ratio.displayWidth, result.ratio.displayWidthSource, 2, true);
   setResultBox(dom.outputRatioHeight, result.ratio.displayHeight, result.ratio.displayHeightSource, 2, true);
 }
