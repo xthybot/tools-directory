@@ -1,4 +1,5 @@
 import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+import elkLayouts from 'https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.2.1/dist/mermaid-layout-elk.esm.min.mjs';
 import html2canvas from 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/+esm';
 import { Canvg } from 'https://cdn.jsdelivr.net/npm/canvg@4.0.2/+esm';
 
@@ -78,6 +79,8 @@ const pageTheme = {
 
 const defaultTheme = themePresets.dark;
 
+mermaid.registerLayoutLoaders(elkLayouts);
+
 let renderTimer = null;
 let latestSvg = '';
 let latestCode = '';
@@ -122,12 +125,13 @@ function applyInputs(config) {
 
 function buildMermaidConfig({ forExport = false } = {}) {
   const theme = getThemeConfig();
-  const renderer = layoutEngine.value || 'dagre-wrapper';
+  const selectedLayout = layoutEngine.value || 'dagre';
+  const renderer = selectedLayout.startsWith('elk') ? 'elk' : 'dagre-wrapper';
   return {
     startOnLoad: false,
     securityLevel: 'loose',
     theme: 'base',
-    layout: renderer === 'elk' ? 'elk' : 'dagre',
+    layout: selectedLayout,
     flowchart: {
       defaultRenderer: renderer,
       htmlLabels: false,
@@ -260,15 +264,15 @@ function updateCount() {
 }
 
 function getLayoutConfigBlock() {
-  const renderer = layoutEngine.value || 'dagre-wrapper';
-  const layout = renderer === 'elk' ? 'elk' : 'dagre';
+  const selectedLayout = layoutEngine.value || 'dagre';
+  const renderer = selectedLayout.startsWith('elk') ? 'elk' : 'dagre-wrapper';
 
   // Mermaid 官方 layout 設定建議使用 YAML frontmatter。
   // 單靠 initialize / init directive 在部分圖表或 Mermaid v11 lazy loader 情境下可能不會明顯生效。
   return [
     '---',
     'config:',
-    `  layout: ${layout}`,
+    `  layout: ${selectedLayout}`,
     '  flowchart:',
     `    defaultRenderer: ${renderer}`,
     '  class:',
