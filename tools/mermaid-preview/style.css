@@ -12,6 +12,9 @@
   --surface-soft: rgba(255,255,255,0.03);
   --surface-softer: rgba(255,255,255,0.02);
   --placeholder: #7890b1;
+  --body-bg: radial-gradient(circle at top, #132235 0%, var(--bg) 46%, #0a1020 100%);
+  --orb-a: rgba(148, 163, 184, 0.13);
+  --orb-b: rgba(168, 85, 247, 0.13);
 }
 * { box-sizing: border-box; }
 html, body {
@@ -19,7 +22,7 @@ html, body {
   padding: 0;
   font-family: "Inter", system-ui, sans-serif;
   color: var(--text);
-  background: radial-gradient(circle at top, #10284a 0%, var(--bg) 40%, #030712 100%);
+  background: var(--body-bg);
 }
 body {
   min-height: 100vh;
@@ -49,14 +52,14 @@ textarea, button, select, input { font: inherit; }
   height: 280px;
   top: 8%;
   left: 8%;
-  background: rgba(115,224,255,0.16);
+  background: var(--orb-a);
 }
 .orb-b {
   width: 340px;
   height: 340px;
   right: 4%;
   top: 20%;
-  background: rgba(124,140,255,0.18);
+  background: var(--orb-b);
 }
 .shell {
   position: relative;

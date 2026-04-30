@@ -39,15 +39,15 @@ const demoCode = `flowchart TD
 const themePresets = {
   dark: {
     mode: 'dark',
-    lineColor: '#38bdf8',
-    textColor: '#e2e8f0',
-    backgroundColor: '#0f172a',
-    rectShapeColor: '#3b82f6',
-    roundedShapeColor: '#06b6d4',
-    circleShapeColor: '#10b981',
-    polygonShapeColor: '#f59e0b',
-    specialShapeColor: '#8b5cf6',
-    classShapeColor: '#ec4899'
+    lineColor: '#94a3b8',
+    textColor: '#f8fafc',
+    backgroundColor: '#111827',
+    rectShapeColor: '#475569',
+    roundedShapeColor: '#0f766e',
+    circleShapeColor: '#166534',
+    polygonShapeColor: '#92400e',
+    specialShapeColor: '#6d28d9',
+    classShapeColor: '#9d174d'
   },
   default: {
     mode: 'default',
@@ -65,30 +65,36 @@ const themePresets = {
 
 const pageTheme = {
   dark: {
-    '--bg': '#07111f',
-    '--panel': 'rgba(12, 22, 39, 0.82)',
-    '--text': '#ebf3ff',
-    '--muted': '#92a4bf',
-    '--line': 'rgba(146, 164, 191, 0.16)',
-    '--accent': '#73e0ff',
-    '--accent-2': '#7c8cff',
-    '--surface': 'rgba(4, 10, 20, 0.72)',
-    '--surface-soft': 'rgba(255,255,255,0.03)',
-    '--surface-softer': 'rgba(255,255,255,0.02)',
-    '--placeholder': '#7890b1'
+    '--bg': '#0f172a',
+    '--panel': 'rgba(15, 23, 42, 0.86)',
+    '--text': '#f1f5f9',
+    '--muted': '#94a3b8',
+    '--line': 'rgba(148, 163, 184, 0.18)',
+    '--accent': '#a78bfa',
+    '--accent-2': '#38bdf8',
+    '--surface': 'rgba(15, 23, 42, 0.72)',
+    '--surface-soft': 'rgba(148, 163, 184, 0.08)',
+    '--surface-softer': 'rgba(148, 163, 184, 0.06)',
+    '--placeholder': '#94a3b8',
+    '--body-bg': 'radial-gradient(circle at 18% 0%, rgba(51, 65, 85, 0.42) 0%, rgba(15, 23, 42, 0.96) 42%, #0b1120 100%)',
+    '--orb-a': 'rgba(56, 189, 248, 0.10)',
+    '--orb-b': 'rgba(167, 139, 250, 0.12)'
   },
   default: {
-    '--bg': '#eef4ff',
-    '--panel': 'rgba(255, 255, 255, 0.9)',
-    '--text': '#18212f',
-    '--muted': '#5c6b80',
-    '--line': 'rgba(66, 84, 102, 0.16)',
-    '--accent': '#4f7cff',
-    '--accent-2': '#6d5efc',
+    '--bg': '#f8fafc',
+    '--panel': 'rgba(255, 255, 255, 0.92)',
+    '--text': '#1e293b',
+    '--muted': '#64748b',
+    '--line': 'rgba(100, 116, 139, 0.16)',
+    '--accent': '#2563eb',
+    '--accent-2': '#7c3aed',
     '--surface': '#ffffff',
-    '--surface-soft': '#f6f8fc',
-    '--surface-softer': '#f8faff',
-    '--placeholder': '#8191a6'
+    '--surface-soft': '#f8fafc',
+    '--surface-softer': '#f1f5f9',
+    '--placeholder': '#94a3b8',
+    '--body-bg': 'linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%)',
+    '--orb-a': 'rgba(59, 130, 246, 0.08)',
+    '--orb-b': 'rgba(124, 58, 237, 0.07)'
   }
 };
 
