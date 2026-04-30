@@ -218,6 +218,17 @@ textarea::placeholder {
   grid-template-columns: 112px minmax(0, 1fr);
   align-items: center;
   gap: 10px;
+  text-align: right;
+}
+.theme-mode-label select,
+.theme-grid label select,
+.layout-grid label select,
+.color-settings label select,
+.theme-mode-label input,
+.theme-grid label input,
+.layout-grid label input,
+.color-settings label input {
+  text-align: left;
 }
 .color-settings {
   border: 1px solid var(--line);
