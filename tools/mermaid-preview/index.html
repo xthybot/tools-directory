@@ -77,11 +77,9 @@ flowchart TD
             <label>布局引擎
               <select id="layoutEngine">
                 <option value="dagre">標準 Dagre</option>
-                <option value="elk">ELK Layered</option>
-                <option value="elk.force">ELK Force</option>
-                <option value="elk.stress">ELK Stress</option>
-                <option value="elk.mrtree">ELK Multi-root Tree</option>
+                <option value="elk">ELK Layered（自動排版）</option>
               </select>
+              <span class="field-note">Force / Stress 等 ELK 變體在 flowchart 可能漏線，已改用穩定選項。</span>
             </label>
             <label>圖形方向
               <select id="graphDirection">

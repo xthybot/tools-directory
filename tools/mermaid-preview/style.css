@@ -211,6 +211,11 @@ textarea::placeholder {
   display: grid;
   gap: 8px;
 }
+.field-note {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
 select, input[type="color"] {
   width: 100%;
   border: 1px solid var(--line);
