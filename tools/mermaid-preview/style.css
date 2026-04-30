@@ -215,7 +215,7 @@ textarea::placeholder {
 }
 .theme-mode-label, .theme-grid label, .layout-grid label, .color-settings label {
   display: grid;
-  grid-template-columns: minmax(86px, auto) minmax(0, 1fr);
+  grid-template-columns: 112px minmax(0, 1fr);
   align-items: center;
   gap: 10px;
 }
@@ -294,6 +294,6 @@ input[type="color"] {
     grid-template-columns: 1fr;
   }
   .theme-mode-label, .theme-grid label, .layout-grid label, .color-settings label {
-    grid-template-columns: minmax(78px, auto) minmax(0, 1fr);
+    grid-template-columns: 96px minmax(0, 1fr);
   }
 }
