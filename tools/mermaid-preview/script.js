@@ -259,9 +259,35 @@ function updateCount() {
   charCount.textContent = `${codeInput.value.length} 字元`;
 }
 
-function getLayoutDirective() {
+function getLayoutConfigBlock() {
   const renderer = layoutEngine.value || 'dagre-wrapper';
-  return `%%{init: {"layout":"${renderer === 'elk' ? 'elk' : 'dagre'}","flowchart":{"defaultRenderer":"${renderer}"},"class":{"defaultRenderer":"${renderer}"},"state":{"defaultRenderer":"${renderer}"}}}%%`;
+  const layout = renderer === 'elk' ? 'elk' : 'dagre';
+
+  // Mermaid 官方 layout 設定建議使用 YAML frontmatter。
+  // 單靠 initialize / init directive 在部分圖表或 Mermaid v11 lazy loader 情境下可能不會明顯生效。
+  return [
+    '---',
+    'config:',
+    `  layout: ${layout}`,
+    '  flowchart:',
+    `    defaultRenderer: ${renderer}`,
+    '  class:',
+    `    defaultRenderer: ${renderer}`,
+    '  state:',
+    `    defaultRenderer: ${renderer}`,
+    '---'
+  ].join('\n');
+}
+
+function hasYamlFrontmatter(code) {
+  return /^---\s*\n[\s\S]*?\n---\s*\n?/.test(code);
+}
+
+function withLayoutConfig(code) {
+  // 若使用者已手寫 Mermaid YAML frontmatter，保留使用者設定，避免粗暴覆蓋。
+  // 否則由工具注入目前選取的 layout / renderer。
+  if (hasYamlFrontmatter(code)) return code;
+  return `${getLayoutConfigBlock()}\n${code}`;
 }
 
 function getRenderCode(code) {
@@ -277,7 +303,7 @@ function getRenderCode(code) {
       );
     }
 
-    return `${getLayoutDirective()}\n${lines.join('\n')}`;
+    return withLayoutConfig(lines.join('\n'));
   }
 
   const classLineIndex = lines.findIndex(line => /^\s*classDiagram(?:-v2)?\b/i.test(line));
@@ -297,10 +323,10 @@ function getRenderCode(code) {
       }
     }
 
-    return `${getLayoutDirective()}\n${lines.join('\n')}`;
+    return withLayoutConfig(lines.join('\n'));
   }
 
-  return `${getLayoutDirective()}\n${code}`;
+  return withLayoutConfig(code);
 }
 
 async function renderDiagram() {
