@@ -15,9 +15,7 @@ const downloadPngBtn = document.getElementById('downloadPngBtn');
 const themeMode = document.getElementById('themeMode');
 const layoutEngine = document.getElementById('layoutEngine');
 const graphDirection = document.getElementById('graphDirection');
-const primaryColor = document.getElementById('primaryColor');
 const lineColor = document.getElementById('lineColor');
-const shapeColorMode = document.getElementById('shapeColorMode');
 const rectShapeColor = document.getElementById('rectShapeColor');
 const roundedShapeColor = document.getElementById('roundedShapeColor');
 const circleShapeColor = document.getElementById('circleShapeColor');
@@ -41,7 +39,6 @@ const demoCode = `flowchart TD
 const themePresets = {
   dark: {
     mode: 'dark',
-    primaryColor: '#7c8cff',
     lineColor: '#73e0ff',
     textColor: '#e8f0ff',
     backgroundColor: '#0b1220',
@@ -54,7 +51,6 @@ const themePresets = {
   },
   default: {
     mode: 'default',
-    primaryColor: '#dbe8ff',
     lineColor: '#5b6f8a',
     textColor: '#18212f',
     backgroundColor: '#f7fafc',
@@ -127,7 +123,7 @@ function getExportDimensions() {
 function getThemeConfig() {
   return {
     mode: themeMode.value,
-    primaryColor: primaryColor.value,
+    primaryColor: rectShapeColor.value,
     lineColor: lineColor.value,
     textColor: textColor.value,
     backgroundColor: backgroundColor.value
@@ -136,7 +132,6 @@ function getThemeConfig() {
 
 function applyInputs(config) {
   themeMode.value = config.mode;
-  primaryColor.value = config.primaryColor;
   lineColor.value = config.lineColor;
   textColor.value = config.textColor;
   backgroundColor.value = config.backgroundColor;
@@ -246,8 +241,6 @@ function paintElement(el, fillColor) {
 }
 
 function paintShapeColors(svg) {
-  if (!shapeColorMode.checked) return;
-
   svg.querySelectorAll('.node rect').forEach(el => {
     if (el.closest('.cluster')) return;
     paintElement(el, isRoundedRect(el) ? roundedShapeColor.value : rectShapeColor.value);
@@ -705,10 +698,10 @@ themeMode.addEventListener('change', () => {
   applyPreset(themeMode.value);
   renderDiagram();
 });
-[layoutEngine, graphDirection, shapeColorMode].forEach(el => {
+[layoutEngine, graphDirection].forEach(el => {
   el.addEventListener('change', renderDiagram);
 });
-[primaryColor, lineColor, textColor, backgroundColor, rectShapeColor, roundedShapeColor, circleShapeColor, polygonShapeColor, specialShapeColor, classShapeColor].forEach(el => {
+[lineColor, textColor, backgroundColor, rectShapeColor, roundedShapeColor, circleShapeColor, polygonShapeColor, specialShapeColor, classShapeColor].forEach(el => {
   el.addEventListener('input', () => {
     syncPreviewSurface();
     scheduleRender();
