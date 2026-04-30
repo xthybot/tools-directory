@@ -134,6 +134,13 @@ function buildMermaidConfig({ forExport = false } = {}) {
       useMaxWidth: true,
       wrappingWidth: 220
     },
+    class: {
+      defaultRenderer: renderer,
+      useMaxWidth: true
+    },
+    state: {
+      defaultRenderer: renderer
+    },
     sequence: {
       useMaxWidth: true
     },
@@ -252,19 +259,48 @@ function updateCount() {
   charCount.textContent = `${codeInput.value.length} 字元`;
 }
 
+function getLayoutDirective() {
+  const renderer = layoutEngine.value || 'dagre-wrapper';
+  return `%%{init: {"layout":"${renderer === 'elk' ? 'elk' : 'dagre'}","flowchart":{"defaultRenderer":"${renderer}"},"class":{"defaultRenderer":"${renderer}"},"state":{"defaultRenderer":"${renderer}"}}}%%`;
+}
+
 function getRenderCode(code) {
   const direction = graphDirection.value;
-  if (!direction || direction === 'auto') return code;
-
+  const shouldOverrideDirection = direction && direction !== 'auto';
   const lines = code.split('\n');
-  const graphLineIndex = lines.findIndex(line => /^\s*(flowchart|graph)(\s+(TB|TD|BT|RL|LR))?\b/i.test(line));
-  if (graphLineIndex === -1) return code;
+  const flowchartLineIndex = lines.findIndex(line => /^\s*(flowchart|graph)(\s+(TB|TD|BT|RL|LR))?\b/i.test(line));
+  if (flowchartLineIndex !== -1) {
+    if (shouldOverrideDirection) {
+      lines[flowchartLineIndex] = lines[flowchartLineIndex].replace(
+        /^(\s*(?:flowchart|graph))(?:\s+(?:TB|TD|BT|RL|LR))?(\b.*)$/i,
+        `$1 ${direction}$2`
+      );
+    }
 
-  lines[graphLineIndex] = lines[graphLineIndex].replace(
-    /^(\s*(?:flowchart|graph))(?:\s+(?:TB|TD|BT|RL|LR))?(\b.*)$/i,
-    `$1 ${direction}$2`
-  );
-  return lines.join('\n');
+    return `${getLayoutDirective()}\n${lines.join('\n')}`;
+  }
+
+  const classLineIndex = lines.findIndex(line => /^\s*classDiagram(?:-v2)?\b/i.test(line));
+  if (classLineIndex !== -1) {
+    if (shouldOverrideDirection) {
+      const directionLineIndex = lines.findIndex((line, index) => (
+        index > classLineIndex && /^\s*direction\s+(TB|TD|BT|RL|LR)\s*$/i.test(line)
+      ));
+
+      if (directionLineIndex !== -1) {
+        lines[directionLineIndex] = lines[directionLineIndex].replace(
+          /^(\s*direction\s+)(TB|TD|BT|RL|LR)(\s*)$/i,
+          `$1${direction}$3`
+        );
+      } else {
+        lines.splice(classLineIndex + 1, 0, `  direction ${direction}`);
+      }
+    }
+
+    return `${getLayoutDirective()}\n${lines.join('\n')}`;
+  }
+
+  return `${getLayoutDirective()}\n${code}`;
 }
 
 async function renderDiagram() {
