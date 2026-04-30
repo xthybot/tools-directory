@@ -197,17 +197,17 @@ textarea::placeholder {
   gap: 12px;
   margin-bottom: 14px;
 }
-.theme-mode-label, .theme-grid label, .layout-grid label {
+.theme-mode-label, .theme-grid label, .layout-grid label, .shape-color-grid label {
   color: var(--muted);
   font-size: 14px;
 }
-.theme-grid, .layout-grid {
+.theme-grid, .layout-grid, .shape-color-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 14px;
 }
-.theme-grid label, .layout-grid label {
+.theme-grid label, .layout-grid label, .shape-color-grid label {
   display: grid;
   gap: 8px;
 }
@@ -239,6 +239,12 @@ textarea::placeholder {
 }
 .toggle-row small {
   color: var(--muted);
+}
+.shape-color-grid {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px;
+  background: var(--surface-softer);
 }
 select, input[type="color"] {
   width: 100%;
@@ -305,7 +311,7 @@ input[type="color"] {
   .hero, .editor-card, .preview-card {
     padding: 20px;
   }
-  .theme-grid, .layout-grid {
+  .theme-grid, .layout-grid, .shape-color-grid {
     grid-template-columns: 1fr;
   }
 }

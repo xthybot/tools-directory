@@ -17,7 +17,14 @@ const layoutEngine = document.getElementById('layoutEngine');
 const graphDirection = document.getElementById('graphDirection');
 const primaryColor = document.getElementById('primaryColor');
 const lineColor = document.getElementById('lineColor');
-const unifiedShapeColors = document.getElementById('unifiedShapeColors');
+const shapeColorMode = document.getElementById('shapeColorMode');
+const shapeColorPanel = document.getElementById('shapeColorPanel');
+const rectShapeColor = document.getElementById('rectShapeColor');
+const roundedShapeColor = document.getElementById('roundedShapeColor');
+const circleShapeColor = document.getElementById('circleShapeColor');
+const polygonShapeColor = document.getElementById('polygonShapeColor');
+const specialShapeColor = document.getElementById('specialShapeColor');
+const classShapeColor = document.getElementById('classShapeColor');
 const textColor = document.getElementById('textColor');
 const backgroundColor = document.getElementById('backgroundColor');
 const applyThemeBtn = document.getElementById('applyThemeBtn');
@@ -38,14 +45,26 @@ const themePresets = {
     primaryColor: '#7c8cff',
     lineColor: '#73e0ff',
     textColor: '#e8f0ff',
-    backgroundColor: '#0b1220'
+    backgroundColor: '#0b1220',
+    rectShapeColor: '#7c8cff',
+    roundedShapeColor: '#8dd8ff',
+    circleShapeColor: '#7ff0c7',
+    polygonShapeColor: '#ffd166',
+    specialShapeColor: '#c7a4ff',
+    classShapeColor: '#ffb4c8'
   },
   default: {
     mode: 'default',
     primaryColor: '#dbe8ff',
     lineColor: '#5b6f8a',
     textColor: '#18212f',
-    backgroundColor: '#f7fafc'
+    backgroundColor: '#f7fafc',
+    rectShapeColor: '#dbe8ff',
+    roundedShapeColor: '#c6e8ff',
+    circleShapeColor: '#c8f7dc',
+    polygonShapeColor: '#ffe8a3',
+    specialShapeColor: '#ded3ff',
+    classShapeColor: '#ffd4df'
   }
 };
 
@@ -122,6 +141,12 @@ function applyInputs(config) {
   lineColor.value = config.lineColor;
   textColor.value = config.textColor;
   backgroundColor.value = config.backgroundColor;
+  rectShapeColor.value = config.rectShapeColor || config.primaryColor;
+  roundedShapeColor.value = config.roundedShapeColor || config.primaryColor;
+  circleShapeColor.value = config.circleShapeColor || config.primaryColor;
+  polygonShapeColor.value = config.polygonShapeColor || config.primaryColor;
+  specialShapeColor.value = config.specialShapeColor || config.primaryColor;
+  classShapeColor.value = config.classShapeColor || config.primaryColor;
 }
 
 function buildMermaidConfig({ forExport = false } = {}) {
@@ -210,6 +235,52 @@ function syncPreviewSurface() {
   preview.style.background = backgroundColor.value;
 }
 
+function isRoundedRect(el) {
+  const rx = Number.parseFloat(el.getAttribute('rx') || el.style.rx || '0');
+  const ry = Number.parseFloat(el.getAttribute('ry') || el.style.ry || '0');
+  return rx > 0 || ry > 0;
+}
+
+function paintElement(el, fillColor) {
+  el.style.fill = fillColor;
+  el.style.stroke = lineColor.value;
+}
+
+function paintShapeColors(svg) {
+  if (!shapeColorMode.checked) return;
+
+  svg.querySelectorAll('.node rect').forEach(el => {
+    if (el.closest('.cluster')) return;
+    paintElement(el, isRoundedRect(el) ? roundedShapeColor.value : rectShapeColor.value);
+  });
+
+  svg.querySelectorAll('.node circle, .node ellipse').forEach(el => {
+    paintElement(el, circleShapeColor.value);
+  });
+
+  svg.querySelectorAll('.node polygon').forEach(el => {
+    paintElement(el, polygonShapeColor.value);
+  });
+
+  svg.querySelectorAll('.node path').forEach(el => {
+    if (el.closest('.arrowMarkerPath') || el.closest('.edgePath') || el.closest('.flowchart-link')) return;
+    paintElement(el, specialShapeColor.value);
+  });
+
+  svg.querySelectorAll('.classGroup rect, .classGroup path, .stateGroup rect, .stateGroup circle, .stateGroup ellipse, .stateGroup polygon, .stateGroup path').forEach(el => {
+    if (el.closest('.arrowMarkerPath') || el.closest('.edgePath')) return;
+    paintElement(el, classShapeColor.value);
+  });
+
+  svg.querySelectorAll('.er.entityBox, .er.attributeBoxOdd, .er.attributeBoxEven, .er.relationshipLabelBox, .actor, .participant rect, .task, .section, .slice').forEach(el => {
+    paintElement(el, classShapeColor.value);
+  });
+
+  svg.querySelectorAll('.classGroup line, .stateGroup line').forEach(el => {
+    el.style.stroke = lineColor.value;
+  });
+}
+
 function paintRenderedDiagram() {
   const svg = preview.querySelector('svg');
   if (!svg) return;
@@ -217,41 +288,7 @@ function paintRenderedDiagram() {
   const labelBg = themeMode.value === 'default' ? '#ffffff' : '#0f1726';
   const clusterBg = themeMode.value === 'default' ? '#edf3ff' : '#10192a';
 
-  if (unifiedShapeColors.checked) {
-    const shapeSelectors = [
-      '.node rect',
-      '.node circle',
-      '.node ellipse',
-      '.node polygon',
-      '.node path',
-      '.classGroup rect',
-      '.classGroup path',
-      '.stateGroup rect',
-      '.stateGroup circle',
-      '.stateGroup ellipse',
-      '.stateGroup polygon',
-      '.stateGroup path',
-      '.er.entityBox',
-      '.er.attributeBoxOdd',
-      '.er.attributeBoxEven',
-      '.er.relationshipLabelBox',
-      '.actor',
-      '.participant rect',
-      '.task',
-      '.section',
-      '.slice'
-    ].join(', ');
-
-    svg.querySelectorAll(shapeSelectors).forEach(el => {
-      if (el.closest('.arrowMarkerPath') || el.closest('.edgePath') || el.closest('.flowchart-link')) return;
-      el.style.fill = primaryColor.value;
-      el.style.stroke = lineColor.value;
-    });
-
-    svg.querySelectorAll('.classGroup line, .stateGroup line').forEach(el => {
-      el.style.stroke = lineColor.value;
-    });
-  }
+  paintShapeColors(svg);
 
   svg.querySelectorAll('.cluster rect').forEach(el => {
     el.style.fill = clusterBg;
@@ -669,10 +706,13 @@ themeMode.addEventListener('change', () => {
   applyPreset(themeMode.value);
   renderDiagram();
 });
-[layoutEngine, graphDirection, unifiedShapeColors].forEach(el => {
-  el.addEventListener('change', renderDiagram);
+[layoutEngine, graphDirection, shapeColorMode].forEach(el => {
+  el.addEventListener('change', () => {
+    shapeColorPanel.hidden = !shapeColorMode.checked;
+    renderDiagram();
+  });
 });
-[primaryColor, lineColor, textColor, backgroundColor].forEach(el => {
+[primaryColor, lineColor, textColor, backgroundColor, rectShapeColor, roundedShapeColor, circleShapeColor, polygonShapeColor, specialShapeColor, classShapeColor].forEach(el => {
   el.addEventListener('input', () => {
     syncPreviewSurface();
     scheduleRender();
