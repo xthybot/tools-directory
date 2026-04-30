@@ -12,6 +12,8 @@ const copyBtn = document.getElementById('copyBtn');
 const downloadSvgBtn = document.getElementById('downloadSvgBtn');
 const downloadPngBtn = document.getElementById('downloadPngBtn');
 const themeMode = document.getElementById('themeMode');
+const layoutEngine = document.getElementById('layoutEngine');
+const graphDirection = document.getElementById('graphDirection');
 const primaryColor = document.getElementById('primaryColor');
 const lineColor = document.getElementById('lineColor');
 const textColor = document.getElementById('textColor');
@@ -79,6 +81,7 @@ const defaultTheme = themePresets.dark;
 let renderTimer = null;
 let latestSvg = '';
 let latestCode = '';
+let latestRenderCode = '';
 let renderCount = 0;
 
 function getExportDimensions() {
@@ -119,11 +122,14 @@ function applyInputs(config) {
 
 function buildMermaidConfig({ forExport = false } = {}) {
   const theme = getThemeConfig();
+  const renderer = layoutEngine.value || 'dagre-wrapper';
   return {
     startOnLoad: false,
     securityLevel: 'loose',
     theme: 'base',
+    layout: renderer === 'elk' ? 'elk' : 'dagre',
     flowchart: {
+      defaultRenderer: renderer,
       htmlLabels: false,
       useMaxWidth: true,
       wrappingWidth: 220
@@ -246,9 +252,26 @@ function updateCount() {
   charCount.textContent = `${codeInput.value.length} 字元`;
 }
 
+function getRenderCode(code) {
+  const direction = graphDirection.value;
+  if (!direction || direction === 'auto') return code;
+
+  const lines = code.split('\n');
+  const graphLineIndex = lines.findIndex(line => /^\s*(flowchart|graph)(\s+(TB|TD|BT|RL|LR))?\b/i.test(line));
+  if (graphLineIndex === -1) return code;
+
+  lines[graphLineIndex] = lines[graphLineIndex].replace(
+    /^(\s*(?:flowchart|graph))(?:\s+(?:TB|TD|BT|RL|LR))?(\b.*)$/i,
+    `$1 ${direction}$2`
+  );
+  return lines.join('\n');
+}
+
 async function renderDiagram() {
   const code = codeInput.value.trim();
+  const renderCode = getRenderCode(code);
   latestCode = code;
+  latestRenderCode = renderCode;
   updateCount();
 
   if (!code) {
@@ -266,7 +289,7 @@ async function renderDiagram() {
 
   try {
     const id = `mermaid-preview-${++renderCount}`;
-    const { svg } = await mermaid.render(id, code);
+    const { svg } = await mermaid.render(id, renderCode);
     latestSvg = svg;
     preview.innerHTML = svg;
     syncPreviewSurface();
@@ -468,7 +491,7 @@ async function downloadPng() {
     console.warn('DOM PNG export failed, fallback to SVG export:', domError);
 
     try {
-      const exportCode = latestCode || codeInput.value.trim();
+      const exportCode = latestRenderCode || getRenderCode(latestCode || codeInput.value.trim());
       if (!exportCode) {
         setStatus('目前沒有可下載的圖');
         return;
@@ -538,6 +561,9 @@ codeInput.addEventListener('input', scheduleRender);
 themeMode.addEventListener('change', () => {
   applyPreset(themeMode.value);
   renderDiagram();
+});
+[layoutEngine, graphDirection].forEach(el => {
+  el.addEventListener('change', renderDiagram);
 });
 [primaryColor, lineColor, textColor, backgroundColor].forEach(el => {
   el.addEventListener('input', () => {

@@ -73,6 +73,24 @@ flowchart TD
             </label>
           </div>
 
+          <div class="layout-grid">
+            <label>布局引擎
+              <select id="layoutEngine">
+                <option value="dagre-wrapper">標準 Dagre</option>
+                <option value="elk">自動排版 ELK</option>
+              </select>
+            </label>
+            <label>圖形方向
+              <select id="graphDirection">
+                <option value="auto">依程式碼</option>
+                <option value="LR">左到右</option>
+                <option value="TB">上到下</option>
+                <option value="RL">右到左</option>
+                <option value="BT">下到上</option>
+              </select>
+            </label>
+          </div>
+
           <div class="theme-grid">
             <label>主色
               <input type="color" id="primaryColor" value="#7c8cff" />
