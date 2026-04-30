@@ -18,7 +18,6 @@ const graphDirection = document.getElementById('graphDirection');
 const primaryColor = document.getElementById('primaryColor');
 const lineColor = document.getElementById('lineColor');
 const shapeColorMode = document.getElementById('shapeColorMode');
-const shapeColorPanel = document.getElementById('shapeColorPanel');
 const rectShapeColor = document.getElementById('rectShapeColor');
 const roundedShapeColor = document.getElementById('roundedShapeColor');
 const circleShapeColor = document.getElementById('circleShapeColor');
@@ -707,10 +706,7 @@ themeMode.addEventListener('change', () => {
   renderDiagram();
 });
 [layoutEngine, graphDirection, shapeColorMode].forEach(el => {
-  el.addEventListener('change', () => {
-    shapeColorPanel.hidden = !shapeColorMode.checked;
-    renderDiagram();
-  });
+  el.addEventListener('change', renderDiagram);
 });
 [primaryColor, lineColor, textColor, backgroundColor, rectShapeColor, roundedShapeColor, circleShapeColor, polygonShapeColor, specialShapeColor, classShapeColor].forEach(el => {
   el.addEventListener('input', () => {

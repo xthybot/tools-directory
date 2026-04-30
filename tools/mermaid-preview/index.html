@@ -79,7 +79,6 @@ flowchart TD
                 <option value="dagre">標準 Dagre</option>
                 <option value="elk">ELK Layered（自動排版）</option>
               </select>
-              <span class="field-note">Force / Stress 等 ELK 變體在 flowchart 可能漏線，已改用穩定選項。</span>
             </label>
             <label>圖形方向
               <select id="graphDirection">
@@ -92,7 +91,7 @@ flowchart TD
             </label>
           </div>
 
-          <div class="theme-grid">
+          <div class="color-settings">
             <label>物件填色
               <input type="color" id="primaryColor" value="#7c8cff" />
             </label>
@@ -105,33 +104,31 @@ flowchart TD
             <label>背景色
               <input type="color" id="backgroundColor" value="#0b1220" />
             </label>
-          </div>
 
-          <label class="toggle-row">
-            <input type="checkbox" id="shapeColorMode" checked />
-            <span>
-              <strong>依形狀自訂物件顏色</strong>
-              <small>相同形狀會統一套用同一個顏色；關閉時回到 Mermaid 主色。</small>
-            </span>
-          </label>
+            <label class="toggle-row color-toggle">
+              <input type="checkbox" id="shapeColorMode" checked />
+              <span>
+                <strong>依形狀自訂物件顏色</strong>
+                <small>相同形狀會統一套用同一個顏色；關閉時回到 Mermaid 主色。</small>
+              </span>
+            </label>
 
-          <div class="shape-color-grid" id="shapeColorPanel">
-            <label>矩形 / 方框
+            <label class="shape-color-control">矩形 / 方框
               <input type="color" id="rectShapeColor" value="#7c8cff" />
             </label>
-            <label>圓角 / 膠囊
+            <label class="shape-color-control">圓角 / 膠囊
               <input type="color" id="roundedShapeColor" value="#8dd8ff" />
             </label>
-            <label>圓形 / 橢圓
+            <label class="shape-color-control">圓形 / 橢圓
               <input type="color" id="circleShapeColor" value="#7ff0c7" />
             </label>
-            <label>菱形 / 多邊形
+            <label class="shape-color-control">菱形 / 多邊形
               <input type="color" id="polygonShapeColor" value="#ffd166" />
             </label>
-            <label>特殊形狀
+            <label class="shape-color-control">特殊形狀
               <input type="color" id="specialShapeColor" value="#c7a4ff" />
             </label>
-            <label>Class / State 區塊
+            <label class="shape-color-control">Class / State 區塊
               <input type="color" id="classShapeColor" value="#ffb4c8" />
             </label>
           </div>

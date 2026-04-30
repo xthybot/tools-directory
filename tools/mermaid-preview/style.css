@@ -197,24 +197,22 @@ textarea::placeholder {
   gap: 12px;
   margin-bottom: 14px;
 }
-.theme-mode-label, .theme-grid label, .layout-grid label, .shape-color-grid label {
+.theme-mode-label, .theme-grid label, .layout-grid label, .color-settings label {
   color: var(--muted);
   font-size: 14px;
 }
-.theme-grid, .layout-grid, .shape-color-grid {
+.theme-grid, .layout-grid, .color-settings {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 14px;
 }
-.theme-grid label, .layout-grid label, .shape-color-grid label {
+.layout-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.theme-grid label, .layout-grid label, .color-settings label {
   display: grid;
   gap: 8px;
-}
-.field-note {
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.5;
 }
 .toggle-row {
   display: flex;
@@ -223,7 +221,7 @@ textarea::placeholder {
   color: var(--muted);
   font-size: 14px;
   line-height: 1.5;
-  margin: 0 0 14px;
+  margin: 0;
 }
 .toggle-row input {
   margin-top: 4px;
@@ -240,11 +238,14 @@ textarea::placeholder {
 .toggle-row small {
   color: var(--muted);
 }
-.shape-color-grid {
+.color-settings {
   border: 1px solid var(--line);
   border-radius: 18px;
   padding: 14px;
   background: var(--surface-softer);
+}
+.color-toggle {
+  grid-column: span 2;
 }
 select, input[type="color"] {
   width: 100%;
@@ -311,7 +312,10 @@ input[type="color"] {
   .hero, .editor-card, .preview-card {
     padding: 20px;
   }
-  .theme-grid, .layout-grid, .shape-color-grid {
+  .theme-grid, .layout-grid, .color-settings {
     grid-template-columns: 1fr;
+  }
+  .color-toggle {
+    grid-column: auto;
   }
 }
