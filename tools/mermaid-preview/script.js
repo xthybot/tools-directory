@@ -17,6 +17,7 @@ const layoutEngine = document.getElementById('layoutEngine');
 const graphDirection = document.getElementById('graphDirection');
 const primaryColor = document.getElementById('primaryColor');
 const lineColor = document.getElementById('lineColor');
+const unifiedShapeColors = document.getElementById('unifiedShapeColors');
 const textColor = document.getElementById('textColor');
 const backgroundColor = document.getElementById('backgroundColor');
 const applyThemeBtn = document.getElementById('applyThemeBtn');
@@ -216,12 +217,41 @@ function paintRenderedDiagram() {
   const labelBg = themeMode.value === 'default' ? '#ffffff' : '#0f1726';
   const clusterBg = themeMode.value === 'default' ? '#edf3ff' : '#10192a';
 
-  svg.querySelectorAll('.node rect, .node circle, .node ellipse, .node polygon, .node path').forEach(el => {
-    if (!el.closest('.arrowMarkerPath')) {
+  if (unifiedShapeColors.checked) {
+    const shapeSelectors = [
+      '.node rect',
+      '.node circle',
+      '.node ellipse',
+      '.node polygon',
+      '.node path',
+      '.classGroup rect',
+      '.classGroup path',
+      '.stateGroup rect',
+      '.stateGroup circle',
+      '.stateGroup ellipse',
+      '.stateGroup polygon',
+      '.stateGroup path',
+      '.er.entityBox',
+      '.er.attributeBoxOdd',
+      '.er.attributeBoxEven',
+      '.er.relationshipLabelBox',
+      '.actor',
+      '.participant rect',
+      '.task',
+      '.section',
+      '.slice'
+    ].join(', ');
+
+    svg.querySelectorAll(shapeSelectors).forEach(el => {
+      if (el.closest('.arrowMarkerPath') || el.closest('.edgePath') || el.closest('.flowchart-link')) return;
       el.style.fill = primaryColor.value;
       el.style.stroke = lineColor.value;
-    }
-  });
+    });
+
+    svg.querySelectorAll('.classGroup line, .stateGroup line').forEach(el => {
+      el.style.stroke = lineColor.value;
+    });
+  }
 
   svg.querySelectorAll('.cluster rect').forEach(el => {
     el.style.fill = clusterBg;
@@ -639,7 +669,7 @@ themeMode.addEventListener('change', () => {
   applyPreset(themeMode.value);
   renderDiagram();
 });
-[layoutEngine, graphDirection].forEach(el => {
+[layoutEngine, graphDirection, unifiedShapeColors].forEach(el => {
   el.addEventListener('change', renderDiagram);
 });
 [primaryColor, lineColor, textColor, backgroundColor].forEach(el => {
