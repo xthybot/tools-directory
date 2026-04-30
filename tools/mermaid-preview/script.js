@@ -126,14 +126,15 @@ function applyInputs(config) {
 function buildMermaidConfig({ forExport = false } = {}) {
   const theme = getThemeConfig();
   const selectedLayout = layoutEngine.value || 'dagre';
-  const renderer = selectedLayout.startsWith('elk') ? 'elk' : 'dagre-wrapper';
+  const isElkLayout = selectedLayout.startsWith('elk');
+  const renderer = isElkLayout ? 'elk' : 'dagre-wrapper';
   return {
     startOnLoad: false,
     securityLevel: 'loose',
     theme: 'base',
     layout: selectedLayout,
     flowchart: {
-      defaultRenderer: renderer,
+      ...(isElkLayout ? {} : { defaultRenderer: renderer }),
       htmlLabels: false,
       useMaxWidth: true,
       wrappingWidth: 220
@@ -265,22 +266,32 @@ function updateCount() {
 
 function getLayoutConfigBlock() {
   const selectedLayout = layoutEngine.value || 'dagre';
-  const renderer = selectedLayout.startsWith('elk') ? 'elk' : 'dagre-wrapper';
-
-  // Mermaid 官方 layout 設定建議使用 YAML frontmatter。
-  // 單靠 initialize / init directive 在部分圖表或 Mermaid v11 lazy loader 情境下可能不會明顯生效。
-  return [
+  const isElkLayout = selectedLayout.startsWith('elk');
+  const renderer = isElkLayout ? 'elk' : 'dagre-wrapper';
+  const configLines = [
     '---',
     'config:',
-    `  layout: ${selectedLayout}`,
-    '  flowchart:',
-    `    defaultRenderer: ${renderer}`,
+    `  layout: ${selectedLayout}`
+  ];
+
+  // Mermaid flowchart 若同時設定 defaultRenderer: elk，會把 layout 強制覆蓋回 elk.layered。
+  // 因此 ELK Force / Stress / Multi-root Tree 只設定 layout，不設定 flowchart.defaultRenderer。
+  if (!isElkLayout) {
+    configLines.push(
+      '  flowchart:',
+      `    defaultRenderer: ${renderer}`
+    );
+  }
+
+  configLines.push(
     '  class:',
     `    defaultRenderer: ${renderer}`,
     '  state:',
     `    defaultRenderer: ${renderer}`,
     '---'
-  ].join('\n');
+  );
+
+  return configLines.join('\n');
 }
 
 function hasYamlFrontmatter(code) {
