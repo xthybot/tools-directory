@@ -39,27 +39,27 @@ const demoCode = `flowchart TD
 const themePresets = {
   dark: {
     mode: 'dark',
-    lineColor: '#73e0ff',
-    textColor: '#e8f0ff',
-    backgroundColor: '#0b1220',
-    rectShapeColor: '#7c8cff',
-    roundedShapeColor: '#8dd8ff',
-    circleShapeColor: '#7ff0c7',
-    polygonShapeColor: '#ffd166',
-    specialShapeColor: '#c7a4ff',
-    classShapeColor: '#ffb4c8'
+    lineColor: '#38bdf8',
+    textColor: '#e2e8f0',
+    backgroundColor: '#0f172a',
+    rectShapeColor: '#3b82f6',
+    roundedShapeColor: '#06b6d4',
+    circleShapeColor: '#10b981',
+    polygonShapeColor: '#f59e0b',
+    specialShapeColor: '#8b5cf6',
+    classShapeColor: '#ec4899'
   },
   default: {
     mode: 'default',
-    lineColor: '#5b6f8a',
-    textColor: '#18212f',
-    backgroundColor: '#f7fafc',
-    rectShapeColor: '#dbe8ff',
-    roundedShapeColor: '#c6e8ff',
-    circleShapeColor: '#c8f7dc',
-    polygonShapeColor: '#ffe8a3',
-    specialShapeColor: '#ded3ff',
-    classShapeColor: '#ffd4df'
+    lineColor: '#64748b',
+    textColor: '#334155',
+    backgroundColor: '#f8fafc',
+    rectShapeColor: '#dbeafe',
+    roundedShapeColor: '#cffafe',
+    circleShapeColor: '#dcfce7',
+    polygonShapeColor: '#fef3c7',
+    specialShapeColor: '#ede9fe',
+    classShapeColor: '#fde2e4'
   }
 };
 
@@ -92,7 +92,7 @@ const pageTheme = {
   }
 };
 
-const defaultTheme = themePresets.dark;
+const defaultTheme = themePresets.default;
 
 mermaid.registerLayoutLoaders(elkLayouts);
 
