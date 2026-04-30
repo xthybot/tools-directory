@@ -39,15 +39,15 @@ const demoCode = `flowchart TD
 const themePresets = {
   dark: {
     mode: 'dark',
-    lineColor: '#94a3b8',
+    lineColor: '#9ca3af',
     textColor: '#f8fafc',
     backgroundColor: '#111827',
-    rectShapeColor: '#475569',
-    roundedShapeColor: '#0f766e',
-    circleShapeColor: '#166534',
-    polygonShapeColor: '#92400e',
-    specialShapeColor: '#6d28d9',
-    classShapeColor: '#9d174d'
+    rectShapeColor: '#64748b',
+    roundedShapeColor: '#5b8fa3',
+    circleShapeColor: '#6fa57f',
+    polygonShapeColor: '#b3915a',
+    specialShapeColor: '#8b7ab8',
+    classShapeColor: '#b7798f'
   },
   default: {
     mode: 'default',
@@ -76,9 +76,10 @@ const pageTheme = {
     '--surface-soft': 'rgba(148, 163, 184, 0.08)',
     '--surface-softer': 'rgba(148, 163, 184, 0.06)',
     '--placeholder': '#94a3b8',
-    '--body-bg': 'radial-gradient(circle at 18% 0%, rgba(51, 65, 85, 0.42) 0%, rgba(15, 23, 42, 0.96) 42%, #0b1120 100%)',
-    '--orb-a': 'rgba(56, 189, 248, 0.10)',
-    '--orb-b': 'rgba(167, 139, 250, 0.12)'
+    '--shadow': '0 18px 44px rgba(0, 0, 0, 0.26)',
+    '--body-bg': '#0f172a',
+    '--orb-a': 'transparent',
+    '--orb-b': 'transparent'
   },
   default: {
     '--bg': '#f8fafc',
@@ -92,9 +93,10 @@ const pageTheme = {
     '--surface-soft': '#f8fafc',
     '--surface-softer': '#f1f5f9',
     '--placeholder': '#94a3b8',
-    '--body-bg': 'linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%)',
-    '--orb-a': 'rgba(59, 130, 246, 0.08)',
-    '--orb-b': 'rgba(124, 58, 237, 0.07)'
+    '--shadow': '0 10px 28px rgba(15, 23, 42, 0.08)',
+    '--body-bg': 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)',
+    '--orb-a': 'rgba(59, 130, 246, 0.04)',
+    '--orb-b': 'rgba(124, 58, 237, 0.035)'
   }
 };
 
