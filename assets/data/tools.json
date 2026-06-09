@@ -70,5 +70,15 @@
       "開發"
     ],
     "link": "tools/markdown-slides/"
+  },
+  {
+    "title": "空格轉斜線工具",
+    "icon": "assets/icons/example-local.svg",
+    "description": "將文字中的空格、Tab、全形空格等空白字元快速替換成斜線。",
+    "tags": [
+      "文字",
+      "格式轉換"
+    ],
+    "link": "tools/remove_slash/"
   }
 ]
