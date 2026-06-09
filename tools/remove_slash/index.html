@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>空格轉換工具</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: #333;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 850px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 24px;
+      padding: 36px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(12px);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 32px;
+      margin-bottom: 12px;
+      color: #3b2f63;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 16px;
+    }
+
+    .box {
+      margin-bottom: 22px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 700;
+      color: #444;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 160px;
+      resize: vertical;
+      border: 2px solid #ddd;
+      border-radius: 16px;
+      padding: 16px;
+      font-size: 16px;
+      line-height: 1.6;
+      outline: none;
+      transition: 0.25s;
+      background: #fafafa;
+    }
+
+    textarea:focus {
+      border-color: #667eea;
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+    }
+
+    .buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    button {
+      flex: 1;
+      min-width: 140px;
+      border: none;
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .convert {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+    }
+
+    .copy {
+      background: #f0f2ff;
+      color: #4b55b7;
+    }
+
+    .clear {
+      background: #fff0f0;
+      color: #c0392b;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
+    }
+
+    .notice {
+      text-align: center;
+      min-height: 24px;
+      color: #27ae60;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 24px;
+      }
+
+      h1 {
+        font-size: 26px;
+      }
+
+      button {
+        flex: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>空格轉換工具</h1>
+    <p class="subtitle">貼上文字後，將所有空格替換成「/」</p>
+
+    <div class="box">
+      <label for="inputText">輸入文字</label>
+      <textarea id="inputText" placeholder="請在這裡貼上文字..."></textarea>
+    </div>
+
+    <div class="buttons">
+      <button class="convert" onclick="convertText()">轉換</button>
+      <button class="copy" onclick="copyText()">複製結果</button>
+      <button class="clear" onclick="clearText()">清空</button>
+    </div>
+
+    <div class="box">
+      <label for="outputText">轉換結果</label>
+      <textarea id="outputText" placeholder="轉換後的結果會顯示在這裡..." readonly></textarea>
+    </div>
+
+    <div class="notice" id="notice"></div>
+  </div>
+
+  <script>
+    const inputText = document.getElementById("inputText");
+    const outputText = document.getElementById("outputText");
+    const notice = document.getElementById("notice");
+
+    function convertText() {
+      const text = inputText.value;
+
+      // 將所有「半形空格」替換成 /
+      // const result = text.replace(/ /g, "/");
+	  // 包含：半形空格、Tab、全形空格、不換行空格等
+	  const result = text.replace(/[^\S\r\n]/g, "/");
+
+      outputText.value = result;
+      showNotice("轉換完成");
+    }
+
+    function copyText() {
+      if (!outputText.value.trim()) {
+        showNotice("沒有可複製的內容", true);
+        return;
+      }
+
+      navigator.clipboard.writeText(outputText.value)
+        .then(() => {
+          showNotice("已複製到剪貼簿");
+        })
+        .catch(() => {
+          showNotice("複製失敗，請手動複製", true);
+        });
+    }
+
+    function clearText() {
+      inputText.value = "";
+      outputText.value = "";
+      showNotice("已清空");
+      inputText.focus();
+    }
+
+    function showNotice(message, isError = false) {
+      notice.textContent = message;
+      notice.style.color = isError ? "#c0392b" : "#27ae60";
+
+      setTimeout(() => {
+        notice.textContent = "";
+      }, 1800);
+    }
+
+    // 即時轉換：輸入時自動更新結果
+    inputText.addEventListener("input", convertText);
+  </script>
+</body>
+</html>
