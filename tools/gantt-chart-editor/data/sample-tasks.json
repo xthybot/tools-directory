@@ -1,0 +1,71 @@
+{
+  "projectTitle": "網站改版甘特圖範例",
+  "settings": {
+    "timelineScale": "month",
+    "sortMode": "manual",
+    "rowLabelMode": "combined",
+    "showWeekends": true
+  },
+  "tasks": [
+    {
+      "id": "task-001",
+      "order": 1,
+      "rowMode": "new",
+      "name": "需求盤點",
+      "startDate": "2026-06-20",
+      "endDate": "2026-06-25",
+      "color": "#EF4444",
+      "owner": "Alex"
+    },
+    {
+      "id": "task-002",
+      "order": 2,
+      "rowMode": "continue",
+      "name": "資訊架構",
+      "startDate": "2026-06-26",
+      "endDate": "2026-06-30",
+      "color": "#F97316",
+      "owner": "Alex"
+    },
+    {
+      "id": "task-003",
+      "order": 3,
+      "rowMode": "new",
+      "name": "UI 設計",
+      "startDate": "2026-07-01",
+      "endDate": "2026-07-10",
+      "color": "#3B82F6",
+      "owner": "Mia"
+    },
+    {
+      "id": "task-004",
+      "order": 4,
+      "rowMode": "continue",
+      "name": "設計審核",
+      "startDate": "2026-07-11",
+      "endDate": "2026-07-14",
+      "color": "#8B5CF6",
+      "owner": "Mia"
+    },
+    {
+      "id": "task-005",
+      "order": 5,
+      "rowMode": "new",
+      "name": "前端開發",
+      "startDate": "2026-07-15",
+      "endDate": "2026-08-05",
+      "color": "#10B981",
+      "owner": "Kai"
+    },
+    {
+      "id": "task-006",
+      "order": 6,
+      "rowMode": "new",
+      "name": "驗收與交付",
+      "startDate": "2026-08-06",
+      "endDate": "2026-08-12",
+      "color": "#64748B",
+      "owner": "Nora"
+    }
+  ]
+}

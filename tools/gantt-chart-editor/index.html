@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>靜態網頁甘特圖生成器</title>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <img src="assets/icon.svg" alt="" class="brand-icon">
+        <input id="projectTitleInput" class="project-title" value="我的甘特圖" aria-label="專案標題">
+      </div>
+      <div class="toolbar" aria-label="工具列">
+        <button id="importBtn" class="icon-tool" data-tooltip="匯入資料" aria-label="匯入資料"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 5-5m-5 5-5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button id="exportBtn" class="icon-tool" data-tooltip="匯出" aria-label="匯出"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12h8m0 0-4-4m4 4-4 4M5 5h14v14H5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button id="sampleBtn" class="icon-tool" data-tooltip="匯入範例資料" aria-label="匯入範例資料">▣</button>
+        <button id="clearBtn" class="icon-tool danger" data-tooltip="清空資料" aria-label="清空資料"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M9 7l1-3h4l1 3m-9 0 1 14h10l1-14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
+    </header>
+
+    <main id="splitLayout" class="split-layout">
+      <section class="panel task-panel" aria-label="任務面板">
+        <div class="panel-head task-head">
+          <button id="addTaskBtn" class="btn primary">＋ 新增任務</button>
+          <label class="compact-control">任務排序
+            <select id="taskSortModeSelect">
+              <option value="manual">手動排序</option>
+              <option value="startDate">依開始日期排序</option>
+            </select>
+          </label>
+        </div>
+        <div id="taskTableWrap" class="table-wrap">
+          <table class="task-table" aria-label="任務表格">
+            <colgroup>
+              <col data-col="drag">
+              <col data-col="index">
+              <col data-col="mode">
+              <col data-col="color">
+              <col data-col="name">
+              <col data-col="startDate">
+              <col data-col="endDate">
+              <col data-col="owner">
+              <col data-col="copy">
+              <col data-col="delete">
+            </colgroup>
+            <thead>
+              <tr>
+                <th data-col-key="drag">排序<span class="col-resizer" data-col="drag"></span></th>
+                <th data-col-key="index">#<span class="col-resizer" data-col="index"></span></th>
+                <th data-col-key="mode">模式<span class="col-resizer" data-col="mode"></span></th>
+                <th data-col-key="color">顏色<span class="col-resizer" data-col="color"></span></th>
+                <th data-col-key="name">任務名稱<span class="col-resizer" data-col="name"></span></th>
+                <th data-col-key="startDate">開始日期<span class="col-resizer" data-col="startDate"></span></th>
+                <th data-col-key="endDate">結束日期<span class="col-resizer" data-col="endDate"></span></th>
+                <th data-col-key="owner">負責人<span class="col-resizer" data-col="owner"></span></th>
+                <th data-col-key="copy">複製<span class="col-resizer" data-col="copy"></span></th>
+                <th data-col-key="delete">刪除<span class="col-resizer" data-col="delete"></span></th>
+              </tr>
+            </thead>
+            <tbody id="taskTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <div id="splitter" class="splitter" role="separator" aria-orientation="vertical" aria-label="調整左右面板寬度"></div>
+
+      <section class="panel chart-panel" aria-label="甘特圖面板">
+        <div class="chart-head">
+          <div>
+            <strong>甘特圖預覽</strong>
+            <span id="chartErrorBadge" class="chart-error-badge" hidden>錯誤</span>
+            <span id="chartMeta" class="muted small"></span>
+          </div>
+          <button id="settingsBtnInline" class="btn small-btn">設定</button>
+        </div>
+        <section id="settingsPanel" class="settings-panel" hidden>
+          <div class="settings-grid">
+            <label>
+              <span>時間粒度</span>
+              <select id="timelineScaleSelect">
+                <option value="day">日</option>
+                <option value="week">週</option>
+                <option value="month">月</option>
+              </select>
+            </label>
+            <label>
+              <span>甘特圖列名</span>
+              <select id="rowLabelModeSelect">
+                <option value="combined">顯示所有同列任務名稱，以 / 串接</option>
+                <option value="hidden">不顯示列名，只顯示甘特條上的文字</option>
+              </select>
+            </label>
+            <label>
+              <span>週末顯示</span>
+              <select id="showWeekendsSelect">
+                <option value="true">開</option>
+                <option value="false">關</option>
+              </select>
+            </label>
+            <label>
+              <span>甘特圖負責人</span>
+              <select id="ownerDisplaySelect">
+                <option value="none">不顯示</option>
+                <option value="left">僅顯示在左側</option>
+                <option value="bar">僅顯示在甘特條</option>
+                <option value="both">顯示在左側與甘特條</option>
+              </select>
+            </label>
+            <label>
+              <span>甘特條文字</span>
+              <select id="showGanttBarLabelSelect">
+                <option value="true">顯示任務標題與負責人</option>
+                <option value="false">隱藏，只顯示顏色甘特條</option>
+              </select>
+            </label>
+          </div>
+          <pre class="tutorial-text">使用教學：
+1. 左側表格可直接點擊欄位編輯。
+2. 按 Enter 可新增下一個任務。
+3. 按 Tab 可移動到同一列右側欄位。
+4. 拖曳排序 icon 可調整任務順序。
+5. 顯示模式 icon 可切換「新列」或「接續上一列」。
+6. 接續任務會與上一個新列任務顯示在同一條甘特列。
+7. 同一列任務日期不可重疊。
+8. 今日線只會在網頁預覽中顯示，不會出現在匯出檔案。</pre>
+        </section>
+        <div id="validationBox" class="validation-box" hidden></div>
+        <div id="ganttViewport" class="gantt-viewport">
+          <div id="ganttEmpty" class="empty-state">尚無任務。請從左側新增任務，或匯入範例資料。</div>
+          <div id="ganttHost" class="gantt-host" aria-label="甘特圖"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <datalist id="ownersList"></datalist>
+
+  <div id="confirmBubble" class="confirm-bubble" hidden>
+    <button id="confirmBubbleBtn" class="btn danger"></button>
+  </div>
+
+  <div id="colorPopover" class="color-popover" hidden>
+    <div class="preset-colors" id="presetColors"></div>
+    <div class="color-actions">
+      <button id="eyedropperBtn" class="btn small-btn icon-action" title="滴管工具" aria-label="滴管工具"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5 5 5-9.5 9.5H5v-4.5L14 5Zm-2-2 9 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <label class="btn small-btn palette-label icon-action" title="調色盤" aria-label="調色盤"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4a8 8 0 0 0 0 16h1.2a1.8 1.8 0 0 0 1.2-3.1 1.4 1.4 0 0 1 .9-2.5H17a3 3 0 0 0 3-3C20 7.3 16.4 4 12 4Z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="10" r=".8" fill="currentColor"/><circle cx="11" cy="7.8" r=".8" fill="currentColor"/><circle cx="14.5" cy="8.8" r=".8" fill="currentColor"/></svg><input id="paletteInput" type="color" hidden></label>
+    </div>
+  </div>
+
+  <div id="importModal" class="modal" hidden>
+    <div class="modal-backdrop" data-close="importModal"></div>
+    <section class="modal-card import-card" role="dialog" aria-modal="true" aria-labelledby="importTitle">
+      <div class="modal-head">
+        <h2 id="importTitle">匯入資料</h2>
+        <button class="icon-btn" data-close="importModal" aria-label="關閉">×</button>
+      </div>
+      <div class="import-tabs" role="tablist">
+        <button class="tab-btn active" data-import-tab="paste">貼上表格資料</button>
+        <button class="tab-btn" data-import-tab="csv">CSV</button>
+        <button class="tab-btn" data-import-tab="json">JSON</button>
+        <button class="tab-btn" data-import-tab="xlsx">Excel xlsx</button>
+      </div>
+      <div class="import-source">
+        <div data-import-panel="paste">
+          <textarea id="pasteInput" placeholder="貼上表格資料。支援 Markdown 表格、Tab 表格、空格對齊表格；第一列需包含欄位名稱。"></textarea>
+        </div>
+        <div data-import-panel="csv" hidden>
+          <label class="file-picker">選擇 CSV 檔案
+            <input id="csvFileInput" type="file" accept=".csv,text/csv" hidden>
+          </label>
+          <span id="csvFileName" class="muted small"></span>
+        </div>
+        <div data-import-panel="json" hidden>
+          <label class="file-picker">選擇 JSON 檔案
+            <input id="jsonFileInput" type="file" accept=".json,application/json" hidden>
+          </label>
+          <span id="jsonFileName" class="muted small"></span>
+          <textarea id="jsonTextInput" placeholder="也可直接貼上本網站匯出的 JSON。JSON 會完整還原專案標題、設定、欄位寬度、ID 與任務順序。"></textarea>
+        </div>
+        <div data-import-panel="xlsx" hidden>
+          <label class="file-picker">選擇 Excel xlsx 檔案
+            <input id="xlsxFileInput" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+          </label>
+          <span id="xlsxFileName" class="muted small"></span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="parseImportBtn" class="btn primary">解析資料</button>
+      </div>
+      <div id="mappingBox" class="mapping-box" hidden>
+        <h3>欄位對應</h3>
+        <p class="muted small">任務名稱需指定。開始或結束日期可留空；留空時會使用目前表格最早或最晚日期作為有效範圍。</p>
+        <div id="mappingGrid" class="mapping-grid"></div>
+        <div class="modal-actions import-final-actions">
+          <button id="confirmImportBtn" class="btn primary">確認匯入有效資料</button>
+          <div id="importChoice" class="choice-box inline-choice" hidden>
+            <strong>目前已有資料，請選擇匯入方式。</strong>
+            <div class="choice-actions">
+              <button id="importReplaceBtn" class="btn danger">覆蓋目前資料</button>
+              <button id="importAppendBtn" class="btn">追加到目前資料</button>
+              <button id="importCancelChoiceBtn" class="btn ghost">取消</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="importErrors" class="error-list" hidden></div>
+    </section>
+  </div>
+
+  <div id="exportModal" class="modal" hidden>
+    <div class="modal-backdrop" data-close="exportModal"></div>
+    <section class="modal-card export-card" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+      <div class="modal-head export-head">
+        <h2 id="exportTitle">匯出</h2>
+        <label class="check-row"><input id="printTitleCheck" type="checkbox" checked> 是否列印標題</label>
+        <button class="icon-btn" data-close="exportModal" aria-label="關閉">×</button>
+      </div>
+      <div class="export-section">
+        <h3>圖表匯出</h3>
+        <div class="button-row">
+          <button class="btn" data-export="png">PNG</button>
+          <button class="btn" data-export="svg">SVG</button>
+          <button class="btn" data-export="pdf">PDF</button>
+        </div>
+        <div id="pngOptions" class="png-options" hidden>
+          <label>PNG 解析度 (%)
+            <input id="pngResolutionInput" type="number" min="50" max="800" step="10" value="250">
+          </label>
+          <span class="muted small">可輸入 50–800，建議 150–300，預設 250。</span>
+          <button id="confirmPngExportBtn" class="btn primary">確認匯出 PNG</button>
+        </div>
+      </div>
+      <div class="export-section">
+        <h3>資料匯出</h3>
+        <div class="button-row">
+          <button class="btn" data-export="csv">CSV</button>
+          <button class="btn" data-export="json">JSON</button>
+          <button class="btn" data-export="xlsx">Excel xlsx</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="libs/xlsx.full.min.js"></script>
+  <script src="libs/jspdf.umd.min.js"></script>
+  <script src="libs/html-to-image.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
