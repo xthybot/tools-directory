@@ -72,6 +72,17 @@
     "link": "tools/markdown-slides/"
   },
   {
+    "title": "甘特圖編輯器",
+    "icon": "tools/gantt-chart-editor/assets/icon.svg",
+    "description": "建立可互動編輯的甘特圖，支援任務管理、匯入匯出、列印與圖片輸出。",
+    "tags": [
+      "專案管理",
+      "甘特圖",
+      "排程"
+    ],
+    "link": "tools/gantt-chart-editor/"
+  },
+  {
     "title": "空格轉斜線工具",
     "icon": "assets/icons/example-local.svg",
     "description": "將文字中的空格、Tab、全形空格等空白字元快速替換成斜線。",
