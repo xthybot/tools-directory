@@ -1,34 +1,24 @@
 [
   {
-    "title": "影像輸出計算機",
-    "icon": "assets/icons/image-output-calculator.svg",
-    "description": "自動補完實體尺寸、像素尺寸、解析度與長寬比的影像輸出換算工具。",
+    "title": "甘特圖編輯器",
+    "icon": "tools/gantt-chart-editor/assets/icon.svg",
+    "description": "建立可互動編輯的甘特圖，支援任務管理、匯入匯出、列印與圖片輸出。",
     "tags": [
-      "圖片",
-      "列印"
+      "專案管理",
+      "甘特圖",
+      "排程"
     ],
-    "link": "tools/image-output-calculator/"
+    "link": "tools/gantt-chart-editor/"
   },
   {
-    "title": "A4 合併列印工具",
-    "icon": "assets/icons/a4-merge-print-tool.svg",
-    "description": "把多張圖片整理成適合 A4 列印的版面，方便預覽與輸出。",
+    "title": "多國颱風路徑比較",
+    "icon": "assets/icons/example-external.svg",
+    "description": "在地圖上比較多國氣象機構的颱風預報路徑，並透過時間軸查看不同預報批次。",
     "tags": [
-      "列印",
-      "排版"
+      "氣象",
+      "颱風"
     ],
-    "link": "tools/a4-merge-print-tool/"
-  },
-  {
-    "title": "移除 Gemini NanoBanana 浮水印",
-    "icon": "assets/icons/nanobanana-tool.svg",
-    "description": "只限於去除Gemini NanoBanana生成的浮水印。",
-    "tags": [
-      "AI圖片",
-      "浮水印",
-      "修圖"
-    ],
-    "link": "tools/NanoBanana_remove_watermark/"
+    "link": "https://typhoon.xthy.work/"
   },
   {
     "title": "Mermaid 即時預覽",
@@ -61,6 +51,47 @@
     "link": "tools/code-syntax-highlighter/"
   },
   {
+    "title": "我的組裝電腦",
+    "icon": "assets/icons/example-external.svg",
+    "description": "瀏覽個人組裝電腦收藏，點選主機查看完整硬體規格與組裝紀錄。",
+    "tags": [
+      "電腦",
+      "硬體"
+    ],
+    "link": "https://build-pc.xthy.work/"
+  },
+  {
+    "title": "影像輸出計算機",
+    "icon": "assets/icons/image-output-calculator.svg",
+    "description": "自動補完實體尺寸、像素尺寸、解析度與長寬比的影像輸出換算工具。",
+    "tags": [
+      "圖片",
+      "列印"
+    ],
+    "link": "tools/image-output-calculator/"
+  },
+  {
+    "title": "A4 合併列印工具",
+    "icon": "assets/icons/a4-merge-print-tool.svg",
+    "description": "把多張圖片整理成適合 A4 列印的版面，方便預覽與輸出。",
+    "tags": [
+      "列印",
+      "排版"
+    ],
+    "link": "tools/a4-merge-print-tool/"
+  },
+  {
+    "title": "移除 Gemini NanoBanana 浮水印",
+    "icon": "assets/icons/nanobanana-tool.svg",
+    "description": "只限於去除Gemini NanoBanana生成的浮水印。",
+    "tags": [
+      "AI圖片",
+      "浮水印",
+      "修圖"
+    ],
+    "link": "tools/NanoBanana_remove_watermark/"
+  },
+  {
     "title": "Markdown 簡報",
     "icon": "assets/icons/markdown-slides.svg",
     "description": "用 Markdown 快速製作簡報，支援可編輯預覽、播放模式與 PDF 匯出。",
@@ -70,17 +101,6 @@
       "開發"
     ],
     "link": "tools/markdown-slides/"
-  },
-  {
-    "title": "甘特圖編輯器",
-    "icon": "tools/gantt-chart-editor/assets/icon.svg",
-    "description": "建立可互動編輯的甘特圖，支援任務管理、匯入匯出、列印與圖片輸出。",
-    "tags": [
-      "專案管理",
-      "甘特圖",
-      "排程"
-    ],
-    "link": "tools/gantt-chart-editor/"
   },
   {
     "title": "空格轉斜線工具",
@@ -101,26 +121,6 @@
       "塔科夫"
     ],
     "link": "https://tarkov-stash-planner.xthy.work/"
-  },
-  {
-    "title": "多國颱風路徑比較",
-    "icon": "assets/icons/example-external.svg",
-    "description": "在地圖上比較多國氣象機構的颱風預報路徑，並透過時間軸查看不同預報批次。",
-    "tags": [
-      "氣象",
-      "颱風"
-    ],
-    "link": "https://typhoon.xthy.work/"
-  },
-  {
-    "title": "我的組裝電腦",
-    "icon": "assets/icons/example-external.svg",
-    "description": "瀏覽個人組裝電腦收藏，點選主機查看完整硬體規格與組裝紀錄。",
-    "tags": [
-      "電腦",
-      "硬體"
-    ],
-    "link": "https://build-pc.xthy.work/"
   },
   {
     "title": "SQL Blockly",
