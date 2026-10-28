@@ -121,5 +121,15 @@
       "硬體"
     ],
     "link": "https://build-pc.xthy.work/"
+  },
+  {
+    "title": "SQL Blockly",
+    "icon": "assets/icons/example-external.svg",
+    "description": "SQL Blockly 線上工具入口。",
+    "tags": [
+      "開發",
+      "SQL"
+    ],
+    "link": "https://sql-blockly.xthy.work/"
   }
 ]
