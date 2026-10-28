@@ -331,63 +331,11 @@ input {
   display: none;
 }
 
-.profile-card__heading {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.profile-card__heading img {
-  flex: 0 0 48px;
-  border-radius: 16px;
-}
-
-.profile-card__label {
-  margin: 0 0 4px;
-  color: var(--text-soft);
-  font-size: 12px;
-}
-
-.profile-card h2 {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 600;
-}
-
-.profile-card__intro {
-  margin: 20px 0;
-  color: var(--text-soft);
-  font-size: 14px;
-  line-height: 1.8;
-}
-
-.profile-card__facts {
-  display: grid;
-  gap: 16px;
-  margin: 0 0 24px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border);
-  font-size: 13px;
-  line-height: 1.7;
-}
-
-.profile-card__facts dt {
-  margin-bottom: 4px;
-  color: var(--text-soft);
-  font-size: 12px;
-}
-
-.profile-card__facts dd {
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-
 .profile-card a {
   color: var(--text-main);
   text-decoration: none;
 }
 
-.profile-card__facts a:hover,
 .profile-card__link:hover {
   color: var(--primary);
   text-decoration: underline;
