@@ -12,6 +12,46 @@
     <link rel="stylesheet" href="assets/css/style.css" />
   </head>
   <body>
+    <aside class="profile-widget" id="profileWidget" aria-label="關於工具集作者">
+      <button
+        class="profile-toggle"
+        id="profileToggle"
+        type="button"
+        aria-label="開啟個人介紹"
+        aria-expanded="false"
+        aria-controls="profileCard"
+      >
+        <span class="profile-toggle__icon" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span>關於我</span>
+      </button>
+      <div class="profile-card" id="profileCard">
+        <div class="profile-card__heading">
+          <img src="assets/icons/tools-home-favicon.png" alt="" width="48" height="48" />
+          <div>
+            <p class="profile-card__label">工具集作者</p>
+            <h2>XthyWork</h2>
+          </div>
+        </div>
+        <p class="profile-card__intro">專注於透過 AI 協作開發軟體服務與 Web 應用。</p>
+        <dl class="profile-card__facts">
+          <div>
+            <dt>專長</dt>
+            <dd>伺服器、網路、Web 應用</dd>
+          </div>
+          <div>
+            <dt>信箱</dt>
+            <dd><a href="mailto:xthywork@gmail.com">xthywork@gmail.com</a></dd>
+          </div>
+        </dl>
+        <a class="profile-card__website" href="https://xthy.work/" target="_blank" rel="noreferrer noopener">
+          個人網站 <span aria-hidden="true">↗</span>
+        </a>
+        <a class="profile-card__github" href="https://github.com/xthywork" target="_blank" rel="noreferrer noopener">
+          GitHub <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </aside>
+
     <div class="page-shell">
       <header class="hero">
         <div class="hero__brand">
@@ -57,6 +97,7 @@
       </main>
     </div>
 
+    <script src="assets/js/profile.js"></script>
     <script src="assets/js/app.js"></script>
   </body>
 </html>

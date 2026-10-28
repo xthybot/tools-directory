@@ -304,6 +304,212 @@ input {
   color: var(--text-main);
 }
 
+.profile-widget {
+  position: fixed;
+  z-index: 20;
+  top: 50%;
+  right: 32px;
+  width: 256px;
+  transform: translateY(-50%);
+}
+
+.profile-toggle {
+  display: none;
+}
+
+.profile-card {
+  max-height: calc(100dvh - 64px);
+  overflow-y: auto;
+  padding: 24px;
+  border: 1px solid rgba(88, 197, 254, 0.22);
+  border-radius: 24px;
+  background: #111827;
+  box-shadow: var(--shadow);
+}
+
+.profile-card[hidden] {
+  display: none;
+}
+
+.profile-card__heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-card__heading img {
+  flex: 0 0 48px;
+  border-radius: 16px;
+}
+
+.profile-card__label {
+  margin: 0 0 4px;
+  color: var(--text-soft);
+  font-size: 12px;
+}
+
+.profile-card h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.profile-card__intro {
+  margin: 20px 0;
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.profile-card__facts {
+  display: grid;
+  gap: 16px;
+  margin: 0 0 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.profile-card__facts dt {
+  margin-bottom: 4px;
+  color: var(--text-soft);
+  font-size: 12px;
+}
+
+.profile-card__facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.profile-card a {
+  color: var(--text-main);
+  text-decoration: none;
+}
+
+.profile-card__facts a:hover,
+.profile-card__github:hover {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.profile-card .profile-card__website {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 12px 16px;
+  border: 1px solid rgba(88, 197, 254, 0.32);
+  border-radius: 14px;
+  background: rgba(88, 197, 254, 0.12);
+  color: var(--primary);
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+.profile-card__website:hover {
+  background: rgba(88, 197, 254, 0.22);
+}
+
+.profile-card__github {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  margin-top: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+}
+
+.profile-widget a:focus-visible,
+.profile-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+}
+
+/* Collapse when the original centered directory leaves too little side space. */
+@media (max-width: 1759px) {
+  .profile-widget {
+    top: max(20px, env(safe-area-inset-top));
+    right: max(20px, env(safe-area-inset-right));
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+    width: auto;
+    transform: none;
+  }
+
+  .profile-widget.is-ready .profile-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 10px 14px;
+    border: 1px solid rgba(88, 197, 254, 0.28);
+    border-radius: 14px;
+    background: #111827;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    color: var(--text-main);
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .profile-toggle:hover {
+    border-color: var(--primary);
+  }
+
+  .profile-toggle:active {
+    transform: scale(0.98);
+  }
+
+  .profile-toggle__icon {
+    display: grid;
+    gap: 4px;
+    width: 18px;
+  }
+
+  .profile-toggle__icon span {
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    transition: transform 0.18s ease, opacity 0.18s ease;
+  }
+
+  .profile-toggle[aria-expanded="true"] .profile-toggle__icon span:first-child {
+    transform: translateY(6px) rotate(45deg);
+  }
+
+  .profile-toggle[aria-expanded="true"] .profile-toggle__icon span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .profile-toggle[aria-expanded="true"] .profile-toggle__icon span:last-child {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+
+  .profile-card {
+    width: min(288px, calc(100vw - 40px));
+    max-height: calc(100dvh - 96px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    overscroll-behavior: contain;
+  }
+
+  /* Keep the personal link available when JavaScript is disabled. */
+  .profile-widget:not(.is-ready) {
+    position: static;
+    margin-bottom: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-toggle__icon span,
+  .profile-card__website {
+    transition: none;
+  }
+}
+
 @media (max-width: 640px) {
   body {
     padding: 20px;
