@@ -91,5 +91,35 @@
       "格式轉換"
     ],
     "link": "tools/remove_slash/"
+  },
+  {
+    "title": "塔科夫套包規劃器",
+    "icon": "assets/icons/example-external.svg",
+    "description": "規劃逃離塔科夫 PvE 的背包巢狀收納，計算格子配置、節省空間與套包順序。",
+    "tags": [
+      "遊戲",
+      "塔科夫"
+    ],
+    "link": "https://tarkov-stash-planner.xthy.work/"
+  },
+  {
+    "title": "多國颱風路徑比較",
+    "icon": "assets/icons/example-external.svg",
+    "description": "在地圖上比較多國氣象機構的颱風預報路徑，並透過時間軸查看不同預報批次。",
+    "tags": [
+      "氣象",
+      "颱風"
+    ],
+    "link": "https://typhoon.xthy.work/"
+  },
+  {
+    "title": "我的組裝電腦",
+    "icon": "assets/icons/example-external.svg",
+    "description": "瀏覽個人組裝電腦收藏，點選主機查看完整硬體規格與組裝紀錄。",
+    "tags": [
+      "電腦",
+      "硬體"
+    ],
+    "link": "https://build-pc.xthy.work/"
   }
 ]
